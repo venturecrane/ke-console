@@ -406,7 +406,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Link
                 href="/settings/children"
                 className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
@@ -432,6 +432,34 @@ export default function DashboardPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Add or remove children for expense tagging
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/activity"
+                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                  <svg
+                    className="h-5 w-5 text-blue-600 dark:text-blue-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Activity Feed
+                  </h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    View recent actions by you and your co-parent
                   </p>
                 </div>
               </Link>

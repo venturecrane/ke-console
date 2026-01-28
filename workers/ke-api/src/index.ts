@@ -1143,6 +1143,935 @@ app.delete('/families/:id/children/:childId', async (c) => {
   }
 });
 
+// ============================================
+// DISPUTE ENDPOINTS
+// ============================================
+
+type QuestionReason = 'wrong_amount' | 'not_child_related' | 'duplicate' | 'split_dispute' | 'other';
+
+interface QuestionExpenseRequest {
+  reason: QuestionReason;
+  note?: string;
+}
+
+interface ResolveExpenseRequest {
+  action: 'keep' | 'edit' | 'personal' | 'delete';
+  newAmount?: number; // in dollars, only for 'edit' action
+}
+
+// Helper to check 7-day timeout and auto-resolve
+async function checkAndApplyTimeout(db: D1Database, expense: Expense): Promise<Expense> {
+  if (expense.status !== 'pending_satisfaction') return expense;
+
+  const resolvedAt = new Date(expense.resolved_at!);
+  const now = new Date();
+  const daysDiff = (now.getTime() - resolvedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (daysDiff >= 7) {
+    await db.prepare(
+      `UPDATE expenses SET status = 'resolved_creator_decided', updated_at = datetime('now') WHERE id = ?`
+    ).bind(expense.id).run();
+
+    return { ...expense, status: 'resolved_creator_decided' };
+  }
+
+  return expense;
+}
+
+// Question an expense (dispute initiation)
+app.post('/expenses/:id/question', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Get the expense
+    const expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Cannot question your own expense
+    if (expense.created_by === userId) {
+      return c.json({ error: 'Cannot question your own expense' }, 400);
+    }
+
+    // Cannot question if already questioned or resolved
+    if (expense.status !== 'posted') {
+      return c.json({ error: `Cannot question expense with status '${expense.status}'` }, 400);
+    }
+
+    // Parse request body
+    const body = await c.req.json<QuestionExpenseRequest>();
+    const { reason, note } = body;
+
+    // Validate reason
+    const validReasons: QuestionReason[] = ['wrong_amount', 'not_child_related', 'duplicate', 'split_dispute', 'other'];
+    if (!reason || !validReasons.includes(reason)) {
+      return c.json({ error: 'Valid reason is required: wrong_amount, not_child_related, duplicate, split_dispute, or other' }, 400);
+    }
+
+    // Update expense
+    await c.env.DB.prepare(
+      `UPDATE expenses SET
+        status = 'questioned',
+        questioned_by = ?,
+        questioned_at = datetime('now'),
+        question_reason = ?,
+        question_note = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(userId, reason, note || null, expenseId).run();
+
+    // Fetch updated expense
+    const updatedExpense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      expense.family_id,
+      userId,
+      'expense.questioned',
+      'expense',
+      expenseId,
+      expense,
+      updatedExpense,
+      { reason, note }
+    );
+
+    return c.json({ success: true, expense: updatedExpense });
+  } catch (error) {
+    console.error('Question expense error:', error);
+    return c.json({ error: 'Failed to question expense', details: String(error) }, 500);
+  }
+});
+
+// Resolve a questioned expense (creator response)
+app.post('/expenses/:id/resolve', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Get the expense
+    const expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Only creator can resolve
+    if (expense.created_by !== userId) {
+      return c.json({ error: 'Only the expense creator can resolve' }, 403);
+    }
+
+    // Must be in questioned status
+    if (expense.status !== 'questioned') {
+      return c.json({ error: `Cannot resolve expense with status '${expense.status}'` }, 400);
+    }
+
+    // Parse request body
+    const body = await c.req.json<ResolveExpenseRequest>();
+    const { action, newAmount } = body;
+
+    // Validate action
+    const validActions = ['keep', 'edit', 'personal', 'delete'];
+    if (!action || !validActions.includes(action)) {
+      return c.json({ error: 'Valid action is required: keep, edit, personal, or delete' }, 400);
+    }
+
+    // Handle edit action
+    if (action === 'edit' && (typeof newAmount !== 'number' || newAmount <= 0)) {
+      return c.json({ error: 'newAmount is required for edit action and must be positive' }, 400);
+    }
+
+    let newStatus: string;
+    let newAmountCents = expense.amount_cents;
+    let resolvedAt: string | null = null;
+    let deletedAt: string | null = null;
+
+    switch (action) {
+      case 'keep':
+        newStatus = 'pending_satisfaction';
+        resolvedAt = new Date().toISOString();
+        break;
+      case 'edit':
+        newStatus = 'pending_satisfaction';
+        newAmountCents = dollarsToCents(newAmount!);
+        resolvedAt = new Date().toISOString();
+        break;
+      case 'personal':
+        newStatus = 'resolved_personal';
+        resolvedAt = new Date().toISOString();
+        break;
+      case 'delete':
+        newStatus = 'resolved_deleted';
+        resolvedAt = new Date().toISOString();
+        deletedAt = new Date().toISOString();
+        break;
+      default:
+        newStatus = 'questioned';
+    }
+
+    // Update expense
+    await c.env.DB.prepare(
+      `UPDATE expenses SET
+        status = ?,
+        amount_cents = ?,
+        resolution_action = ?,
+        resolved_at = ?,
+        deleted_at = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(newStatus, newAmountCents, action, resolvedAt, deletedAt, expenseId).run();
+
+    // Fetch updated expense
+    const updatedExpense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      expense.family_id,
+      userId,
+      'expense.resolved',
+      'expense',
+      expenseId,
+      expense,
+      updatedExpense,
+      { action, newAmount: action === 'edit' ? newAmount : undefined }
+    );
+
+    return c.json({ success: true, expense: updatedExpense });
+  } catch (error) {
+    console.error('Resolve expense error:', error);
+    return c.json({ error: 'Failed to resolve expense', details: String(error) }, 500);
+  }
+});
+
+// Satisfy a resolved expense (questioner confirms)
+app.post('/expenses/:id/satisfy', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Get the expense
+    let expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Check for 7-day timeout
+    expense = await checkAndApplyTimeout(c.env.DB, expense);
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Only questioner can satisfy
+    if (expense.questioned_by !== userId) {
+      return c.json({ error: 'Only the original questioner can mark as satisfied' }, 403);
+    }
+
+    // Must be in pending_satisfaction status
+    if (expense.status !== 'pending_satisfaction') {
+      return c.json({ error: `Cannot satisfy expense with status '${expense.status}'` }, 400);
+    }
+
+    // Update expense
+    await c.env.DB.prepare(
+      `UPDATE expenses SET
+        status = 'resolved',
+        satisfied_at = datetime('now'),
+        updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(expenseId).run();
+
+    // Fetch updated expense
+    const updatedExpense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      expense.family_id,
+      userId,
+      'expense.satisfied',
+      'expense',
+      expenseId,
+      expense,
+      updatedExpense
+    );
+
+    return c.json({ success: true, expense: updatedExpense });
+  } catch (error) {
+    console.error('Satisfy expense error:', error);
+    return c.json({ error: 'Failed to satisfy expense', details: String(error) }, 500);
+  }
+});
+
+// Get single expense (with timeout check)
+app.get('/expenses/:id', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    let expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Check for 7-day timeout
+    expense = await checkAndApplyTimeout(c.env.DB, expense);
+
+    return c.json({ expense });
+  } catch (error) {
+    console.error('Get expense error:', error);
+    return c.json({ error: 'Failed to get expense', details: String(error) }, 500);
+  }
+});
+
+// ============================================
+// FIXED EXPENSES ENDPOINTS
+// ============================================
+
+interface FixedExpense {
+  id: string;
+  family_id: string;
+  created_by: string;
+  description: string;
+  amount_cents: number;
+  category: string;
+  child_ids: string | null;
+  link_url: string | null;
+  memo: string | null;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+interface CreateFixedExpenseRequest {
+  description: string;
+  amount: number; // in dollars
+  category: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  effectiveFrom: string; // YYYY-MM-DD
+  effectiveUntil?: string; // YYYY-MM-DD
+  linkUrl?: string;
+  memo?: string;
+}
+
+interface UpdateFixedExpenseRequest {
+  description?: string;
+  amount?: number; // in dollars
+  category?: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  effectiveUntil?: string | null;
+  linkUrl?: string | null;
+  memo?: string | null;
+}
+
+// Check tier limit for fixed expenses
+async function checkFixedExpenseLimit(db: D1Database, familyId: string): Promise<{ allowed: boolean; current: number; limit: number }> {
+  // Check if family has pro subscription
+  const subscription = await db.prepare(
+    `SELECT * FROM subscriptions WHERE family_id = ? AND status = 'active'`
+  ).bind(familyId).first();
+
+  const isPro = subscription !== null;
+  const limit = isPro ? Infinity : 2;
+
+  // Count current active fixed expenses
+  const result = await db.prepare(
+    `SELECT COUNT(*) as count FROM fixed_expenses
+     WHERE family_id = ? AND deleted_at IS NULL
+     AND (effective_until IS NULL OR effective_until >= date('now'))`
+  ).bind(familyId).first<{ count: number }>();
+
+  const current = result?.count || 0;
+
+  return {
+    allowed: current < limit,
+    current,
+    limit: isPro ? -1 : 2, // -1 means unlimited
+  };
+}
+
+// Generate monthly expenses from fixed expense templates
+async function generateMonthlyExpenses(db: D1Database, familyId: string): Promise<number> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // 1-indexed
+  const monthStr = `${year}-${month.toString().padStart(2, '0')}`;
+
+  // Get active fixed expenses for this family
+  const fixedExpenses = await db.prepare(
+    `SELECT * FROM fixed_expenses
+     WHERE family_id = ?
+     AND deleted_at IS NULL
+     AND effective_from <= date('now')
+     AND (effective_until IS NULL OR effective_until >= date('now'))`
+  ).bind(familyId).all<FixedExpense>();
+
+  let generated = 0;
+
+  for (const fixed of fixedExpenses.results || []) {
+    // Check if expense already exists for this month
+    const existingExpense = await db.prepare(
+      `SELECT id FROM expenses
+       WHERE fixed_expense_id = ?
+       AND strftime('%Y-%m', expense_date) = ?
+       AND deleted_at IS NULL`
+    ).bind(fixed.id, monthStr).first();
+
+    if (existingExpense) {
+      continue; // Already generated for this month
+    }
+
+    // Create expense from template
+    const expenseId = generateId();
+    const expenseDate = `${monthStr}-01`; // 1st of month
+
+    await db.prepare(
+      `INSERT INTO expenses (
+        id, family_id, created_by, paid_by, fixed_expense_id, description, amount_cents,
+        category, expense_date, child_ids, link_url, memo, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'posted', datetime('now'), datetime('now'))`
+    ).bind(
+      expenseId,
+      fixed.family_id,
+      fixed.created_by,
+      fixed.created_by, // paid_by defaults to creator
+      fixed.id,
+      fixed.description,
+      fixed.amount_cents,
+      fixed.category,
+      expenseDate,
+      fixed.child_ids,
+      fixed.link_url,
+      fixed.memo
+    ).run();
+
+    // Log activity
+    await createActivityEvent(
+      db,
+      fixed.family_id,
+      fixed.created_by,
+      'expense.generated',
+      'expense',
+      expenseId,
+      null,
+      { fixed_expense_id: fixed.id }
+    );
+
+    generated++;
+  }
+
+  return generated;
+}
+
+// Create fixed expense
+app.post('/families/:id/fixed-expenses', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to add fixed expenses to this family' }, 403);
+    }
+
+    // Check tier limit
+    const tierCheck = await checkFixedExpenseLimit(c.env.DB, familyId);
+    if (!tierCheck.allowed) {
+      return c.json({
+        error: 'Fixed expense limit reached',
+        current: tierCheck.current,
+        limit: tierCheck.limit,
+        upgrade: 'Upgrade to Pro for unlimited fixed expenses',
+      }, 403);
+    }
+
+    const body = await c.req.json<CreateFixedExpenseRequest>();
+    const { description, amount, category, effectiveFrom, effectiveUntil, linkUrl, memo } = body;
+
+    // Validate required fields
+    if (!description || description.length === 0) {
+      return c.json({ error: 'Description is required' }, 400);
+    }
+    if (description.length > 200) {
+      return c.json({ error: 'Description must be 200 characters or less' }, 400);
+    }
+    if (typeof amount !== 'number' || amount <= 0) {
+      return c.json({ error: 'Amount is required and must be a positive number' }, 400);
+    }
+    if (!category || !['school', 'medical', 'activities', 'childcare', 'other'].includes(category)) {
+      return c.json({ error: 'Category is required and must be: school, medical, activities, childcare, or other' }, 400);
+    }
+    if (!effectiveFrom || !/^\d{4}-\d{2}-\d{2}$/.test(effectiveFrom)) {
+      return c.json({ error: 'effectiveFrom is required in YYYY-MM-DD format' }, 400);
+    }
+    if (memo && memo.length > 500) {
+      return c.json({ error: 'Memo must be 500 characters or less' }, 400);
+    }
+
+    const fixedExpenseId = generateId();
+    const amountCents = dollarsToCents(amount);
+
+    await c.env.DB.prepare(
+      `INSERT INTO fixed_expenses (
+        id, family_id, created_by, description, amount_cents, category,
+        link_url, memo, effective_from, effective_until, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(
+      fixedExpenseId,
+      familyId,
+      userId,
+      description,
+      amountCents,
+      category,
+      linkUrl || null,
+      memo || null,
+      effectiveFrom,
+      effectiveUntil || null
+    ).run();
+
+    // Fetch the created fixed expense
+    const fixedExpense = await c.env.DB.prepare(
+      'SELECT * FROM fixed_expenses WHERE id = ?'
+    ).bind(fixedExpenseId).first<FixedExpense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'fixed_expense.created',
+      'fixed_expense',
+      fixedExpenseId,
+      null,
+      fixedExpense
+    );
+
+    return c.json({ success: true, fixedExpense }, 201);
+  } catch (error) {
+    console.error('Create fixed expense error:', error);
+    return c.json({ error: 'Failed to create fixed expense', details: String(error) }, 500);
+  }
+});
+
+// List fixed expenses
+app.get('/families/:id/fixed-expenses', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to view this family\'s fixed expenses' }, 403);
+    }
+
+    // Generate monthly expenses if needed (on app open check)
+    await generateMonthlyExpenses(c.env.DB, familyId);
+
+    const includeEnded = c.req.query('includeEnded') === 'true';
+
+    let query = `SELECT * FROM fixed_expenses WHERE family_id = ? AND deleted_at IS NULL`;
+    if (!includeEnded) {
+      query += ` AND (effective_until IS NULL OR effective_until >= date('now'))`;
+    }
+    query += ` ORDER BY created_at DESC`;
+
+    const result = await c.env.DB.prepare(query).bind(familyId).all<FixedExpense>();
+
+    // Get tier info
+    const tierCheck = await checkFixedExpenseLimit(c.env.DB, familyId);
+
+    return c.json({
+      fixedExpenses: result.results || [],
+      count: result.results?.length || 0,
+      tier: {
+        current: tierCheck.current,
+        limit: tierCheck.limit,
+        canAdd: tierCheck.allowed,
+      },
+    });
+  } catch (error) {
+    console.error('List fixed expenses error:', error);
+    return c.json({ error: 'Failed to list fixed expenses', details: String(error) }, 500);
+  }
+});
+
+// Update fixed expense
+app.patch('/families/:id/fixed-expenses/:fixedExpenseId', async (c) => {
+  const familyId = c.req.param('id');
+  const fixedExpenseId = c.req.param('fixedExpenseId');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to modify this family\'s fixed expenses' }, 403);
+    }
+
+    // Get the fixed expense
+    const fixedExpense = await c.env.DB.prepare(
+      'SELECT * FROM fixed_expenses WHERE id = ? AND family_id = ? AND deleted_at IS NULL'
+    ).bind(fixedExpenseId, familyId).first<FixedExpense>();
+
+    if (!fixedExpense) {
+      return c.json({ error: 'Fixed expense not found' }, 404);
+    }
+
+    const body = await c.req.json<UpdateFixedExpenseRequest>();
+    const { description, amount, category, effectiveUntil, linkUrl, memo } = body;
+
+    // Build update query
+    const updates: string[] = [];
+    const params: (string | number | null)[] = [];
+
+    if (description !== undefined) {
+      if (description.length === 0 || description.length > 200) {
+        return c.json({ error: 'Description must be between 1 and 200 characters' }, 400);
+      }
+      updates.push('description = ?');
+      params.push(description);
+    }
+
+    if (amount !== undefined) {
+      if (typeof amount !== 'number' || amount <= 0) {
+        return c.json({ error: 'Amount must be a positive number' }, 400);
+      }
+      updates.push('amount_cents = ?');
+      params.push(dollarsToCents(amount));
+    }
+
+    if (category !== undefined) {
+      if (!['school', 'medical', 'activities', 'childcare', 'other'].includes(category)) {
+        return c.json({ error: 'Category must be: school, medical, activities, childcare, or other' }, 400);
+      }
+      updates.push('category = ?');
+      params.push(category);
+    }
+
+    if (effectiveUntil !== undefined) {
+      updates.push('effective_until = ?');
+      params.push(effectiveUntil);
+    }
+
+    if (linkUrl !== undefined) {
+      updates.push('link_url = ?');
+      params.push(linkUrl);
+    }
+
+    if (memo !== undefined) {
+      if (memo && memo.length > 500) {
+        return c.json({ error: 'Memo must be 500 characters or less' }, 400);
+      }
+      updates.push('memo = ?');
+      params.push(memo);
+    }
+
+    if (updates.length === 0) {
+      return c.json({ error: 'No fields to update' }, 400);
+    }
+
+    updates.push("updated_at = datetime('now')");
+    params.push(fixedExpenseId);
+
+    await c.env.DB.prepare(
+      `UPDATE fixed_expenses SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...params).run();
+
+    // Fetch updated fixed expense
+    const updatedFixedExpense = await c.env.DB.prepare(
+      'SELECT * FROM fixed_expenses WHERE id = ?'
+    ).bind(fixedExpenseId).first<FixedExpense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'fixed_expense.updated',
+      'fixed_expense',
+      fixedExpenseId,
+      fixedExpense,
+      updatedFixedExpense
+    );
+
+    return c.json({ success: true, fixedExpense: updatedFixedExpense });
+  } catch (error) {
+    console.error('Update fixed expense error:', error);
+    return c.json({ error: 'Failed to update fixed expense', details: String(error) }, 500);
+  }
+});
+
+// End fixed expense (set effective_until to today)
+app.delete('/families/:id/fixed-expenses/:fixedExpenseId', async (c) => {
+  const familyId = c.req.param('id');
+  const fixedExpenseId = c.req.param('fixedExpenseId');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to modify this family\'s fixed expenses' }, 403);
+    }
+
+    // Get the fixed expense
+    const fixedExpense = await c.env.DB.prepare(
+      'SELECT * FROM fixed_expenses WHERE id = ? AND family_id = ? AND deleted_at IS NULL'
+    ).bind(fixedExpenseId, familyId).first<FixedExpense>();
+
+    if (!fixedExpense) {
+      return c.json({ error: 'Fixed expense not found' }, 404);
+    }
+
+    // Set effective_until to today (end the template, don't hard delete)
+    const today = getTodayDate();
+    await c.env.DB.prepare(
+      `UPDATE fixed_expenses SET effective_until = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(today, fixedExpenseId).run();
+
+    // Fetch updated fixed expense
+    const updatedFixedExpense = await c.env.DB.prepare(
+      'SELECT * FROM fixed_expenses WHERE id = ?'
+    ).bind(fixedExpenseId).first<FixedExpense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'fixed_expense.ended',
+      'fixed_expense',
+      fixedExpenseId,
+      fixedExpense,
+      updatedFixedExpense
+    );
+
+    return c.json({ success: true, fixedExpense: updatedFixedExpense });
+  } catch (error) {
+    console.error('End fixed expense error:', error);
+    return c.json({ error: 'Failed to end fixed expense', details: String(error) }, 500);
+  }
+});
+
+// ============================================
+// ACTIVITY FEED ENDPOINT
+// ============================================
+
+interface ActivityEvent {
+  id: string;
+  family_id: string;
+  user_id: string;
+  event_type: string;
+  target_type: string;
+  target_id: string;
+  before_snapshot: string | null;
+  after_snapshot: string | null;
+  metadata: string | null;
+  created_at: string;
+}
+
+interface ActivityEventWithUser extends ActivityEvent {
+  user_email: string;
+  user_name: string | null;
+}
+
+// Get activity feed for family
+app.get('/families/:id/activity', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to view this family\'s activity' }, 403);
+    }
+
+    const limit = parseInt(c.req.query('limit') || '20');
+    const offset = parseInt(c.req.query('offset') || '0');
+
+    // Get activity events with user info
+    const result = await c.env.DB.prepare(
+      `SELECT ae.*, u.email as user_email, u.name as user_name
+       FROM activity_events ae
+       LEFT JOIN users u ON ae.user_id = u.id
+       WHERE ae.family_id = ?
+       ORDER BY ae.created_at DESC
+       LIMIT ? OFFSET ?`
+    ).bind(familyId, limit, offset).all<ActivityEventWithUser>();
+
+    // Get total count for pagination
+    const countResult = await c.env.DB.prepare(
+      'SELECT COUNT(*) as count FROM activity_events WHERE family_id = ?'
+    ).bind(familyId).first<{ count: number }>();
+
+    // Parse JSON fields for each event
+    const events = (result.results || []).map(event => ({
+      ...event,
+      before_snapshot: event.before_snapshot ? JSON.parse(event.before_snapshot) : null,
+      after_snapshot: event.after_snapshot ? JSON.parse(event.after_snapshot) : null,
+      metadata: event.metadata ? JSON.parse(event.metadata) : null,
+    }));
+
+    return c.json({
+      events,
+      pagination: {
+        total: countResult?.count || 0,
+        limit,
+        offset,
+      },
+    });
+  } catch (error) {
+    console.error('Get activity error:', error);
+    return c.json({ error: 'Failed to get activity', details: String(error) }, 500);
+  }
+});
+
 // API info
 app.get('/', (c) => {
   return c.json({
@@ -1161,6 +2090,13 @@ app.get('/', (c) => {
       '/families/:id/payments',
       '/families/:id/children',
       '/families/:id/children/:childId',
+      '/families/:id/fixed-expenses',
+      '/families/:id/fixed-expenses/:fixedExpenseId',
+      '/families/:id/activity',
+      '/expenses/:id',
+      '/expenses/:id/question',
+      '/expenses/:id/resolve',
+      '/expenses/:id/satisfy',
     ],
   });
 });
