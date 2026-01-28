@@ -28,7 +28,7 @@ export default async function Home() {
             A shared space to track child-related expenses. Log costs, set up
             recurring expenses, and always know where things stand.
           </p>
-          <ul className="space-y-2 text-left">
+          <ul className="inline-flex flex-col items-start space-y-2">
             <li className="flex items-center gap-2">
               <span className="text-green-600 dark:text-green-400">&#10003;</span>
               Quick and easy expense logging
