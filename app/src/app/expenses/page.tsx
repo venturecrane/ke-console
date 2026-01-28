@@ -6,11 +6,16 @@ import Link from "next/link";
 import {
   getMe,
   getExpenses,
+  questionExpense,
+  resolveExpense,
+  satisfyExpense,
   type MeResponse,
   type Expense,
   type ExpenseCategory,
   type ExpenseStatus,
   type ExpenseFilters,
+  type QuestionReason,
+  type ResolutionAction,
 } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 20;
@@ -41,6 +46,14 @@ const DATE_RANGE_OPTIONS = [
   { value: "last-month", label: "Last Month" },
   { value: "last-3-months", label: "Last 3 Months" },
   { value: "custom", label: "Custom Range" },
+];
+
+const QUESTION_REASONS: { value: QuestionReason; label: string }[] = [
+  { value: "wrong_amount", label: "Wrong Amount" },
+  { value: "not_child_related", label: "Not Child Related" },
+  { value: "duplicate", label: "Duplicate" },
+  { value: "split_dispute", label: "Split Dispute" },
+  { value: "other", label: "Other" },
 ];
 
 // Format cents to dollars display
@@ -129,6 +142,22 @@ export default function ExpenseListPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
+  // Question Modal State
+  const [questionModalOpen, setQuestionModalOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [questionReason, setQuestionReason] = useState<QuestionReason>("wrong_amount");
+  const [questionNote, setQuestionNote] = useState("");
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
+
+  // Resolve Modal State
+  const [resolveModalOpen, setResolveModalOpen] = useState(false);
+  const [resolveAction, setResolveAction] = useState<ResolutionAction>("keep");
+  const [resolveNewAmount, setResolveNewAmount] = useState("");
+  const [isSubmittingResolve, setIsSubmittingResolve] = useState(false);
+
+  // Satisfy action state
+  const [isSubmittingSatisfy, setIsSubmittingSatisfy] = useState<string | null>(null);
+
   const fetchExpenses = useCallback(
     async (offset: number = 0, append: boolean = false) => {
       if (!user || !meData?.family) return;
@@ -211,6 +240,105 @@ export default function ExpenseListPage() {
   };
 
   const hasMore = currentOffset < totalExpenses;
+
+  // Open Question Modal
+  const openQuestionModal = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setQuestionReason("wrong_amount");
+    setQuestionNote("");
+    setQuestionModalOpen(true);
+  };
+
+  // Submit Question
+  const handleSubmitQuestion = async () => {
+    if (!user || !selectedExpense) return;
+
+    setIsSubmittingQuestion(true);
+    try {
+      await questionExpense(user.id, selectedExpense.id, {
+        reason: questionReason,
+        note: questionNote || undefined,
+      });
+      setQuestionModalOpen(false);
+      // Refresh expenses
+      fetchExpenses(0, false);
+    } catch (error) {
+      console.error("Failed to question expense:", error);
+      alert("Failed to question expense. Please try again.");
+    } finally {
+      setIsSubmittingQuestion(false);
+    }
+  };
+
+  // Open Resolve Modal
+  const openResolveModal = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setResolveAction("keep");
+    setResolveNewAmount((expense.amount_cents / 100).toString());
+    setResolveModalOpen(true);
+  };
+
+  // Submit Resolve
+  const handleSubmitResolve = async () => {
+    if (!user || !selectedExpense) return;
+
+    setIsSubmittingResolve(true);
+    try {
+      await resolveExpense(user.id, selectedExpense.id, {
+        action: resolveAction,
+        newAmount: resolveAction === "edit" ? parseFloat(resolveNewAmount) : undefined,
+      });
+      setResolveModalOpen(false);
+      // Refresh expenses
+      fetchExpenses(0, false);
+    } catch (error) {
+      console.error("Failed to resolve expense:", error);
+      alert("Failed to resolve expense. Please try again.");
+    } finally {
+      setIsSubmittingResolve(false);
+    }
+  };
+
+  // Handle Satisfy
+  const handleSatisfy = async (expense: Expense) => {
+    if (!user) return;
+
+    setIsSubmittingSatisfy(expense.id);
+    try {
+      await satisfyExpense(user.id, expense.id);
+      // Refresh expenses
+      fetchExpenses(0, false);
+    } catch (error) {
+      console.error("Failed to satisfy expense:", error);
+      alert("Failed to mark as satisfied. Please try again.");
+    } finally {
+      setIsSubmittingSatisfy(null);
+    }
+  };
+
+  // Check if user can question this expense
+  const canQuestion = (expense: Expense) => {
+    return (
+      expense.status === "posted" &&
+      expense.created_by !== user?.id
+    );
+  };
+
+  // Check if user can resolve this expense
+  const canResolve = (expense: Expense) => {
+    return (
+      expense.status === "questioned" &&
+      expense.created_by === user?.id
+    );
+  };
+
+  // Check if user can satisfy this expense
+  const canSatisfy = (expense: Expense) => {
+    return (
+      expense.status === "pending_satisfaction" &&
+      expense.questioned_by === user?.id
+    );
+  };
 
   if (!isLoaded) {
     return (
@@ -407,7 +535,11 @@ export default function ExpenseListPage() {
             {expenses.map((expense) => (
               <div
                 key={expense.id}
-                className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+                className={`rounded-lg border bg-white p-4 dark:bg-zinc-950 ${
+                  expense.status === "questioned" || expense.status === "pending_satisfaction"
+                    ? "border-yellow-300 dark:border-yellow-700"
+                    : "border-zinc-200 dark:border-zinc-800"
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -420,6 +552,11 @@ export default function ExpenseListPage() {
                       >
                         {formatStatus(expense.status)}
                       </span>
+                      {expense.fixed_expense_id && (
+                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                          Fixed
+                        </span>
+                      )}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
                       <span className="inline-flex items-center gap-1">
@@ -446,8 +583,27 @@ export default function ExpenseListPage() {
                         {expense.memo}
                       </p>
                     )}
+                    {/* Show question info if questioned */}
+                    {expense.question_reason && (
+                      <div className="mt-2 rounded bg-yellow-50 p-2 text-sm dark:bg-yellow-900/20">
+                        <p className="font-medium text-yellow-800 dark:text-yellow-300">
+                          Questioned: {formatStatus(expense.question_reason)}
+                        </p>
+                        {expense.question_note && (
+                          <p className="text-yellow-700 dark:text-yellow-400">{expense.question_note}</p>
+                        )}
+                      </div>
+                    )}
+                    {/* Show resolution info if resolved */}
+                    {expense.resolution_action && expense.status === "pending_satisfaction" && (
+                      <div className="mt-2 rounded bg-orange-50 p-2 text-sm dark:bg-orange-900/20">
+                        <p className="font-medium text-orange-800 dark:text-orange-300">
+                          Resolution: {formatStatus(expense.resolution_action)}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
                     <p
                       className={`text-lg font-semibold ${
                         expense.amount_cents < 0
@@ -459,6 +615,34 @@ export default function ExpenseListPage() {
                       {formatCurrency(Math.abs(expense.amount_cents))}
                       {expense.amount_cents < 0 && ")"}
                     </p>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {canQuestion(expense) && (
+                        <button
+                          onClick={() => openQuestionModal(expense)}
+                          className="rounded border border-yellow-400 px-2 py-1 text-xs font-medium text-yellow-600 hover:bg-yellow-50 dark:border-yellow-600 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                        >
+                          Question
+                        </button>
+                      )}
+                      {canResolve(expense) && (
+                        <button
+                          onClick={() => openResolveModal(expense)}
+                          className="rounded border border-blue-400 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                        >
+                          Respond
+                        </button>
+                      )}
+                      {canSatisfy(expense) && (
+                        <button
+                          onClick={() => handleSatisfy(expense)}
+                          disabled={isSubmittingSatisfy === expense.id}
+                          className="rounded border border-green-400 px-2 py-1 text-xs font-medium text-green-600 hover:bg-green-50 disabled:opacity-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-900/20"
+                        >
+                          {isSubmittingSatisfy === expense.id ? "..." : "Satisfied"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -479,6 +663,166 @@ export default function ExpenseListPage() {
           </div>
         )}
       </main>
+
+      {/* Question Modal */}
+      {questionModalOpen && selectedExpense && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Question Expense
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              {selectedExpense.description} - {formatCurrency(selectedExpense.amount_cents)}
+            </p>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Reason *
+              </label>
+              <select
+                value={questionReason}
+                onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              >
+                {QUESTION_REASONS.map((r) => (
+                  <option key={r.value} value={r.value}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Note (optional)
+              </label>
+              <textarea
+                value={questionNote}
+                onChange={(e) => setQuestionNote(e.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                placeholder="Add any additional details..."
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setQuestionModalOpen(false)}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitQuestion}
+                disabled={isSubmittingQuestion}
+                className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600 disabled:opacity-50"
+              >
+                {isSubmittingQuestion ? "Submitting..." : "Question Expense"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resolve Modal */}
+      {resolveModalOpen && selectedExpense && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Respond to Question
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              {selectedExpense.description} - {formatCurrency(selectedExpense.amount_cents)}
+            </p>
+            {selectedExpense.question_reason && (
+              <p className="mt-2 text-sm text-yellow-600 dark:text-yellow-400">
+                Reason: {formatStatus(selectedExpense.question_reason)}
+                {selectedExpense.question_note && ` - "${selectedExpense.question_note}"`}
+              </p>
+            )}
+
+            <div className="mt-4 space-y-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="keep"
+                  checked={resolveAction === "keep"}
+                  onChange={() => setResolveAction("keep")}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-zinc-700 dark:text-zinc-300">Keep as-is</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="edit"
+                  checked={resolveAction === "edit"}
+                  onChange={() => setResolveAction("edit")}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-zinc-700 dark:text-zinc-300">Edit amount</span>
+              </label>
+              {resolveAction === "edit" && (
+                <div className="ml-6">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    New Amount ($)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={resolveNewAmount}
+                    onChange={(e) => setResolveNewAmount(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  />
+                </div>
+              )}
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="personal"
+                  checked={resolveAction === "personal"}
+                  onChange={() => setResolveAction("personal")}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                  Mark as personal (exclude from split)
+                </span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="delete"
+                  checked={resolveAction === "delete"}
+                  onChange={() => setResolveAction("delete")}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-red-600 dark:text-red-400">Delete expense</span>
+              </label>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setResolveModalOpen(false)}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitResolve}
+                disabled={isSubmittingResolve || (resolveAction === "edit" && !resolveNewAmount)}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isSubmittingResolve ? "Submitting..." : "Submit Response"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

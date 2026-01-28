@@ -364,3 +364,187 @@ export async function deleteChild(
     userId
   );
 }
+
+// ============================================
+// DISPUTE API
+// ============================================
+
+export type QuestionReason =
+  | "wrong_amount"
+  | "not_child_related"
+  | "duplicate"
+  | "split_dispute"
+  | "other";
+
+export type ResolutionAction = "keep" | "edit" | "personal" | "delete";
+
+export interface QuestionExpenseRequest {
+  reason: QuestionReason;
+  note?: string;
+}
+
+export interface ResolveExpenseRequest {
+  action: ResolutionAction;
+  newAmount?: number; // in dollars, only for 'edit' action
+}
+
+export async function getExpense(
+  userId: string,
+  expenseId: string
+): Promise<{ expense: Expense }> {
+  return apiRequest<{ expense: Expense }>(
+    `/expenses/${expenseId}`,
+    { method: "GET" },
+    userId
+  );
+}
+
+export async function questionExpense(
+  userId: string,
+  expenseId: string,
+  request: QuestionExpenseRequest
+): Promise<{ success: boolean; expense: Expense }> {
+  return apiRequest(
+    `/expenses/${expenseId}/question`,
+    {
+      method: "POST",
+      body: JSON.stringify(request),
+    },
+    userId
+  );
+}
+
+export async function resolveExpense(
+  userId: string,
+  expenseId: string,
+  request: ResolveExpenseRequest
+): Promise<{ success: boolean; expense: Expense }> {
+  return apiRequest(
+    `/expenses/${expenseId}/resolve`,
+    {
+      method: "POST",
+      body: JSON.stringify(request),
+    },
+    userId
+  );
+}
+
+export async function satisfyExpense(
+  userId: string,
+  expenseId: string
+): Promise<{ success: boolean; expense: Expense }> {
+  return apiRequest(
+    `/expenses/${expenseId}/satisfy`,
+    { method: "POST" },
+    userId
+  );
+}
+
+// ============================================
+// FIXED EXPENSES API
+// ============================================
+
+export interface FixedExpense {
+  id: string;
+  family_id: string;
+  created_by: string;
+  description: string;
+  amount_cents: number;
+  category: ExpenseCategory;
+  child_ids: string | null;
+  link_url: string | null;
+  memo: string | null;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CreateFixedExpenseRequest {
+  description: string;
+  amount: number; // in dollars
+  category: ExpenseCategory;
+  effectiveFrom: string; // YYYY-MM-DD
+  effectiveUntil?: string; // YYYY-MM-DD
+  linkUrl?: string;
+  memo?: string;
+}
+
+export interface UpdateFixedExpenseRequest {
+  description?: string;
+  amount?: number; // in dollars
+  category?: ExpenseCategory;
+  effectiveUntil?: string | null;
+  linkUrl?: string | null;
+  memo?: string | null;
+}
+
+export interface FixedExpenseTier {
+  current: number;
+  limit: number; // -1 means unlimited
+  canAdd: boolean;
+}
+
+export interface FixedExpenseListResponse {
+  fixedExpenses: FixedExpense[];
+  count: number;
+  tier: FixedExpenseTier;
+}
+
+export async function getFixedExpenses(
+  userId: string,
+  familyId: string,
+  includeEnded?: boolean
+): Promise<FixedExpenseListResponse> {
+  const params = new URLSearchParams();
+  if (includeEnded) params.set("includeEnded", "true");
+
+  const queryString = params.toString();
+  const path = `/families/${familyId}/fixed-expenses${queryString ? `?${queryString}` : ""}`;
+
+  return apiRequest<FixedExpenseListResponse>(path, { method: "GET" }, userId);
+}
+
+export async function createFixedExpense(
+  userId: string,
+  familyId: string,
+  request: CreateFixedExpenseRequest
+): Promise<{ success: boolean; fixedExpense: FixedExpense }> {
+  return apiRequest(
+    `/families/${familyId}/fixed-expenses`,
+    {
+      method: "POST",
+      body: JSON.stringify(request),
+    },
+    userId
+  );
+}
+
+export async function updateFixedExpense(
+  userId: string,
+  familyId: string,
+  fixedExpenseId: string,
+  request: UpdateFixedExpenseRequest
+): Promise<{ success: boolean; fixedExpense: FixedExpense }> {
+  return apiRequest(
+    `/families/${familyId}/fixed-expenses/${fixedExpenseId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(request),
+    },
+    userId
+  );
+}
+
+export async function endFixedExpense(
+  userId: string,
+  familyId: string,
+  fixedExpenseId: string
+): Promise<{ success: boolean; fixedExpense: FixedExpense }> {
+  return apiRequest(
+    `/families/${familyId}/fixed-expenses/${fixedExpenseId}`,
+    { method: "DELETE" },
+    userId
+  );
+}

@@ -406,7 +406,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Link
                 href="/settings/children"
                 className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
@@ -432,6 +432,34 @@ export default function DashboardPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Add or remove children for expense tagging
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/settings/fixed-expenses"
+                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                  <svg
+                    className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Fixed Expenses
+                  </h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Set up recurring monthly expenses
                   </p>
                 </div>
               </Link>
