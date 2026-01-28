@@ -381,6 +381,24 @@ export default function DashboardPage() {
                       )}
                     </div>
                   </div>
+
+                  {/* Payment Actions */}
+                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                    <Link
+                      href="/payments"
+                      className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                    >
+                      View Payment History
+                    </Link>
+                    {balance.balance_cents !== 0 && balance.payer_id === user?.id && (
+                      <Link
+                        href="/payments/add"
+                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+                      >
+                        Record Payment
+                      </Link>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <p className="text-sm text-zinc-500">No balance data available</p>
@@ -388,7 +406,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <Link
                 href="/settings/children"
                 className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
@@ -442,6 +460,34 @@ export default function DashboardPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Record a new shared expense
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/payments/add"
+                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                  <svg
+                    className="h-5 w-5 text-green-600 dark:text-green-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Record Payment
+                  </h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Log a payment to your co-parent
                   </p>
                 </div>
               </Link>
