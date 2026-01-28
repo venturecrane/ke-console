@@ -406,7 +406,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link
                 href="/settings/children"
                 className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
@@ -432,6 +432,34 @@ export default function DashboardPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Add or remove children for expense tagging
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/settings/fixed-expenses"
+                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                  <svg
+                    className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Fixed Expenses
+                  </h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Recurring monthly expense templates
                   </p>
                 </div>
               </Link>
@@ -516,6 +544,34 @@ export default function DashboardPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Log a payment to your co-parent
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/expenses"
+                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                  <svg
+                    className="h-5 w-5 text-yellow-600 dark:text-yellow-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                    All Expenses
+                  </h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    View, filter, and manage all expenses
                   </p>
                 </div>
               </Link>
