@@ -6,11 +6,16 @@ import Link from "next/link";
 import {
   getMe,
   getExpenses,
+  questionExpense,
+  resolveExpense,
+  satisfyExpense,
   type MeResponse,
   type Expense,
   type ExpenseCategory,
   type ExpenseStatus,
   type ExpenseFilters,
+  type QuestionReason,
+  type ResolutionAction,
 } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 20;
@@ -41,6 +46,21 @@ const DATE_RANGE_OPTIONS = [
   { value: "last-month", label: "Last Month" },
   { value: "last-3-months", label: "Last 3 Months" },
   { value: "custom", label: "Custom Range" },
+];
+
+const QUESTION_REASONS: { value: QuestionReason; label: string }[] = [
+  { value: "wrong_amount", label: "Wrong Amount" },
+  { value: "not_child_related", label: "Not Child Related" },
+  { value: "duplicate", label: "Duplicate Entry" },
+  { value: "split_dispute", label: "Split Dispute" },
+  { value: "other", label: "Other" },
+];
+
+const RESOLUTION_ACTIONS: { value: ResolutionAction; label: string; description: string }[] = [
+  { value: "keep", label: "Keep As-Is", description: "Keep the expense unchanged" },
+  { value: "edit", label: "Edit Amount", description: "Update the amount" },
+  { value: "personal", label: "Mark as Personal", description: "Won't count in split" },
+  { value: "delete", label: "Delete Expense", description: "Remove this expense" },
 ];
 
 // Format cents to dollars display
@@ -129,6 +149,23 @@ export default function ExpenseListPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
+  // Question modal state
+  const [questionModalExpense, setQuestionModalExpense] = useState<Expense | null>(null);
+  const [questionReason, setQuestionReason] = useState<QuestionReason>("wrong_amount");
+  const [questionNote, setQuestionNote] = useState("");
+  const [isQuestioning, setIsQuestioning] = useState(false);
+  const [questionError, setQuestionError] = useState<string | null>(null);
+
+  // Resolve modal state
+  const [resolveModalExpense, setResolveModalExpense] = useState<Expense | null>(null);
+  const [resolveAction, setResolveAction] = useState<ResolutionAction>("keep");
+  const [resolveNewAmount, setResolveNewAmount] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
+
+  // Satisfy state
+  const [satisfyingExpenseId, setSatisfyingExpenseId] = useState<string | null>(null);
+
   const fetchExpenses = useCallback(
     async (offset: number = 0, append: boolean = false) => {
       if (!user || !meData?.family) return;
@@ -211,6 +248,124 @@ export default function ExpenseListPage() {
   };
 
   const hasMore = currentOffset < totalExpenses;
+
+  // Handle question expense
+  async function handleQuestionExpense() {
+    if (!user || !questionModalExpense) return;
+
+    setIsQuestioning(true);
+    setQuestionError(null);
+
+    try {
+      const result = await questionExpense(user.id, questionModalExpense.id, {
+        reason: questionReason,
+        note: questionNote || undefined,
+      });
+
+      // Update the expense in the list
+      setExpenses((prev) =>
+        prev.map((exp) => (exp.id === result.expense.id ? result.expense : exp))
+      );
+
+      // Close modal and reset state
+      setQuestionModalExpense(null);
+      setQuestionReason("wrong_amount");
+      setQuestionNote("");
+    } catch (err) {
+      console.error("Failed to question expense:", err);
+      setQuestionError(err instanceof Error ? err.message : "Failed to question expense");
+    } finally {
+      setIsQuestioning(false);
+    }
+  }
+
+  // Handle resolve expense
+  async function handleResolveExpense() {
+    if (!user || !resolveModalExpense) return;
+
+    setIsResolving(true);
+    setResolveError(null);
+
+    try {
+      const request: { action: ResolutionAction; newAmount?: number } = { action: resolveAction };
+      if (resolveAction === "edit") {
+        const amount = parseFloat(resolveNewAmount);
+        if (isNaN(amount) || amount <= 0) {
+          setResolveError("Please enter a valid positive amount");
+          setIsResolving(false);
+          return;
+        }
+        request.newAmount = amount;
+      }
+
+      const result = await resolveExpense(user.id, resolveModalExpense.id, request);
+
+      // Update the expense in the list (or remove if deleted)
+      if (resolveAction === "delete") {
+        setExpenses((prev) => prev.filter((exp) => exp.id !== result.expense.id));
+        setTotalExpenses((prev) => prev - 1);
+      } else {
+        setExpenses((prev) =>
+          prev.map((exp) => (exp.id === result.expense.id ? result.expense : exp))
+        );
+      }
+
+      // Close modal and reset state
+      setResolveModalExpense(null);
+      setResolveAction("keep");
+      setResolveNewAmount("");
+    } catch (err) {
+      console.error("Failed to resolve expense:", err);
+      setResolveError(err instanceof Error ? err.message : "Failed to resolve expense");
+    } finally {
+      setIsResolving(false);
+    }
+  }
+
+  // Handle satisfy expense
+  async function handleSatisfyExpense(expenseId: string) {
+    if (!user) return;
+
+    setSatisfyingExpenseId(expenseId);
+
+    try {
+      const result = await satisfyExpense(user.id, expenseId);
+
+      // Update the expense in the list
+      setExpenses((prev) =>
+        prev.map((exp) => (exp.id === result.expense.id ? result.expense : exp))
+      );
+    } catch (err) {
+      console.error("Failed to satisfy expense:", err);
+      // Could show a toast notification here
+    } finally {
+      setSatisfyingExpenseId(null);
+    }
+  }
+
+  // Check if user can question an expense
+  function canQuestion(expense: Expense): boolean {
+    return (
+      expense.status === "posted" &&
+      expense.created_by !== user?.id
+    );
+  }
+
+  // Check if user can resolve an expense
+  function canResolve(expense: Expense): boolean {
+    return (
+      expense.status === "questioned" &&
+      expense.created_by === user?.id
+    );
+  }
+
+  // Check if user can satisfy an expense
+  function canSatisfy(expense: Expense): boolean {
+    return (
+      expense.status === "pending_satisfaction" &&
+      expense.questioned_by === user?.id
+    );
+  }
 
   if (!isLoaded) {
     return (
@@ -461,6 +616,66 @@ export default function ExpenseListPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Dispute Info for questioned expenses */}
+                {expense.status === "questioned" && expense.question_reason && (
+                  <div className="mt-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                      Questioned: {QUESTION_REASONS.find(r => r.value === expense.question_reason)?.label || expense.question_reason}
+                    </p>
+                    {expense.question_note && (
+                      <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
+                        {expense.question_note}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Pending satisfaction info */}
+                {expense.status === "pending_satisfaction" && (
+                  <div className="mt-3 rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
+                    <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
+                      Creator responded: {expense.resolution_action === "kept" ? "Kept as-is" : expense.resolution_action === "edited" ? "Amount edited" : expense.resolution_action}
+                    </p>
+                    <p className="mt-1 text-sm text-orange-700 dark:text-orange-400">
+                      Waiting for questioner confirmation
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {canQuestion(expense) && (
+                    <button
+                      onClick={() => setQuestionModalExpense(expense)}
+                      className="rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-1.5 text-sm font-medium text-yellow-700 transition-colors hover:bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/40"
+                    >
+                      Question
+                    </button>
+                  )}
+
+                  {canResolve(expense) && (
+                    <button
+                      onClick={() => {
+                        setResolveModalExpense(expense);
+                        setResolveNewAmount((expense.amount_cents / 100).toString());
+                      }}
+                      className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+                    >
+                      Respond
+                    </button>
+                  )}
+
+                  {canSatisfy(expense) && (
+                    <button
+                      onClick={() => handleSatisfyExpense(expense.id)}
+                      disabled={satisfyingExpenseId === expense.id}
+                      className="rounded-lg border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40"
+                    >
+                      {satisfyingExpenseId === expense.id ? "..." : "Satisfied"}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -479,6 +694,176 @@ export default function ExpenseListPage() {
           </div>
         )}
       </main>
+
+      {/* Question Modal */}
+      {questionModalExpense && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
+            <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Question Expense
+            </h3>
+            <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+              Questioning: <strong>{questionModalExpense.description}</strong> ({formatCurrency(questionModalExpense.amount_cents)})
+            </p>
+
+            {questionError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+                <p className="text-sm text-red-600 dark:text-red-400">{questionError}</p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Reason *
+              </label>
+              <select
+                value={questionReason}
+                onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
+                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              >
+                {QUESTION_REASONS.map((reason) => (
+                  <option key={reason.value} value={reason.value}>
+                    {reason.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Note (optional)
+              </label>
+              <textarea
+                value={questionNote}
+                onChange={(e) => setQuestionNote(e.target.value)}
+                placeholder="Add additional details..."
+                rows={3}
+                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setQuestionModalExpense(null);
+                  setQuestionReason("wrong_amount");
+                  setQuestionNote("");
+                  setQuestionError(null);
+                }}
+                disabled={isQuestioning}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleQuestionExpense}
+                disabled={isQuestioning}
+                className="rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
+              >
+                {isQuestioning ? "Submitting..." : "Question Expense"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resolve Modal */}
+      {resolveModalExpense && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
+            <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Respond to Question
+            </h3>
+            <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
+              Expense: <strong>{resolveModalExpense.description}</strong> ({formatCurrency(resolveModalExpense.amount_cents)})
+            </p>
+            {resolveModalExpense.question_reason && (
+              <p className="mb-4 text-sm text-yellow-600 dark:text-yellow-400">
+                Questioned for: {QUESTION_REASONS.find(r => r.value === resolveModalExpense.question_reason)?.label}
+                {resolveModalExpense.question_note && ` - "${resolveModalExpense.question_note}"`}
+              </p>
+            )}
+
+            {resolveError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+                <p className="text-sm text-red-600 dark:text-red-400">{resolveError}</p>
+              </div>
+            )}
+
+            <div className="mb-4 space-y-2">
+              {RESOLUTION_ACTIONS.map((action) => (
+                <label
+                  key={action.value}
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                    resolveAction === action.value
+                      ? "border-blue-500 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20"
+                      : "border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="resolveAction"
+                    value={action.value}
+                    checked={resolveAction === action.value}
+                    onChange={(e) => setResolveAction(e.target.value as ResolutionAction)}
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                      {action.label}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {action.description}
+                    </p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            {resolveAction === "edit" && (
+              <div className="mb-6">
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  New Amount ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={resolveNewAmount}
+                  onChange={(e) => setResolveNewAmount(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setResolveModalExpense(null);
+                  setResolveAction("keep");
+                  setResolveNewAmount("");
+                  setResolveError(null);
+                }}
+                disabled={isResolving}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResolveExpense}
+                disabled={isResolving}
+                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
+                  resolveAction === "delete"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                {isResolving ? "Submitting..." : resolveAction === "delete" ? "Delete Expense" : "Submit Response"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
