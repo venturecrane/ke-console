@@ -17,33 +17,33 @@ export default async function Home() {
           Kid Expenses
         </h1>
         <p className="mb-2 text-xl text-zinc-600 dark:text-zinc-400">
-          A neutral ledger for kid costs
+          Simple expense tracking for co-parents
         </p>
         <p className="mb-8 text-lg text-zinc-500 dark:text-zinc-500">
-          So money doesn&apos;t become a weekly argument.
+          Stay organized together, effortlessly.
         </p>
 
         <div className="mb-12 max-w-lg text-zinc-600 dark:text-zinc-400">
           <p className="mb-4">
-            Track shared child expenses with your co-parent. See who owes what,
-            resolve disputes, and keep a clear audit trail.
+            A shared space to track child-related expenses. Log costs, set up
+            recurring expenses, and always know where things stand.
           </p>
           <ul className="space-y-2 text-left">
             <li className="flex items-center gap-2">
               <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Split expenses with configurable ratios
+              Quick and easy expense logging
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Built-in dispute resolution workflow
+              Set up recurring expenses once
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Full audit trail of all changes
+              Flexible split ratios that work for you
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Rolling balance calculation
+              Clear running balance at a glance
             </li>
           </ul>
         </div>
