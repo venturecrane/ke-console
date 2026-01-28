@@ -1,0 +1,8 @@
+name = "ke-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ke-main"
+database_id = "8a876b33-faf8-4267-bd08-770b76786dcb"
