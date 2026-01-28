@@ -31,6 +31,87 @@ export interface FamilyWithParents {
   parentB: User | null;
 }
 
+export type ExpenseCategory = "school" | "medical" | "activities" | "childcare" | "other";
+
+export type ExpenseStatus =
+  | "posted"
+  | "questioned"
+  | "pending_satisfaction"
+  | "resolved"
+  | "resolved_creator_decided"
+  | "resolved_personal"
+  | "resolved_deleted"
+  | "closed_unresolved";
+
+export interface Expense {
+  id: string;
+  family_id: string;
+  created_by: string;
+  paid_by: string;
+  fixed_expense_id: string | null;
+  description: string;
+  amount_cents: number;
+  category: ExpenseCategory;
+  expense_date: string;
+  child_ids: string | null;
+  link_url: string | null;
+  memo: string | null;
+  status: ExpenseStatus;
+  questioned_by: string | null;
+  questioned_at: string | null;
+  question_reason: string | null;
+  question_note: string | null;
+  resolved_at: string | null;
+  resolution_action: string | null;
+  satisfied_at: string | null;
+  closed_unresolved_at: string | null;
+  closed_unresolved_by: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CreateExpenseRequest {
+  description: string;
+  amount: number; // in dollars
+  category: ExpenseCategory;
+  expenseDate?: string;
+  paidBy?: string;
+  linkUrl?: string;
+  memo?: string;
+}
+
+export interface ExpenseListResponse {
+  expenses: Expense[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+  };
+}
+
+export interface ExpenseFilters {
+  status?: ExpenseStatus;
+  category?: ExpenseCategory;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface Child {
+  id: string;
+  family_id: string;
+  name: string;
+  created_at: string;
+  deleted_at: string | null;
+}
+
+export interface ChildrenListResponse {
+  children: Child[];
+  count: number;
+}
+
 export interface ApiError {
   error: string;
   details?: string;
@@ -105,4 +186,83 @@ export async function joinFamily(
     method: "POST",
     body: JSON.stringify({ userId, inviteCode }),
   });
+}
+
+export async function createExpense(
+  userId: string,
+  familyId: string,
+  expense: CreateExpenseRequest
+): Promise<{ success: boolean; expense: Expense }> {
+  return apiRequest(
+    `/families/${familyId}/expenses`,
+    {
+      method: "POST",
+      body: JSON.stringify(expense),
+    },
+    userId
+  );
+}
+
+export async function getExpenses(
+  userId: string,
+  familyId: string,
+  filters?: ExpenseFilters
+): Promise<ExpenseListResponse> {
+  const params = new URLSearchParams();
+  if (filters?.status) params.set("status", filters.status);
+  if (filters?.category) params.set("category", filters.category);
+  if (filters?.startDate) params.set("startDate", filters.startDate);
+  if (filters?.endDate) params.set("endDate", filters.endDate);
+  if (filters?.limit) params.set("limit", filters.limit.toString());
+  if (filters?.offset) params.set("offset", filters.offset.toString());
+
+  const queryString = params.toString();
+  const path = `/families/${familyId}/expenses${queryString ? `?${queryString}` : ""}`;
+
+  return apiRequest<ExpenseListResponse>(path, { method: "GET" }, userId);
+}
+
+// ============================================
+// CHILDREN API
+// ============================================
+
+export async function getChildren(
+  userId: string,
+  familyId: string,
+  includeDeleted?: boolean
+): Promise<ChildrenListResponse> {
+  const params = new URLSearchParams();
+  if (includeDeleted) params.set("include_deleted", "true");
+
+  const queryString = params.toString();
+  const path = `/families/${familyId}/children${queryString ? `?${queryString}` : ""}`;
+
+  return apiRequest<ChildrenListResponse>(path, { method: "GET" }, userId);
+}
+
+export async function createChild(
+  userId: string,
+  familyId: string,
+  name: string
+): Promise<Child> {
+  return apiRequest<Child>(
+    `/families/${familyId}/children`,
+    {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    },
+    userId
+  );
+}
+
+export async function deleteChild(
+  userId: string,
+  familyId: string,
+  childId: string
+): Promise<{ id: string; deleted_at: string }> {
+  return apiRequest<{ id: string; deleted_at: string }>(
+    `/families/${familyId}/children/${childId}`,
+    { method: "DELETE" },
+    userId
+  );
 }

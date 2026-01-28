@@ -21,6 +21,44 @@ interface JoinFamilyRequest {
   inviteCode: string;
 }
 
+interface CreateExpenseRequest {
+  description: string;
+  amount: number; // in dollars, will be converted to cents
+  category: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  expenseDate?: string; // ISO date string, defaults to today
+  paidBy?: string; // defaults to current user
+  linkUrl?: string;
+  memo?: string;
+}
+
+interface Expense {
+  id: string;
+  family_id: string;
+  created_by: string;
+  paid_by: string;
+  fixed_expense_id: string | null;
+  description: string;
+  amount_cents: number;
+  category: string;
+  expense_date: string;
+  child_ids: string | null;
+  link_url: string | null;
+  memo: string | null;
+  status: string;
+  questioned_by: string | null;
+  questioned_at: string | null;
+  question_reason: string | null;
+  question_note: string | null;
+  resolved_at: string | null;
+  resolution_action: string | null;
+  satisfied_at: string | null;
+  closed_unresolved_at: string | null;
+  closed_unresolved_by: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 interface Family {
   id: string;
   name: string | null;
@@ -55,13 +93,52 @@ function getInviteExpiry(): string {
   return date.toISOString();
 }
 
+// Convert dollars to cents (multiply by 100 and round)
+function dollarsToCents(dollars: number): number {
+  return Math.round(dollars * 100);
+}
+
+// Get today's date in ISO format (YYYY-MM-DD)
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+// Create activity event
+async function createActivityEvent(
+  db: D1Database,
+  familyId: string,
+  userId: string,
+  eventType: string,
+  targetType: string,
+  targetId: string,
+  beforeSnapshot: unknown | null,
+  afterSnapshot: unknown | null,
+  metadata?: unknown
+): Promise<void> {
+  const id = generateId();
+  await db.prepare(
+    `INSERT INTO activity_events (id, family_id, user_id, event_type, target_type, target_id, before_snapshot, after_snapshot, metadata, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+  ).bind(
+    id,
+    familyId,
+    userId,
+    eventType,
+    targetType,
+    targetId,
+    beforeSnapshot ? JSON.stringify(beforeSnapshot) : null,
+    afterSnapshot ? JSON.stringify(afterSnapshot) : null,
+    metadata ? JSON.stringify(metadata) : null
+  ).run();
+}
+
 const app = new Hono<{ Bindings: Env }>();
 
 // CORS middleware
 app.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
 }));
 
 // Health check
@@ -378,6 +455,390 @@ app.post('/families/join', async (c) => {
   }
 });
 
+// Add expense to family
+app.post('/families/:id/expenses', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to add expenses to this family' }, 403);
+    }
+
+    const body = await c.req.json<CreateExpenseRequest>();
+    const { description, amount, category, expenseDate, paidBy, linkUrl, memo } = body;
+
+    // Validate required fields
+    if (!description || description.length === 0) {
+      return c.json({ error: 'Description is required' }, 400);
+    }
+    if (description.length > 200) {
+      return c.json({ error: 'Description must be 200 characters or less' }, 400);
+    }
+    if (typeof amount !== 'number') {
+      return c.json({ error: 'Amount is required and must be a number' }, 400);
+    }
+    if (!category || !['school', 'medical', 'activities', 'childcare', 'other'].includes(category)) {
+      return c.json({ error: 'Category is required and must be: school, medical, activities, childcare, or other' }, 400);
+    }
+    if (memo && memo.length > 500) {
+      return c.json({ error: 'Memo must be 500 characters or less' }, 400);
+    }
+
+    // Validate paidBy if provided
+    const paidByUserId = paidBy || userId;
+    if (paidByUserId !== family.parent_a_id && paidByUserId !== family.parent_b_id) {
+      return c.json({ error: 'paidBy must be a member of the family' }, 400);
+    }
+
+    const expenseId = generateId();
+    const amountCents = dollarsToCents(amount);
+    const date = expenseDate || getTodayDate();
+
+    await c.env.DB.prepare(
+      `INSERT INTO expenses (
+        id, family_id, created_by, paid_by, description, amount_cents, category,
+        expense_date, link_url, memo, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'posted', datetime('now'), datetime('now'))`
+    ).bind(
+      expenseId,
+      familyId,
+      userId,
+      paidByUserId,
+      description,
+      amountCents,
+      category,
+      date,
+      linkUrl || null,
+      memo || null
+    ).run();
+
+    // Fetch the created expense
+    const expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    // Create activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'expense.created',
+      'expense',
+      expenseId,
+      null,
+      expense
+    );
+
+    return c.json({ success: true, expense }, 201);
+  } catch (error) {
+    console.error('Create expense error:', error);
+    return c.json({ error: 'Failed to create expense', details: String(error) }, 500);
+  }
+});
+
+// List expenses for family
+app.get('/families/:id/expenses', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to view this family\'s expenses' }, 403);
+    }
+
+    // Get query parameters for filtering
+    const status = c.req.query('status');
+    const category = c.req.query('category');
+    const startDate = c.req.query('startDate');
+    const endDate = c.req.query('endDate');
+    const limit = parseInt(c.req.query('limit') || '50');
+    const offset = parseInt(c.req.query('offset') || '0');
+
+    // Build query
+    let query = 'SELECT * FROM expenses WHERE family_id = ? AND deleted_at IS NULL';
+    const params: (string | number)[] = [familyId];
+
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+    if (startDate) {
+      query += ' AND expense_date >= ?';
+      params.push(startDate);
+    }
+    if (endDate) {
+      query += ' AND expense_date <= ?';
+      params.push(endDate);
+    }
+
+    query += ' ORDER BY expense_date DESC, created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const result = await c.env.DB.prepare(query).bind(...params).all<Expense>();
+
+    // Get total count for pagination
+    let countQuery = 'SELECT COUNT(*) as count FROM expenses WHERE family_id = ? AND deleted_at IS NULL';
+    const countParams: (string | number)[] = [familyId];
+
+    if (status) {
+      countQuery += ' AND status = ?';
+      countParams.push(status);
+    }
+    if (category) {
+      countQuery += ' AND category = ?';
+      countParams.push(category);
+    }
+    if (startDate) {
+      countQuery += ' AND expense_date >= ?';
+      countParams.push(startDate);
+    }
+    if (endDate) {
+      countQuery += ' AND expense_date <= ?';
+      countParams.push(endDate);
+    }
+
+    const countResult = await c.env.DB.prepare(countQuery).bind(...countParams).first<{ count: number }>();
+
+    return c.json({
+      expenses: result.results || [],
+      pagination: {
+        total: countResult?.count || 0,
+        limit,
+        offset,
+      },
+    });
+  } catch (error) {
+    console.error('List expenses error:', error);
+    return c.json({ error: 'Failed to list expenses', details: String(error) }, 500);
+  }
+});
+
+// ============================================
+// CHILDREN ENDPOINTS
+// ============================================
+
+interface Child {
+  id: string;
+  family_id: string;
+  name: string;
+  created_at: string;
+  deleted_at: string | null;
+}
+
+interface CreateChildRequest {
+  name: string;
+}
+
+// Create a child for a family
+app.post('/families/:id/children', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    const body = await c.req.json<CreateChildRequest>();
+    const { name } = body;
+
+    // Validate name
+    if (!name || typeof name !== 'string') {
+      return c.json({ error: 'Name is required' }, 400);
+    }
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 1 || trimmedName.length > 100) {
+      return c.json({ error: 'Name must be between 1 and 100 characters' }, 400);
+    }
+
+    // Check if family exists
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check if user belongs to this family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this family' }, 403);
+    }
+
+    const childId = generateId();
+
+    // Create the child
+    await c.env.DB.prepare(
+      `INSERT INTO children (id, family_id, name, created_at)
+       VALUES (?, ?, ?, datetime('now'))`
+    ).bind(childId, familyId, trimmedName).run();
+
+    // Log activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'child.created',
+      'child',
+      childId,
+      null,
+      { name: trimmedName }
+    );
+
+    const child = await c.env.DB.prepare(
+      'SELECT * FROM children WHERE id = ?'
+    ).bind(childId).first<Child>();
+
+    return c.json(child, 201);
+  } catch (error) {
+    console.error('Create child error:', error);
+    return c.json({ error: 'Failed to create child', details: String(error) }, 500);
+  }
+});
+
+// Get all children for a family
+app.get('/families/:id/children', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+  const includeDeleted = c.req.query('include_deleted') === 'true';
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Check if family exists
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check if user belongs to this family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this family' }, 403);
+    }
+
+    // Fetch children
+    let query = 'SELECT * FROM children WHERE family_id = ?';
+    if (!includeDeleted) {
+      query += ' AND deleted_at IS NULL';
+    }
+    query += ' ORDER BY created_at ASC';
+
+    const result = await c.env.DB.prepare(query).bind(familyId).all<Child>();
+
+    return c.json({
+      children: result.results,
+      count: result.results.length,
+    });
+  } catch (error) {
+    console.error('Get children error:', error);
+    return c.json({ error: 'Failed to get children', details: String(error) }, 500);
+  }
+});
+
+// Soft-delete a child
+app.delete('/families/:id/children/:childId', async (c) => {
+  const familyId = c.req.param('id');
+  const childId = c.req.param('childId');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Check if family exists
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check if user belongs to this family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this family' }, 403);
+    }
+
+    // Check if child exists and belongs to this family
+    const child = await c.env.DB.prepare(
+      'SELECT * FROM children WHERE id = ? AND family_id = ?'
+    ).bind(childId, familyId).first<Child>();
+
+    if (!child) {
+      return c.json({ error: 'Child not found' }, 404);
+    }
+
+    // Check if already deleted
+    if (child.deleted_at) {
+      return c.json({ error: 'Child is already deleted' }, 400);
+    }
+
+    // Soft delete
+    await c.env.DB.prepare(
+      `UPDATE children SET deleted_at = datetime('now') WHERE id = ?`
+    ).bind(childId).run();
+
+    // Log activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'child.deleted',
+      'child',
+      childId,
+      { name: child.name },
+      null
+    );
+
+    const updatedChild = await c.env.DB.prepare(
+      'SELECT id, deleted_at FROM children WHERE id = ?'
+    ).bind(childId).first();
+
+    return c.json(updatedChild);
+  } catch (error) {
+    console.error('Delete child error:', error);
+    return c.json({ error: 'Failed to delete child', details: String(error) }, 500);
+  }
+});
+
 // API info
 app.get('/', (c) => {
   return c.json({
@@ -391,6 +852,9 @@ app.get('/', (c) => {
       '/families/:id',
       '/families/:id/invite',
       '/families/join',
+      '/families/:id/expenses',
+      '/families/:id/children',
+      '/families/:id/children/:childId',
     ],
   });
 });
