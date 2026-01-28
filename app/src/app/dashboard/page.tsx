@@ -380,12 +380,20 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
                   Recent Expenses
                 </h3>
-                <Link
-                  href="/expenses/add"
-                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                >
-                  Add Expense
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/expenses"
+                    className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    href="/expenses/add"
+                    className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  >
+                    Add Expense
+                  </Link>
+                </div>
               </div>
 
               {isLoadingExpenses && (
