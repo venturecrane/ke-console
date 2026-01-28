@@ -223,6 +223,43 @@ export async function getExpenses(
 }
 
 // ============================================
+// BALANCE API
+// ============================================
+
+export interface BalanceBreakdown {
+  total_expenses_cents: number;
+  included_expenses_count: number;
+  a_share_cents: number;
+  b_share_cents: number;
+  a_paid_cents: number;
+  b_paid_cents: number;
+  payments_a_to_b_cents: number;
+  payments_b_to_a_cents: number;
+  questioned_total_cents: number;
+  questioned_count: number;
+}
+
+export interface BalanceResponse {
+  balance_cents: number;
+  payer_id: string | null;
+  payee_id: string | null;
+  parent_a_id: string;
+  parent_b_id: string | null;
+  breakdown: BalanceBreakdown;
+}
+
+export async function getBalance(
+  userId: string,
+  familyId: string
+): Promise<BalanceResponse> {
+  return apiRequest<BalanceResponse>(
+    `/families/${familyId}/balance`,
+    { method: "GET" },
+    userId
+  );
+}
+
+// ============================================
 // CHILDREN API
 // ============================================
 

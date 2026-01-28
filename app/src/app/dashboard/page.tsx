@@ -7,8 +7,10 @@ import {
   getMe,
   generateInviteCode,
   getExpenses,
+  getBalance,
   type MeResponse,
   type Expense,
+  type BalanceResponse,
 } from "@/lib/api";
 
 // Format cents to dollars display
@@ -56,6 +58,8 @@ export default function DashboardPage() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
+  const [balance, setBalance] = useState<BalanceResponse | null>(null);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
   const fetchUserData = useCallback(async () => {
     if (!user) return;
@@ -66,18 +70,22 @@ export default function DashboardPage() {
         setInviteCode(data.family.invite_code);
         setInviteExpiresAt(data.family.invite_expires_at);
       }
-      // Fetch expenses if user has a family
+      // Fetch expenses and balance if user has a family
       if (data.family) {
         setIsLoadingExpenses(true);
+        setIsLoadingBalance(true);
         try {
-          const expenseData = await getExpenses(user.id, data.family.id, {
-            limit: 10,
-          });
+          const [expenseData, balanceData] = await Promise.all([
+            getExpenses(user.id, data.family.id, { limit: 5 }),
+            getBalance(user.id, data.family.id),
+          ]);
           setExpenses(expenseData.expenses);
+          setBalance(balanceData);
         } catch (err) {
-          console.error("Failed to fetch expenses:", err);
+          console.error("Failed to fetch data:", err);
         } finally {
           setIsLoadingExpenses(false);
+          setIsLoadingBalance(false);
         }
       }
     } catch (error) {
@@ -311,6 +319,71 @@ export default function DashboardPage() {
                     </button>
                   )}
                 </div>
+              )}
+            </div>
+
+            {/* Balance Card */}
+            <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+              <h3 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                Balance
+              </h3>
+              {isLoadingBalance ? (
+                <p className="text-sm text-zinc-500">Calculating balance...</p>
+              ) : balance ? (
+                <div>
+                  {balance.balance_cents === 0 ? (
+                    <div className="text-center py-4">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-2">
+                        <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">Settled Up!</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        No balance between you and your co-parent
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                        {formatCurrency(balance.balance_cents)}
+                      </p>
+                      <p className="text-lg mt-2">
+                        {balance.payer_id === user?.id ? (
+                          <span className="text-red-600 dark:text-red-400">
+                            You owe your co-parent
+                          </span>
+                        ) : (
+                          <span className="text-green-600 dark:text-green-400">
+                            Your co-parent owes you
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Breakdown */}
+                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-zinc-500 dark:text-zinc-400">Included Expenses</p>
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {balance.breakdown.included_expenses_count} ({formatCurrency(balance.breakdown.total_expenses_cents)})
+                        </p>
+                      </div>
+                      {balance.breakdown.questioned_count > 0 && (
+                        <div>
+                          <p className="text-zinc-500 dark:text-zinc-400">Questioned</p>
+                          <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                            {balance.breakdown.questioned_count} ({formatCurrency(balance.breakdown.questioned_total_cents)})
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500">No balance data available</p>
               )}
             </div>
 
