@@ -260,6 +260,67 @@ export async function getBalance(
 }
 
 // ============================================
+// PAYMENTS API
+// ============================================
+
+export interface Payment {
+  id: string;
+  family_id: string;
+  paid_by: string;
+  amount_cents: number;
+  payment_date: string;
+  notes: string | null;
+  created_at: string;
+  deleted_at: string | null;
+}
+
+export interface CreatePaymentRequest {
+  amount: number; // in dollars
+  paymentDate?: string;
+  notes?: string;
+}
+
+export interface PaymentListResponse {
+  payments: Payment[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+  };
+}
+
+export async function createPayment(
+  userId: string,
+  familyId: string,
+  payment: CreatePaymentRequest
+): Promise<{ success: boolean; payment: Payment }> {
+  return apiRequest(
+    `/families/${familyId}/payments`,
+    {
+      method: "POST",
+      body: JSON.stringify(payment),
+    },
+    userId
+  );
+}
+
+export async function getPayments(
+  userId: string,
+  familyId: string,
+  limit?: number,
+  offset?: number
+): Promise<PaymentListResponse> {
+  const params = new URLSearchParams();
+  if (limit) params.set("limit", limit.toString());
+  if (offset) params.set("offset", offset.toString());
+
+  const queryString = params.toString();
+  const path = `/families/${familyId}/payments${queryString ? `?${queryString}` : ""}`;
+
+  return apiRequest<PaymentListResponse>(path, { method: "GET" }, userId);
+}
+
+// ============================================
 // CHILDREN API
 // ============================================
 
