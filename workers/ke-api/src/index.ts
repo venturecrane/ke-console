@@ -645,6 +645,178 @@ app.get('/families/:id/expenses', async (c) => {
 });
 
 // ============================================
+// BALANCE ENDPOINT
+// ============================================
+
+interface Payment {
+  id: string;
+  family_id: string;
+  paid_by: string;
+  amount_cents: number;
+  payment_date: string;
+  notes: string | null;
+  created_at: string;
+  deleted_at: string | null;
+}
+
+interface BalanceBreakdown {
+  total_expenses_cents: number;
+  included_expenses_count: number;
+  a_share_cents: number;
+  b_share_cents: number;
+  a_paid_cents: number;
+  b_paid_cents: number;
+  payments_a_to_b_cents: number;
+  payments_b_to_a_cents: number;
+  questioned_total_cents: number;
+  questioned_count: number;
+}
+
+// Get balance for family
+app.get('/families/:id/balance', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    // Verify family exists and user belongs to it
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to view this family\'s balance' }, 403);
+    }
+
+    const parentARatio = family.parent_a_ratio;
+    const parentAId = family.parent_a_id;
+    const parentBId = family.parent_b_id;
+
+    // Get all included expenses (posted, resolved, resolved_creator_decided)
+    const includedExpenses = await c.env.DB.prepare(
+      `SELECT * FROM expenses
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND status IN ('posted', 'resolved', 'resolved_creator_decided')`
+    ).bind(familyId).all<Expense>();
+
+    // Get questioned expenses for the metric
+    const questionedExpenses = await c.env.DB.prepare(
+      `SELECT * FROM expenses
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND status IN ('questioned', 'pending_satisfaction')`
+    ).bind(familyId).all<Expense>();
+
+    // Get all payments
+    const payments = await c.env.DB.prepare(
+      `SELECT * FROM payments
+       WHERE family_id = ?
+       AND deleted_at IS NULL`
+    ).bind(familyId).all<Payment>();
+
+    // Calculate balance
+    // Positive = A owes B, Negative = B owes A
+    let balance = 0;
+    let totalExpensesCents = 0;
+    let aShareCents = 0;
+    let bShareCents = 0;
+    let aPaidCents = 0;
+    let bPaidCents = 0;
+
+    for (const expense of includedExpenses.results || []) {
+      totalExpensesCents += expense.amount_cents;
+      const aShare = Math.floor(expense.amount_cents * parentARatio);
+      const bShare = expense.amount_cents - aShare;
+      aShareCents += aShare;
+      bShareCents += bShare;
+
+      if (expense.paid_by === parentAId) {
+        aPaidCents += expense.amount_cents;
+        // A paid full amount, but only owes aShare
+        // So A is owed (amount - aShare) = bShare from B
+        // balance -= bShare means B owes A more
+        balance += (aShare - expense.amount_cents);
+      } else if (expense.paid_by === parentBId) {
+        bPaidCents += expense.amount_cents;
+        // B paid full amount, but only owes bShare
+        // So B is owed (amount - bShare) = aShare from A
+        // balance += aShare means A owes B more
+        balance += aShare;
+      }
+    }
+
+    // Calculate payments
+    let paymentsAToBCents = 0;
+    let paymentsBToACents = 0;
+
+    for (const payment of payments.results || []) {
+      if (payment.paid_by === parentAId) {
+        // A paid B, reduces A's debt to B
+        paymentsAToBCents += payment.amount_cents;
+        balance -= payment.amount_cents;
+      } else if (payment.paid_by === parentBId) {
+        // B paid A, increases A's debt to B (or reduces B's debt to A)
+        paymentsBToACents += payment.amount_cents;
+        balance += payment.amount_cents;
+      }
+    }
+
+    // Calculate questioned totals
+    let questionedTotalCents = 0;
+    for (const expense of questionedExpenses.results || []) {
+      questionedTotalCents += expense.amount_cents;
+    }
+
+    // Determine payer and payee
+    let payerId: string | null = null;
+    let payeeId: string | null = null;
+
+    if (balance > 0) {
+      // A owes B
+      payerId = parentAId;
+      payeeId = parentBId;
+    } else if (balance < 0) {
+      // B owes A
+      payerId = parentBId;
+      payeeId = parentAId;
+    }
+
+    const breakdown: BalanceBreakdown = {
+      total_expenses_cents: totalExpensesCents,
+      included_expenses_count: (includedExpenses.results || []).length,
+      a_share_cents: aShareCents,
+      b_share_cents: bShareCents,
+      a_paid_cents: aPaidCents,
+      b_paid_cents: bPaidCents,
+      payments_a_to_b_cents: paymentsAToBCents,
+      payments_b_to_a_cents: paymentsBToACents,
+      questioned_total_cents: questionedTotalCents,
+      questioned_count: (questionedExpenses.results || []).length,
+    };
+
+    return c.json({
+      balance_cents: Math.abs(balance),
+      payer_id: payerId,
+      payee_id: payeeId,
+      parent_a_id: parentAId,
+      parent_b_id: parentBId,
+      breakdown,
+    });
+  } catch (error) {
+    console.error('Get balance error:', error);
+    return c.json({ error: 'Failed to get balance', details: String(error) }, 500);
+  }
+});
+
+// ============================================
 // CHILDREN ENDPOINTS
 // ============================================
 
@@ -853,6 +1025,7 @@ app.get('/', (c) => {
       '/families/:id/invite',
       '/families/join',
       '/families/:id/expenses',
+      '/families/:id/balance',
       '/families/:id/children',
       '/families/:id/children/:childId',
     ],
