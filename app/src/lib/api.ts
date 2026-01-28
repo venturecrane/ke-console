@@ -131,6 +131,7 @@ async function apiRequest<T>(
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -374,9 +375,14 @@ export type ActivityEventType =
   | "expense.edited"
   | "expense.questioned"
   | "expense.resolved"
+  | "expense.satisfied"
+  | "expense.generated"
   | "payment.created"
   | "child.created"
-  | "child.deleted";
+  | "child.deleted"
+  | "fixed_expense.created"
+  | "fixed_expense.updated"
+  | "fixed_expense.ended";
 
 export interface ActivityEvent {
   id: string;

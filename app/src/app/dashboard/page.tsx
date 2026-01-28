@@ -238,89 +238,121 @@ export default function DashboardPage() {
         {/* Has Family - Show Family Info */}
         {syncStatus === "synced" && hasFamily && (
           <>
-            {/* Family Card */}
-            <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                  {meData?.family?.name || "Your Family"}
-                </h3>
-                <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                  {isParentA ? "Creator" : "Member"}
-                </span>
-              </div>
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Split Ratio
-                  </p>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% /{" "}
-                    {Math.round(
-                      (1 - (meData?.family?.parent_a_ratio || 0.5)) * 100
-                    )}
-                    %
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Co-Parent
-                  </p>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {hasPartner ? "Connected" : "Not yet joined"}
-                  </p>
+            {/* Family Card - Compact when fully set up, expanded when action needed */}
+            {hasPartner ? (
+              // Compact view when both parents are connected
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                    <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                      {meData?.family?.name || "Your Family"}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Both parents connected · Split: {Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}/{Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}
+                    </p>
+                  </div>
                 </div>
               </div>
+            ) : (
+              // Expanded view when co-parent needs to be invited
+              <div className="mt-8 rounded-lg border-2 border-dashed border-zinc-300 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-950">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                    <svg className="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
+                      Invite your co-parent to join
+                    </h3>
+                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                      Share expenses together by inviting them with a code. They&apos;ll need to create an account and enter the code to join.
+                    </p>
 
-              {/* Invite Section - Only for parent_a without partner */}
-              {isParentA && !hasPartner && (
-                <div className="mt-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-                  <h4 className="mb-2 font-medium text-zinc-900 dark:text-zinc-100">
-                    Invite Your Co-Parent
-                  </h4>
-                  {inviteCode ? (
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <code className="rounded bg-zinc-100 px-3 py-2 font-mono text-lg tracking-widest dark:bg-zinc-800">
-                            {inviteCode}
-                          </code>
+                    {isParentA && (
+                      <div className="mt-4">
+                        {inviteCode ? (
+                          <div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
+                            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+                              Share this code
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <code className="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-xl tracking-[0.25em] text-center border border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+                                {inviteCode}
+                              </code>
+                              <button
+                                onClick={handleCopyInvite}
+                                className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                              >
+                                {copySuccess ? (
+                                  <>
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Copied!
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Copy
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between">
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {inviteExpiresAt && (
+                                  <>Expires {new Date(inviteExpiresAt).toLocaleDateString()}</>
+                                )}
+                              </p>
+                              <button
+                                onClick={handleGenerateInvite}
+                                disabled={isGeneratingInvite}
+                                className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                              >
+                                Generate new code
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
                           <button
-                            onClick={handleCopyInvite}
-                            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                            onClick={handleGenerateInvite}
+                            disabled={isGeneratingInvite}
+                            className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                           >
-                            {copySuccess ? "Copied!" : "Copy"}
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                            {isGeneratingInvite ? "Generating..." : "Generate Invite Code"}
                           </button>
-                        </div>
-                        {inviteExpiresAt && (
-                          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                            Expires{" "}
-                            {new Date(inviteExpiresAt).toLocaleDateString()}
-                          </p>
                         )}
                       </div>
-                      <button
-                        onClick={handleGenerateInvite}
-                        disabled={isGeneratingInvite}
-                        className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                      >
-                        Generate new code
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleGenerateInvite}
-                      disabled={isGeneratingInvite}
-                      className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                    >
-                      {isGeneratingInvite
-                        ? "Generating..."
-                        : "Generate Invite Code"}
-                    </button>
-                  )}
+                    )}
+
+                    {!isParentA && (
+                      <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        Waiting for the family creator to generate and share an invite code with you.
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* Split Ratio Info */}
+                <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Current split ratio: <span className="font-medium text-zinc-700 dark:text-zinc-300">{Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%</span>
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Balance Card */}
             <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -362,42 +394,71 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Breakdown */}
+                  {/* Summary Stats */}
                   <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-zinc-500 dark:text-zinc-400">Included Expenses</p>
-                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                          {balance.breakdown.included_expenses_count} ({formatCurrency(balance.breakdown.total_expenses_cents)})
+                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Total Expenses</p>
+                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                          {formatCurrency(balance.breakdown.total_expenses_cents)}
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {balance.breakdown.included_expenses_count} expense{balance.breakdown.included_expenses_count !== 1 ? 's' : ''}
                         </p>
                       </div>
-                      {balance.breakdown.questioned_count > 0 && (
-                        <div>
-                          <p className="text-zinc-500 dark:text-zinc-400">Questioned</p>
-                          <p className="font-medium text-yellow-600 dark:text-yellow-400">
-                            {balance.breakdown.questioned_count} ({formatCurrency(balance.breakdown.questioned_total_cents)})
-                          </p>
-                        </div>
-                      )}
+                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Your Share</p>
+                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                          {formatCurrency(isParentA ? balance.breakdown.a_share_cents : balance.breakdown.b_share_cents)}
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {Math.round((isParentA ? (meData?.family?.parent_a_ratio || 0.5) : (1 - (meData?.family?.parent_a_ratio || 0.5))) * 100)}% of total
+                        </p>
+                      </div>
                     </div>
+                    {balance.breakdown.questioned_count > 0 && (
+                      <div className="mt-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+                        <div className="flex items-center gap-2">
+                          <svg className="h-4 w-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                            {balance.breakdown.questioned_count} questioned ({formatCurrency(balance.breakdown.questioned_total_cents)})
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Payment Actions */}
-                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                    <Link
-                      href="/payments"
-                      className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                    >
-                      View Payment History
-                    </Link>
+                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
                     {balance.balance_cents !== 0 && balance.payer_id === user?.id && (
                       <Link
                         href="/payments/add"
-                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
                       >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Record Payment
                       </Link>
                     )}
+                    <Link
+                      href="/payments"
+                      className="flex items-center justify-between rounded-lg border border-zinc-200 p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                          <svg className="h-4 w-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">View Payment History</span>
+                      </div>
+                      <svg className="h-4 w-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
                 </div>
               ) : (
@@ -405,99 +466,15 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Quick Links */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Link
-                href="/settings/children"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                  <svg
-                    className="h-5 w-5 text-zinc-600 dark:text-zinc-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Manage Children
-                  </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Add or remove children for expense tagging
-                  </p>
-                </div>
-              </Link>
-              <Link
-                href="/settings/fixed-expenses"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                  <svg
-                    className="h-5 w-5 text-purple-600 dark:text-purple-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Fixed Expenses
-                  </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Recurring monthly expense templates
-                  </p>
-                </div>
-              </Link>
-              <Link
-                href="/activity"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <svg
-                    className="h-5 w-5 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Activity Feed
-                  </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    View recent actions by you and your co-parent
-                  </p>
-                </div>
-              </Link>
+            {/* Primary Actions */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <Link
                 href="/expenses/add"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+                className="flex items-center gap-4 rounded-lg border-2 border-zinc-900 bg-zinc-900 p-5 text-white transition-colors hover:bg-zinc-800 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 dark:bg-zinc-900/20">
                   <svg
-                    className="h-5 w-5 text-zinc-600 dark:text-zinc-400"
+                    className="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -511,21 +488,21 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                  <h4 className="text-lg font-semibold">
                     Add Expense
                   </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm opacity-80">
                     Record a new shared expense
                   </p>
                 </div>
               </Link>
               <Link
                 href="/payments/add"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+                className="flex items-center gap-4 rounded-lg border-2 border-green-600 bg-green-600 p-5 text-white transition-colors hover:bg-green-700 dark:border-green-500 dark:bg-green-600 dark:hover:bg-green-700"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
                   <svg
-                    className="h-5 w-5 text-green-600 dark:text-green-400"
+                    className="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -539,41 +516,113 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                  <h4 className="text-lg font-semibold">
                     Record Payment
                   </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm opacity-80">
                     Log a payment to your co-parent
                   </p>
                 </div>
               </Link>
+            </div>
+
+            {/* Quick Navigation */}
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link
                 href="/expenses"
-                className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-                  <svg
-                    className="h-5 w-5 text-yellow-600 dark:text-yellow-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
-                    All Expenses
-                  </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    View, filter, and manage all expenses
-                  </p>
-                </div>
+                <svg
+                  className="h-4 w-4 text-zinc-500 dark:text-zinc-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+                All Expenses
+              </Link>
+              <Link
+                href="/payments"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              >
+                <svg
+                  className="h-4 w-4 text-zinc-500 dark:text-zinc-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Payment History
+              </Link>
+              <Link
+                href="/activity"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              >
+                <svg
+                  className="h-4 w-4 text-zinc-500 dark:text-zinc-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Activity Feed
+              </Link>
+              <span className="mx-1 text-zinc-300 dark:text-zinc-700">|</span>
+              <Link
+                href="/settings/children"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  />
+                </svg>
+                Children
+              </Link>
+              <Link
+                href="/settings/fixed-expenses"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Fixed Expenses
               </Link>
             </div>
 
@@ -583,20 +632,12 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
                   Recent Expenses
                 </h3>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/expenses"
-                    className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                  >
-                    View All
-                  </Link>
-                  <Link
-                    href="/expenses/add"
-                    className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    Add Expense
-                  </Link>
-                </div>
+                <Link
+                  href="/expenses"
+                  className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                >
+                  View All
+                </Link>
               </div>
 
               {isLoadingExpenses && (

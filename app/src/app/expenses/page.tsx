@@ -145,7 +145,7 @@ export default function ExpenseListPage() {
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | "">("");
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | "">("");
-  const [dateRangePreset, setDateRangePreset] = useState("all");
+  const [dateRangePreset, setDateRangePreset] = useState("this-month");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
@@ -544,11 +544,11 @@ export default function ExpenseListPage() {
               No expenses found
             </p>
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-              {categoryFilter || statusFilter || dateRangePreset !== "all"
+              {categoryFilter || statusFilter
                 ? "Try adjusting your filters"
-                : "Add your first expense to get started"}
+                : "No expenses for this time period"}
             </p>
-            {!categoryFilter && !statusFilter && dateRangePreset === "all" && (
+            {!categoryFilter && !statusFilter && (
               <Link
                 href="/expenses/add"
                 className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"

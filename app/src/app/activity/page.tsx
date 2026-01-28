@@ -91,6 +91,26 @@ function getEventStyle(eventType: string): {
         bgColor: "bg-purple-100 dark:bg-purple-900/30",
         textColor: "text-purple-600 dark:text-purple-400",
       };
+    case "expense.satisfied":
+      return {
+        icon: (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+          </svg>
+        ),
+        bgColor: "bg-teal-100 dark:bg-teal-900/30",
+        textColor: "text-teal-600 dark:text-teal-400",
+      };
+    case "expense.generated":
+      return {
+        icon: (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        ),
+        bgColor: "bg-cyan-100 dark:bg-cyan-900/30",
+        textColor: "text-cyan-600 dark:text-cyan-400",
+      };
     case "payment.created":
       return {
         icon: (
@@ -120,6 +140,36 @@ function getEventStyle(eventType: string): {
         ),
         bgColor: "bg-red-100 dark:bg-red-900/30",
         textColor: "text-red-600 dark:text-red-400",
+      };
+    case "fixed_expense.created":
+      return {
+        icon: (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        ),
+        bgColor: "bg-violet-100 dark:bg-violet-900/30",
+        textColor: "text-violet-600 dark:text-violet-400",
+      };
+    case "fixed_expense.updated":
+      return {
+        icon: (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        ),
+        bgColor: "bg-violet-100 dark:bg-violet-900/30",
+        textColor: "text-violet-600 dark:text-violet-400",
+      };
+    case "fixed_expense.ended":
+      return {
+        icon: (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ),
+        bgColor: "bg-violet-100 dark:bg-violet-900/30",
+        textColor: "text-violet-600 dark:text-violet-400",
       };
     default:
       return {
@@ -173,6 +223,21 @@ function getEventDescription(
         details: expense?.description || null,
       };
     }
+    case "expense.satisfied": {
+      const expense = event.after_snapshot as { description?: string } | null;
+      return {
+        action: `${userName} accepted the resolution`,
+        details: expense?.description || null,
+      };
+    }
+    case "expense.generated": {
+      const expense = event.after_snapshot as { description?: string; amount_cents?: number } | null;
+      const amount = expense?.amount_cents ? formatCurrency(expense.amount_cents) : "";
+      return {
+        action: "Monthly expense auto-generated",
+        details: expense?.description ? `${expense.description}${amount ? ` - ${amount}` : ""}` : null,
+      };
+    }
     case "payment.created": {
       const payment = event.after_snapshot as { amount_cents?: number } | null;
       const amount = payment?.amount_cents ? formatCurrency(payment.amount_cents) : "";
@@ -195,6 +260,28 @@ function getEventDescription(
         details: child?.name || null,
       };
     }
+    case "fixed_expense.created": {
+      const fixed = event.after_snapshot as { description?: string; amount_cents?: number } | null;
+      const amount = fixed?.amount_cents ? formatCurrency(fixed.amount_cents) : "";
+      return {
+        action: `${userName} created a fixed expense`,
+        details: fixed?.description ? `${fixed.description}${amount ? ` - ${amount}/month` : ""}` : null,
+      };
+    }
+    case "fixed_expense.updated": {
+      const fixed = event.after_snapshot as { description?: string } | null;
+      return {
+        action: `${userName} updated a fixed expense`,
+        details: fixed?.description || null,
+      };
+    }
+    case "fixed_expense.ended": {
+      const fixed = event.before_snapshot as { description?: string } | null;
+      return {
+        action: `${userName} ended a fixed expense`,
+        details: fixed?.description || null,
+      };
+    }
     default:
       return {
         action: `${userName} performed an action`,
@@ -207,11 +294,13 @@ function getEventDescription(
 function getEventLink(event: ActivityEvent): string | null {
   switch (event.target_type) {
     case "expense":
-      return `/expenses`; // Could link to specific expense if detail page exists
+      return `/expenses`;
     case "payment":
       return `/payments`;
     case "child":
       return `/settings/children`;
+    case "fixed_expense":
+      return `/settings/fixed-expenses`;
     default:
       return null;
   }
