@@ -103,11 +103,6 @@ export default function DashboardPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            id: user.id,
-            email: user.primaryEmailAddress?.emailAddress,
-            name: user.fullName || user.firstName || null,
-          }),
         });
 
         if (response.ok) {
