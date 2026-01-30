@@ -1,0 +1,6 @@
+# Local settings (not committed)
+settings.local.json
+
+# Session cache
+.session
+.todos
