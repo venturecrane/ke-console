@@ -79,6 +79,7 @@ export interface CreateExpenseRequest {
   paidBy?: string;
   linkUrl?: string;
   memo?: string;
+  childIds?: string[];
 }
 
 export interface ExpenseListResponse {

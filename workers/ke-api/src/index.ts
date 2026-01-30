@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 
 export interface Env {
   DB: D1Database;
+  RESEND_API_KEY?: string;
+  APP_URL?: string;
 }
 
 interface UserSyncRequest {
@@ -29,6 +31,7 @@ interface CreateExpenseRequest {
   paidBy?: string; // defaults to current user
   linkUrl?: string;
   memo?: string;
+  childIds?: string[]; // array of child IDs, stored as JSON string
 }
 
 interface Expense {
@@ -71,6 +74,23 @@ interface Family {
   updated_at: string;
 }
 
+interface PendingInvite {
+  id: string;
+  family_id: string;
+  invited_by: string;
+  invited_email: string;
+  invite_code: string;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  sent_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+}
+
+interface SendEmailInviteRequest {
+  email: string;
+}
+
 // Generate 8-character alphanumeric invite code
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars (I,O,0,1)
@@ -101,6 +121,90 @@ function dollarsToCents(dollars: number): number {
 // Get today's date in ISO format (YYYY-MM-DD)
 function getTodayDate(): string {
   return new Date().toISOString().split('T')[0];
+}
+
+// Send email via Resend API
+async function sendEmail(
+  apiKey: string,
+  to: string,
+  subject: string,
+  html: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Kid Expenses <invites@kidexpenses.app>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Resend API error:', error);
+      return { success: false, error: 'Failed to send email' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Email send error:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
+// Generate invite email HTML
+function generateInviteEmailHtml(
+  inviterName: string,
+  familyName: string | null,
+  inviteCode: string,
+  inviteLink: string
+): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #18181b; font-size: 24px; margin: 0;">Kid Expenses</h1>
+  </div>
+
+  <div style="background: #f4f4f5; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+    <h2 style="color: #18181b; font-size: 20px; margin: 0 0 15px 0;">You've been invited!</h2>
+    <p style="margin: 0 0 15px 0;">
+      <strong>${inviterName}</strong> has invited you to join ${familyName ? `"${familyName}"` : 'their family'} on Kid Expenses to share and track child-related expenses together.
+    </p>
+
+    <a href="${inviteLink}" style="display: inline-block; background: #18181b; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; margin: 15px 0;">
+      Join Family
+    </a>
+
+    <p style="margin: 20px 0 10px 0; font-size: 14px; color: #71717a;">
+      Or enter this code manually:
+    </p>
+    <div style="background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 15px; text-align: center;">
+      <code style="font-size: 24px; letter-spacing: 4px; color: #18181b;">${inviteCode}</code>
+    </div>
+
+    <p style="margin: 15px 0 0 0; font-size: 13px; color: #a1a1aa;">
+      This invite expires in 7 days.
+    </p>
+  </div>
+
+  <p style="font-size: 13px; color: #71717a; text-align: center;">
+    If you didn't expect this invitation, you can safely ignore this email.
+  </p>
+</body>
+</html>
+  `.trim();
 }
 
 // Create activity event
@@ -379,6 +483,250 @@ app.post('/families/:id/invite', async (c) => {
   }
 });
 
+// Send email invite for a family
+app.post('/families/:id/invite/email', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    const body = await c.req.json<SendEmailInviteRequest>();
+    const { email } = body;
+
+    // Validate email
+    if (!email || typeof email !== 'string') {
+      return c.json({ error: 'Email is required' }, 400);
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return c.json({ error: 'Invalid email address' }, 400);
+    }
+
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Only parent_a can send invites
+    if (family.parent_a_id !== userId) {
+      return c.json({ error: 'Only the family creator can send invites' }, 403);
+    }
+
+    // Check if family already has parent_b
+    if (family.parent_b_id) {
+      return c.json({ error: 'Family already has two parents' }, 400);
+    }
+
+    // Get inviter info
+    const inviter = await c.env.DB.prepare(
+      'SELECT id, email, name FROM users WHERE id = ?'
+    ).bind(userId).first<{ id: string; email: string; name: string | null }>();
+
+    if (!inviter) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    // Check if inviter is trying to invite themselves
+    if (inviter.email.toLowerCase() === email.toLowerCase()) {
+      return c.json({ error: 'You cannot invite yourself' }, 400);
+    }
+
+    // Check for existing pending invite to this email
+    const existingInvite = await c.env.DB.prepare(
+      `SELECT * FROM pending_invites
+       WHERE family_id = ? AND invited_email = ? AND status = 'pending'
+       AND expires_at > datetime('now')`
+    ).bind(familyId, email.toLowerCase()).first<PendingInvite>();
+
+    // Generate unique invite code (reuse existing if pending invite exists)
+    let inviteCode: string;
+    let expiresAt: string;
+
+    if (existingInvite) {
+      // Resend existing invite
+      inviteCode = existingInvite.invite_code;
+      expiresAt = existingInvite.expires_at;
+    } else {
+      // Generate new invite code
+      inviteCode = generateInviteCode();
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        const existing = await c.env.DB.prepare(
+          'SELECT id FROM families WHERE invite_code = ?'
+        ).bind(inviteCode).first();
+
+        const existingPending = await c.env.DB.prepare(
+          `SELECT id FROM pending_invites WHERE invite_code = ? AND status = 'pending'`
+        ).bind(inviteCode).first();
+
+        if (!existing && !existingPending) break;
+        inviteCode = generateInviteCode();
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        return c.json({ error: 'Failed to generate unique invite code' }, 500);
+      }
+
+      expiresAt = getInviteExpiry();
+
+      // Update family invite code
+      await c.env.DB.prepare(
+        `UPDATE families SET invite_code = ?, invite_expires_at = ?, updated_at = datetime('now')
+         WHERE id = ?`
+      ).bind(inviteCode, expiresAt, familyId).run();
+
+      // Create pending invite record
+      const inviteId = generateId();
+      await c.env.DB.prepare(
+        `INSERT INTO pending_invites (id, family_id, invited_by, invited_email, invite_code, status, expires_at, created_at)
+         VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'))`
+      ).bind(inviteId, familyId, userId, email.toLowerCase(), inviteCode, expiresAt).run();
+    }
+
+    // Generate invite link
+    const appUrl = c.env.APP_URL || 'https://ke-console.vercel.app';
+    const inviteLink = `${appUrl}/family/join?code=${inviteCode}`;
+
+    // Send email if Resend API key is configured
+    if (c.env.RESEND_API_KEY) {
+      const inviterName = inviter.name || inviter.email.split('@')[0];
+      const emailHtml = generateInviteEmailHtml(
+        inviterName,
+        family.name,
+        inviteCode,
+        inviteLink
+      );
+
+      const emailResult = await sendEmail(
+        c.env.RESEND_API_KEY,
+        email,
+        `${inviterName} invited you to Kid Expenses`,
+        emailHtml
+      );
+
+      if (!emailResult.success) {
+        console.error('Failed to send invite email:', emailResult.error);
+        // Continue anyway - user can still share the link manually
+      }
+    }
+
+    return c.json({
+      success: true,
+      inviteCode,
+      inviteLink,
+      expiresAt,
+      emailSent: !!c.env.RESEND_API_KEY,
+    });
+  } catch (error) {
+    console.error('Send email invite error:', error);
+    return c.json({ error: 'Failed to send invite', details: String(error) }, 500);
+  }
+});
+
+// Get pending invites for a family
+app.get('/families/:id/invites', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Only family members can view invites
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to view invites' }, 403);
+    }
+
+    // Get pending invites
+    const invites = await c.env.DB.prepare(
+      `SELECT * FROM pending_invites
+       WHERE family_id = ? AND status = 'pending'
+       ORDER BY created_at DESC`
+    ).bind(familyId).all<PendingInvite>();
+
+    // Mark expired invites
+    const now = new Date();
+    const processedInvites = (invites.results || []).map(invite => ({
+      ...invite,
+      is_expired: new Date(invite.expires_at) < now,
+    }));
+
+    return c.json({
+      invites: processedInvites,
+    });
+  } catch (error) {
+    console.error('Get invites error:', error);
+    return c.json({ error: 'Failed to get invites', details: String(error) }, 500);
+  }
+});
+
+// Cancel a pending invite
+app.delete('/families/:id/invites/:inviteId', async (c) => {
+  const familyId = c.req.param('id');
+  const inviteId = c.req.param('inviteId');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Only parent_a can cancel invites
+    if (family.parent_a_id !== userId) {
+      return c.json({ error: 'Only the family creator can cancel invites' }, 403);
+    }
+
+    // Get the invite
+    const invite = await c.env.DB.prepare(
+      'SELECT * FROM pending_invites WHERE id = ? AND family_id = ?'
+    ).bind(inviteId, familyId).first<PendingInvite>();
+
+    if (!invite) {
+      return c.json({ error: 'Invite not found' }, 404);
+    }
+
+    if (invite.status !== 'pending') {
+      return c.json({ error: 'Invite is not pending' }, 400);
+    }
+
+    // Cancel the invite
+    await c.env.DB.prepare(
+      `UPDATE pending_invites SET status = 'cancelled' WHERE id = ?`
+    ).bind(inviteId).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Cancel invite error:', error);
+    return c.json({ error: 'Failed to cancel invite', details: String(error) }, 500);
+  }
+});
+
 // Join a family with invite code
 app.post('/families/join', async (c) => {
   try {
@@ -479,7 +827,7 @@ app.post('/families/:id/expenses', async (c) => {
     }
 
     const body = await c.req.json<CreateExpenseRequest>();
-    const { description, amount, category, expenseDate, paidBy, linkUrl, memo } = body;
+    const { description, amount, category, expenseDate, paidBy, linkUrl, memo, childIds } = body;
 
     // Validate required fields
     if (!description || description.length === 0) {
@@ -507,12 +855,14 @@ app.post('/families/:id/expenses', async (c) => {
     const expenseId = generateId();
     const amountCents = dollarsToCents(amount);
     const date = expenseDate || getTodayDate();
+    // Convert childIds array to JSON string for storage
+    const childIdsJson = childIds && childIds.length > 0 ? JSON.stringify(childIds) : null;
 
     await c.env.DB.prepare(
       `INSERT INTO expenses (
         id, family_id, created_by, paid_by, description, amount_cents, category,
-        expense_date, link_url, memo, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'posted', datetime('now'), datetime('now'))`
+        expense_date, child_ids, link_url, memo, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'posted', datetime('now'), datetime('now'))`
     ).bind(
       expenseId,
       familyId,
@@ -522,6 +872,7 @@ app.post('/families/:id/expenses', async (c) => {
       amountCents,
       category,
       date,
+      childIdsJson,
       linkUrl || null,
       memo || null
     ).run();

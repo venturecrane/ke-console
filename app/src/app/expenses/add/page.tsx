@@ -7,8 +7,10 @@ import Link from "next/link";
 import {
   createExpense,
   getMe,
+  getChildren,
   type MeResponse,
   type ExpenseCategory,
+  type Child,
 } from "@/lib/api";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
@@ -23,6 +25,7 @@ export default function AddExpensePage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const [meData, setMeData] = useState<MeResponse | null>(null);
+  const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +39,8 @@ export default function AddExpensePage() {
   );
   const [linkUrl, setLinkUrl] = useState("");
   const [memo, setMemo] = useState("");
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
+  const [allChildrenSelected, setAllChildrenSelected] = useState(false);
 
   useEffect(() => {
     async function loadUserData() {
@@ -45,7 +50,11 @@ export default function AddExpensePage() {
         setMeData(data);
         if (!data.family) {
           router.push("/dashboard");
+          return;
         }
+        // Fetch children for the family
+        const childrenData = await getChildren(user.id, data.family.id);
+        setChildren(childrenData.children);
       } catch (err) {
         console.error("Failed to load user data:", err);
         setError("Failed to load user data");
@@ -60,6 +69,31 @@ export default function AddExpensePage() {
       router.push("/sign-in");
     }
   }, [isLoaded, user, router]);
+
+  // Handle "All Children" toggle
+  function handleAllChildrenChange(checked: boolean) {
+    setAllChildrenSelected(checked);
+    if (checked) {
+      setSelectedChildIds(children.map((c) => c.id));
+    } else {
+      setSelectedChildIds([]);
+    }
+  }
+
+  // Handle individual child selection
+  function handleChildToggle(childId: string, checked: boolean) {
+    if (checked) {
+      const newSelected = [...selectedChildIds, childId];
+      setSelectedChildIds(newSelected);
+      // Check if all children are now selected
+      if (newSelected.length === children.length) {
+        setAllChildrenSelected(true);
+      }
+    } else {
+      setSelectedChildIds(selectedChildIds.filter((id) => id !== childId));
+      setAllChildrenSelected(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,6 +118,7 @@ export default function AddExpensePage() {
         expenseDate,
         linkUrl: linkUrl.trim() || undefined,
         memo: memo.trim() || undefined,
+        childIds: selectedChildIds.length > 0 ? selectedChildIds : undefined,
       });
       router.push("/dashboard");
     } catch (err) {
@@ -189,6 +224,53 @@ export default function AddExpensePage() {
               ))}
             </select>
           </div>
+
+          {/* Children */}
+          {children.length > 0 && (
+            <div className="mb-4">
+              <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Children <span className="text-zinc-400">(optional)</span>
+              </label>
+              <div className="rounded-lg border border-zinc-300 p-3 dark:border-zinc-700">
+                {/* All Children option */}
+                <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-zinc-200 pb-2 dark:border-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={allChildrenSelected}
+                    onChange={(e) => handleAllChildrenChange(e.target.checked)}
+                    className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                  />
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    All Children
+                  </span>
+                </label>
+                {/* Individual children */}
+                <div className="mt-2 space-y-2">
+                  {children.map((child) => (
+                    <label
+                      key={child.id}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedChildIds.includes(child.id)}
+                        onChange={(e) =>
+                          handleChildToggle(child.id, e.target.checked)
+                        }
+                        className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                      />
+                      <span className="text-zinc-700 dark:text-zinc-300">
+                        {child.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Select which children this expense applies to
+              </p>
+            </div>
+          )}
 
           {/* Date */}
           <div className="mb-4">
