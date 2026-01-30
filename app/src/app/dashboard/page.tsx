@@ -8,9 +8,13 @@ import {
   generateInviteCode,
   getExpenses,
   getBalance,
+  sendEmailInvite,
+  getPendingInvites,
+  cancelInvite,
   type MeResponse,
   type Expense,
   type BalanceResponse,
+  type PendingInvite,
 } from "@/lib/api";
 
 // Format cents to dollars display
@@ -57,6 +61,15 @@ export default function DashboardPage() {
   const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  // Email invite state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+  const [showCodeFallback, setShowCodeFallback] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copyLinkSuccess, setCopyLinkSuccess] = useState(false);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [balance, setBalance] = useState<BalanceResponse | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -75,12 +88,17 @@ export default function DashboardPage() {
         setIsLoadingExpenses(true);
         setIsLoadingBalance(true);
         try {
-          const [expenseData, balanceData] = await Promise.all([
+          const [expenseData, balanceData, invitesData] = await Promise.all([
             getExpenses(user.id, data.family.id, { limit: 5 }),
             getBalance(user.id, data.family.id),
+            // Only fetch pending invites if user is parent_a and no parent_b
+            data.family.parent_b_id === null
+              ? getPendingInvites(user.id, data.family.id)
+              : Promise.resolve({ invites: [] }),
           ]);
           setExpenses(expenseData.expenses);
           setBalance(balanceData);
+          setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
         } catch (err) {
           console.error("Failed to fetch data:", err);
         } finally {
@@ -146,6 +164,54 @@ export default function DashboardPage() {
       setTimeout(() => setCopySuccess(false), 2000);
     } catch {
       console.error("Failed to copy invite code");
+    }
+  }
+
+  async function handleSendEmailInvite(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user || !meData?.family || !inviteEmail.trim()) return;
+
+    setIsSendingInvite(true);
+    setInviteError(null);
+    setInviteSuccess(false);
+
+    try {
+      const result = await sendEmailInvite(user.id, meData.family.id, inviteEmail.trim());
+      setInviteCode(result.inviteCode);
+      setInviteLink(result.inviteLink);
+      setInviteExpiresAt(result.expiresAt);
+      setInviteSuccess(true);
+      setInviteEmail("");
+      // Refresh pending invites
+      const invitesData = await getPendingInvites(user.id, meData.family.id);
+      setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : "Failed to send invite");
+    } finally {
+      setIsSendingInvite(false);
+    }
+  }
+
+  async function handleCancelInvite(inviteId: string) {
+    if (!user || !meData?.family) return;
+
+    try {
+      await cancelInvite(user.id, meData.family.id, inviteId);
+      setPendingInvites(prev => prev.filter(i => i.id !== inviteId));
+    } catch (error) {
+      console.error("Failed to cancel invite:", error);
+    }
+  }
+
+  async function handleCopyLink() {
+    if (!inviteLink) return;
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopyLinkSuccess(true);
+      setTimeout(() => setCopyLinkSuccess(false), 2000);
+    } catch {
+      console.error("Failed to copy invite link");
     }
   }
 
@@ -272,25 +338,65 @@ export default function DashboardPage() {
                       Invite your co-parent to join
                     </h3>
                     <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                      Share expenses together by inviting them with a code. They&apos;ll need to create an account and enter the code to join.
+                      Enter their email address and we&apos;ll send them an invitation to join your family.
                     </p>
 
                     {isParentA && (
-                      <div className="mt-4">
-                        {inviteCode ? (
-                          <div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
-                            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
-                              Share this code
+                      <div className="mt-4 space-y-4">
+                        {/* Pending Invites */}
+                        {pendingInvites.length > 0 && (
+                          <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                            <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
+                              Pending Invite{pendingInvites.length > 1 ? 's' : ''}
                             </p>
-                            <div className="flex items-center gap-3">
-                              <code className="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-xl tracking-[0.25em] text-center border border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
-                                {inviteCode}
-                              </code>
+                            {pendingInvites.map((invite) => (
+                              <div key={invite.id} className="flex items-center justify-between gap-3 py-2">
+                                <div className="flex items-center gap-2">
+                                  <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="text-sm text-blue-800 dark:text-blue-200">{invite.invited_email}</span>
+                                </div>
+                                <button
+                                  onClick={() => handleCancelInvite(invite.id)}
+                                  className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ))}
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                              Waiting for them to accept the invitation
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Success Message */}
+                        {inviteSuccess && inviteLink && (
+                          <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                                Invitation sent!
+                              </p>
+                            </div>
+                            <p className="text-sm text-green-600 dark:text-green-400 mb-3">
+                              You can also share this link directly:
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                readOnly
+                                value={inviteLink}
+                                className="flex-1 rounded-lg border border-green-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-100"
+                              />
                               <button
-                                onClick={handleCopyInvite}
-                                className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                                onClick={handleCopyLink}
+                                className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
                               >
-                                {copySuccess ? (
+                                {copyLinkSuccess ? (
                                   <>
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -307,39 +413,121 @@ export default function DashboardPage() {
                                 )}
                               </button>
                             </div>
-                            <div className="mt-3 flex items-center justify-between">
-                              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                {inviteExpiresAt && (
-                                  <>Expires {new Date(inviteExpiresAt).toLocaleDateString()}</>
-                                )}
-                              </p>
-                              <button
-                                onClick={handleGenerateInvite}
-                                disabled={isGeneratingInvite}
-                                className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                              >
-                                Generate new code
-                              </button>
-                            </div>
                           </div>
-                        ) : (
-                          <button
-                            onClick={handleGenerateInvite}
-                            disabled={isGeneratingInvite}
-                            className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                          >
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                            </svg>
-                            {isGeneratingInvite ? "Generating..." : "Generate Invite Code"}
-                          </button>
                         )}
+
+                        {/* Email Invite Form */}
+                        <form onSubmit={handleSendEmailInvite} className="space-y-3">
+                          <div className="flex gap-2">
+                            <input
+                              type="email"
+                              value={inviteEmail}
+                              onChange={(e) => setInviteEmail(e.target.value)}
+                              placeholder="co-parent@email.com"
+                              className="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+                            />
+                            <button
+                              type="submit"
+                              disabled={isSendingInvite || !inviteEmail.trim()}
+                              className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              {isSendingInvite ? "Sending..." : "Send Invite"}
+                            </button>
+                          </div>
+
+                          {inviteError && (
+                            <p className="text-sm text-red-600 dark:text-red-400">{inviteError}</p>
+                          )}
+                        </form>
+
+                        {/* Code Fallback Toggle */}
+                        <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                          <button
+                            onClick={() => setShowCodeFallback(!showCodeFallback)}
+                            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                          >
+                            <svg
+                              className={`h-3 w-3 transition-transform ${showCodeFallback ? 'rotate-90' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                            {showCodeFallback ? 'Hide' : 'Show'} invite code option
+                          </button>
+
+                          {showCodeFallback && (
+                            <div className="mt-3 rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
+                              {inviteCode ? (
+                                <>
+                                  <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+                                    Share this code manually
+                                  </p>
+                                  <div className="flex items-center gap-3">
+                                    <code className="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-xl tracking-[0.25em] text-center border border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+                                      {inviteCode}
+                                    </code>
+                                    <button
+                                      onClick={handleCopyInvite}
+                                      className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                                    >
+                                      {copySuccess ? (
+                                        <>
+                                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                          </svg>
+                                          Copied!
+                                        </>
+                                      ) : (
+                                        <>
+                                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                          </svg>
+                                          Copy
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                  <div className="mt-3 flex items-center justify-between">
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                      {inviteExpiresAt && (
+                                        <>Expires {new Date(inviteExpiresAt).toLocaleDateString()}</>
+                                      )}
+                                    </p>
+                                    <button
+                                      onClick={handleGenerateInvite}
+                                      disabled={isGeneratingInvite}
+                                      className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                                    >
+                                      Generate new code
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={handleGenerateInvite}
+                                  disabled={isGeneratingInvite}
+                                  className="flex items-center gap-2 rounded-lg bg-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                  </svg>
+                                  {isGeneratingInvite ? "Generating..." : "Generate Invite Code"}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
                     {!isParentA && (
                       <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
-                        Waiting for the family creator to generate and share an invite code with you.
+                        Waiting for the family creator to send you an invite.
                       </p>
                     )}
                   </div>

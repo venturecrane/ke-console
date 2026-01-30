@@ -180,6 +180,74 @@ export async function generateInviteCode(
   );
 }
 
+// ============================================
+// EMAIL INVITE API
+// ============================================
+
+export interface PendingInvite {
+  id: string;
+  family_id: string;
+  invited_by: string;
+  invited_email: string;
+  invite_code: string;
+  status: "pending" | "accepted" | "expired" | "cancelled";
+  sent_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+  is_expired?: boolean;
+}
+
+export interface SendEmailInviteResponse {
+  success: boolean;
+  inviteCode: string;
+  inviteLink: string;
+  expiresAt: string;
+  emailSent: boolean;
+}
+
+export interface PendingInvitesResponse {
+  invites: PendingInvite[];
+}
+
+export async function sendEmailInvite(
+  userId: string,
+  familyId: string,
+  email: string
+): Promise<SendEmailInviteResponse> {
+  return apiRequest(
+    `/families/${familyId}/invite/email`,
+    {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    },
+    userId
+  );
+}
+
+export async function getPendingInvites(
+  userId: string,
+  familyId: string
+): Promise<PendingInvitesResponse> {
+  return apiRequest<PendingInvitesResponse>(
+    `/families/${familyId}/invites`,
+    { method: "GET" },
+    userId
+  );
+}
+
+export async function cancelInvite(
+  userId: string,
+  familyId: string,
+  inviteId: string
+): Promise<{ success: boolean }> {
+  return apiRequest(
+    `/families/${familyId}/invites/${inviteId}`,
+    { method: "DELETE" },
+    userId
+  );
+}
+
 export async function joinFamily(
   userId: string,
   inviteCode: string

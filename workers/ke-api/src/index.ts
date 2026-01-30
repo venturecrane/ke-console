@@ -789,6 +789,13 @@ app.post('/families/join', async (c) => {
        WHERE id = ?`
     ).bind(userId, family.id).run();
 
+    // Mark any pending invites with this code as accepted
+    await c.env.DB.prepare(
+      `UPDATE pending_invites
+       SET status = 'accepted', accepted_at = datetime('now')
+       WHERE invite_code = ? AND status = 'pending'`
+    ).bind(inviteCode.toUpperCase()).run();
+
     const updatedFamily = await c.env.DB.prepare(
       'SELECT * FROM families WHERE id = ?'
     ).bind(family.id).first<Family>();
@@ -2435,6 +2442,9 @@ app.get('/', (c) => {
       '/families',
       '/families/:id',
       '/families/:id/invite',
+      '/families/:id/invite/email',
+      '/families/:id/invites',
+      '/families/:id/invites/:inviteId',
       '/families/join',
       '/families/:id/expenses',
       '/families/:id/balance',
