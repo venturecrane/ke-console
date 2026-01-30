@@ -1,20 +1,20 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function POST() {
+interface SyncUserRequest {
+  id: string;
+  email: string;
+  name: string | null;
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const body = await request.json() as SyncUserRequest;
+    const { id, email, name } = body;
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await currentUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!id || !email) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Sync user to backend API (ke-api worker)
@@ -23,14 +23,7 @@ export async function POST() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        id: user.id,
-        email: user.primaryEmailAddress?.emailAddress,
-        name:
-          user.firstName && user.lastName
-            ? `${user.firstName} ${user.lastName}`
-            : user.firstName || user.username || null,
-      }),
+      body: JSON.stringify({ id, email, name }),
     });
 
     if (!response.ok) {
