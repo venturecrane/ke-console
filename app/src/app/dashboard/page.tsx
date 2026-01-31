@@ -815,6 +815,7 @@ export default function DashboardPage() {
                                       setSplitRatioA(val);
                                     }}
                                     onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.target.select()}
                                     className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
                                   />
                                 </div>
@@ -831,6 +832,7 @@ export default function DashboardPage() {
                                       setSplitRatioA(100 - val);
                                     }}
                                     onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.target.select()}
                                     className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
                                   />
                                 </div>
