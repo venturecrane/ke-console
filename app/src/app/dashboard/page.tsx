@@ -786,7 +786,11 @@ export default function DashboardPage() {
                                   value={splitRatioA}
                                   onChange={(e) => setSplitRatioA(Number(e.target.value))}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer dark:bg-green-800 accent-green-600"
+                                  className="w-full h-2 bg-green-200 rounded-lg cursor-pointer dark:bg-green-700 accent-green-600"
+                                  style={{
+                                    WebkitAppearance: 'auto',
+                                    appearance: 'auto',
+                                  }}
                                 />
                                 <div className="flex justify-between text-sm">
                                   <span className="text-green-700 dark:text-green-400">
