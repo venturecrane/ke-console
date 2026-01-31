@@ -50,19 +50,23 @@ function JoinFamilyForm() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-900">
       <div className="w-full max-w-md">
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Join a Family
-            </h1>
-          </div>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Enter the invite code shared by your co-parent
+        {/* App branding */}
+        <div className="mb-8 text-center">
+          {/* TODO: Replace with logo when available */}
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+            KidExpenses
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Shared expense tracking for co-parents
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            Join a Family
+          </h2>
+          <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+            Enter the invite code to get started.
           </p>
         </div>
 
