@@ -143,12 +143,19 @@ export default function AddExpensePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 py-8 dark:bg-zinc-900">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Add Expense
-          </h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+              Add Expense
+            </h1>
+          </div>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Log a child-related expense
+            Log a kid-related expense
           </p>
         </div>
 
@@ -229,7 +236,7 @@ export default function AddExpensePage() {
           {children.length > 0 && (
             <div className="mb-4">
               <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Children <span className="text-zinc-400">(optional)</span>
+                Kids <span className="text-zinc-400">(optional)</span>
               </label>
               <div className="rounded-lg border border-zinc-300 p-3 dark:border-zinc-700">
                 {/* All Children option */}
@@ -241,7 +248,7 @@ export default function AddExpensePage() {
                     className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
                   />
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    All Children
+                    All Kids
                   </span>
                 </label>
                 {/* Individual children */}
@@ -267,7 +274,7 @@ export default function AddExpensePage() {
                 </div>
               </div>
               <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                Select which children this expense applies to
+                Select which kids this expense applies to
               </p>
             </div>
           )}
@@ -345,14 +352,6 @@ export default function AddExpensePage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <Link
-            href="/dashboard"
-            className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
-          >
-            Cancel
-          </Link>
-        </div>
       </div>
     </div>
   );

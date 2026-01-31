@@ -50,7 +50,7 @@ const DATE_RANGE_OPTIONS = [
 
 const QUESTION_REASONS: { value: QuestionReason; label: string }[] = [
   { value: "wrong_amount", label: "Wrong Amount" },
-  { value: "not_child_related", label: "Not Child Related" },
+  { value: "not_child_related", label: "Not Kid Related" },
   { value: "duplicate", label: "Duplicate Entry" },
   { value: "split_dispute", label: "Split Dispute" },
   { value: "other", label: "Other" },
@@ -165,6 +165,16 @@ export default function ExpenseListPage() {
 
   // Satisfy state
   const [satisfyingExpenseId, setSatisfyingExpenseId] = useState<string | null>(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (questionModalExpense || resolveModalExpense) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [questionModalExpense, resolveModalExpense]);
 
   const fetchExpenses = useCallback(
     async (offset: number = 0, append: boolean = false) => {
