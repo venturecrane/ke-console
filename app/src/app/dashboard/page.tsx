@@ -8,7 +8,6 @@ import {
   generateInviteCode,
   getExpenses,
   getBalance,
-  sendEmailInvite,
   getPendingInvites,
   cancelInvite,
   getChildren,
@@ -66,14 +65,11 @@ export default function DashboardPage() {
   const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  // Email invite state
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  // Invite state
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [showCodeFallback, setShowCodeFallback] = useState(false);
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copyLinkSuccess, setCopyLinkSuccess] = useState(false);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [balance, setBalance] = useState<BalanceResponse | null>(null);
@@ -185,31 +181,6 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleSendEmailInvite(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !meData?.family || !inviteEmail.trim()) return;
-
-    setIsSendingInvite(true);
-    setInviteError(null);
-    setInviteSuccess(false);
-
-    try {
-      const result = await sendEmailInvite(user.id, meData.family.id, inviteEmail.trim());
-      setInviteCode(result.inviteCode);
-      setInviteLink(result.inviteLink);
-      setInviteExpiresAt(result.expiresAt);
-      setInviteSuccess(true);
-      setInviteEmail("");
-      // Refresh pending invites
-      const invitesData = await getPendingInvites(user.id, meData.family.id);
-      setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
-    } catch (error) {
-      setInviteError(error instanceof Error ? error.message : "Failed to send invite");
-    } finally {
-      setIsSendingInvite(false);
-    }
-  }
-
   async function handleCancelInvite(inviteId: string) {
     if (!user || !meData?.family) return;
 
@@ -221,15 +192,45 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleCopyLink() {
-    if (!inviteLink) return;
+  async function handleShareInvite() {
+    if (!user || !meData?.family) return;
+
+    setIsGeneratingInvite(true);
+    setInviteError(null);
 
     try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopyLinkSuccess(true);
-      setTimeout(() => setCopyLinkSuccess(false), 2000);
-    } catch {
-      console.error("Failed to copy invite link");
+      // Generate invite code if we don't have one
+      let code = inviteCode;
+      if (!code) {
+        const result = await generateInviteCode(user.id, meData.family.id);
+        code = result.inviteCode;
+        setInviteCode(result.inviteCode);
+        setInviteExpiresAt(result.expiresAt);
+      }
+
+      const shareUrl = `${window.location.origin}/family/join?code=${code}`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Join KidExpenses',
+          text: 'Track our shared kid expenses together',
+          url: shareUrl
+        });
+        setInviteSuccess(true);
+        setTimeout(() => setInviteSuccess(false), 3000);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        setCopyLinkSuccess(true);
+        setTimeout(() => setCopyLinkSuccess(false), 2000);
+      }
+    } catch (error) {
+      // User cancelled share dialog is not an error
+      if (error instanceof Error && error.name !== 'AbortError') {
+        setInviteError("Failed to share invite");
+      }
+    } finally {
+      setIsGeneratingInvite(false);
     }
   }
 
@@ -646,54 +647,44 @@ export default function DashboardPage() {
                                     </div>
                                   )}
 
-                                  {/* Success Message */}
-                                  {inviteSuccess && inviteLink && (
-                                    <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <p className="text-sm font-medium text-green-700 dark:text-green-300">Invitation sent!</p>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <input
-                                          type="text"
-                                          readOnly
-                                          value={inviteLink}
-                                          onClick={(e) => e.stopPropagation()}
-                                          className="flex-1 rounded border border-green-200 bg-white px-2 py-1 text-xs text-zinc-900 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-100"
-                                        />
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); handleCopyLink(); }}
-                                          className="rounded bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700"
-                                        >
-                                          {copyLinkSuccess ? 'Copied!' : 'Copy'}
-                                        </button>
-                                      </div>
+                                  {/* Success/Feedback Messages */}
+                                  {inviteSuccess && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
+                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite shared!</p>
                                     </div>
                                   )}
-
-                                  {/* Email Invite Form */}
-                                  <form onSubmit={(e) => { e.stopPropagation(); handleSendEmailInvite(e); }} className="flex gap-2">
-                                    <input
-                                      type="email"
-                                      value={inviteEmail}
-                                      onChange={(e) => setInviteEmail(e.target.value)}
-                                      onClick={(e) => e.stopPropagation()}
-                                      placeholder="co-parent@email.com"
-                                      className="flex-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-amber-500 focus:outline-none dark:border-amber-600 dark:bg-zinc-800 dark:text-zinc-100"
-                                    />
-                                    <button
-                                      type="submit"
-                                      disabled={isSendingInvite || !inviteEmail.trim()}
-                                      className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
-                                    >
-                                      {isSendingInvite ? 'Sending...' : 'Send'}
-                                    </button>
-                                  </form>
+                                  {copyLinkSuccess && !inviteSuccess && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
+                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite link copied!</p>
+                                    </div>
+                                  )}
                                   {inviteError && (
                                     <p className="text-sm text-red-600 dark:text-red-400">{inviteError}</p>
                                   )}
+
+                                  {/* Share Invite Button */}
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleShareInvite(); }}
+                                    disabled={isGeneratingInvite}
+                                    className="w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                                  >
+                                    {isGeneratingInvite ? (
+                                      'Preparing invite...'
+                                    ) : (
+                                      <>
+                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        Invite Co-Parent
+                                      </>
+                                    )}
+                                  </button>
 
                                   {/* Code Fallback */}
                                   <button
@@ -707,12 +698,12 @@ export default function DashboardPage() {
                                     disabled={isGeneratingInvite}
                                     className="text-xs text-amber-600 hover:text-amber-800 dark:text-amber-400 disabled:opacity-50"
                                   >
-                                    {isGeneratingInvite ? 'Loading...' : (showCodeFallback ? 'Hide invite code' : 'Or share invite code manually')}
+                                    {isGeneratingInvite ? 'Loading...' : (showCodeFallback ? 'Hide invite code' : 'Or share code manually')}
                                   </button>
                                   {showCodeFallback && inviteCode && (
                                     <div className="rounded-lg bg-zinc-100 p-3 dark:bg-zinc-800">
                                       <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-                                        Share this code if email doesn&apos;t work. Your co-parent can enter it at the &quot;Join a Family&quot; page.
+                                        Your co-parent can enter this code at the &quot;Join a Family&quot; page.
                                       </p>
                                       <div className="flex items-center gap-2">
                                         <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-lg tracking-widest text-center border dark:bg-zinc-900 dark:text-zinc-100">
