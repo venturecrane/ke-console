@@ -623,7 +623,7 @@ export default function DashboardPage() {
                           ) : (
                             <>
                               <p className="text-sm text-amber-700 dark:text-amber-400">
-                                Send an invitation so you can both track expenses together.
+                                Send an invitation.
                               </p>
                               {isParentA && (
                                 <div className="mt-3 space-y-3">
