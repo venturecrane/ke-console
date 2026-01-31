@@ -542,85 +542,139 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Balance Card */}
+            {/* Balance Card - Redesigned with comprehensive breakdown */}
             <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <h3 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                Balance
-              </h3>
               {isLoadingBalance ? (
                 <p className="text-sm text-zinc-500">Calculating balance...</p>
               ) : balance ? (
                 <div>
-                  {balance.balance_cents === 0 ? (
-                    <div className="text-center py-4">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-2">
-                        <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">Settled Up!</p>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                        No balance between you and your co-parent
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-                        {formatCurrency(balance.balance_cents)}
-                      </p>
-                      <p className="text-lg mt-2">
-                        {balance.payer_id === user?.id ? (
-                          <span className="text-red-600 dark:text-red-400">
-                            You owe your co-parent
-                          </span>
-                        ) : (
-                          <span className="text-green-600 dark:text-green-400">
-                            Your co-parent owes you
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  )}
+                  {/* Period Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                      Balance
+                    </h3>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {balance.period?.label || "Current Period"}
+                    </span>
+                  </div>
 
-                  {/* Summary Stats */}
-                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Total Expenses</p>
-                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                          {formatCurrency(balance.breakdown.total_expenses_cents)}
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {balance.breakdown.included_expenses_count} expense{balance.breakdown.included_expenses_count !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Your Share</p>
-                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                          {formatCurrency(isParentA ? balance.breakdown.a_share_cents : balance.breakdown.b_share_cents)}
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {Math.round((isParentA ? (meData?.family?.parent_a_ratio || 0.5) : (1 - (meData?.family?.parent_a_ratio || 0.5))) * 100)}% of total
-                        </p>
+                  {/* Current Period Breakdown */}
+                  <div className="space-y-4">
+                    {/* My Activity This Period */}
+                    <div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+                        My Activity This Period
+                      </p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">Expenses paid</p>
+                          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            {formatCurrency(isParentA ? balance.current_period.a_expenses_cents : balance.current_period.b_expenses_cents)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">Payments made</p>
+                          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            {formatCurrency(isParentA ? balance.current_period.a_payments_cents : balance.current_period.b_payments_cents)}
+                          </p>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Co-parent Activity This Period */}
+                    <div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+                        Co-parent Activity This Period
+                      </p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">Expenses paid</p>
+                          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            {formatCurrency(isParentA ? balance.current_period.b_expenses_cents : balance.current_period.a_expenses_cents)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">Payments made</p>
+                          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            {formatCurrency(isParentA ? balance.current_period.b_payments_cents : balance.current_period.a_payments_cents)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Prior Balance (Rollover) */}
+                    {balance.prior_balance.balance_cents > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                        <div>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">Prior balance</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            Rollover from previous periods
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            {formatCurrency(balance.prior_balance.balance_cents)}
+                          </p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {balance.prior_balance.payer_id === user?.id ? "You owed" : "Owed to you"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Current Balance Due - Main Display */}
+                    <div className={`rounded-lg p-5 ${balance.balance_cents === 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-zinc-100 dark:bg-zinc-800'}`}>
+                      {balance.balance_cents === 0 ? (
+                        <div className="text-center">
+                          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 mb-2">
+                            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400">Settled Up!</p>
+                          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                            No balance between you and your co-parent
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                              Current balance due
+                            </p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                              {balance.payer_id === user?.id ? (
+                                "You owe your co-parent"
+                              ) : (
+                                "Your co-parent owes you"
+                              )}
+                            </p>
+                          </div>
+                          <p className={`text-2xl font-bold ${balance.payer_id === user?.id ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                            {formatCurrency(balance.balance_cents)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Questioned Expenses Warning */}
                     {balance.breakdown.questioned_count > 0 && (
-                      <div className="mt-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+                      <div className="rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
                         <div className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                            {balance.breakdown.questioned_count} questioned ({formatCurrency(balance.breakdown.questioned_total_cents)})
+                            {balance.breakdown.questioned_count} questioned expense{balance.breakdown.questioned_count !== 1 ? 's' : ''} ({formatCurrency(balance.breakdown.questioned_total_cents)}) not included
                           </span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Payment Actions */}
-                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
-                    {balance.balance_cents !== 0 && balance.payer_id === user?.id && (
+                  {/* Record Payment Button */}
+                  {balance.balance_cents !== 0 && balance.payer_id === user?.id && (
+                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                       <Link
                         href="/payments/add"
                         className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
@@ -630,24 +684,8 @@ export default function DashboardPage() {
                         </svg>
                         Record Payment
                       </Link>
-                    )}
-                    <Link
-                      href="/payments"
-                      className="flex items-center justify-between rounded-lg border border-zinc-200 p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                          <svg className="h-4 w-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </div>
-                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">View Payment History</span>
-                      </div>
-                      <svg className="h-4 w-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-zinc-500">No balance data available</p>

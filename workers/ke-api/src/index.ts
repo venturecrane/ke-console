@@ -1030,6 +1030,71 @@ interface BalanceBreakdown {
   questioned_count: number;
 }
 
+// Helper function to calculate balance from expenses and payments
+function calculateBalanceFromData(
+  expenses: Expense[],
+  payments: Payment[],
+  parentAId: string,
+  parentBId: string | null,
+  parentARatio: number
+): {
+  balance: number;
+  totalExpensesCents: number;
+  aShareCents: number;
+  bShareCents: number;
+  aPaidCents: number;
+  bPaidCents: number;
+  paymentsAToBCents: number;
+  paymentsBToACents: number;
+} {
+  let balance = 0;
+  let totalExpensesCents = 0;
+  let aShareCents = 0;
+  let bShareCents = 0;
+  let aPaidCents = 0;
+  let bPaidCents = 0;
+
+  for (const expense of expenses) {
+    totalExpensesCents += expense.amount_cents;
+    const aShare = Math.floor(expense.amount_cents * parentARatio);
+    const bShare = expense.amount_cents - aShare;
+    aShareCents += aShare;
+    bShareCents += bShare;
+
+    if (expense.paid_by === parentAId) {
+      aPaidCents += expense.amount_cents;
+      balance += (aShare - expense.amount_cents);
+    } else if (expense.paid_by === parentBId) {
+      bPaidCents += expense.amount_cents;
+      balance += aShare;
+    }
+  }
+
+  let paymentsAToBCents = 0;
+  let paymentsBToACents = 0;
+
+  for (const payment of payments) {
+    if (payment.paid_by === parentAId) {
+      paymentsAToBCents += payment.amount_cents;
+      balance -= payment.amount_cents;
+    } else if (payment.paid_by === parentBId) {
+      paymentsBToACents += payment.amount_cents;
+      balance += payment.amount_cents;
+    }
+  }
+
+  return {
+    balance,
+    totalExpensesCents,
+    aShareCents,
+    bShareCents,
+    aPaidCents,
+    bPaidCents,
+    paymentsAToBCents,
+    paymentsBToACents,
+  };
+}
+
 // Get balance for family
 app.get('/families/:id/balance', async (c) => {
   const familyId = c.req.param('id');
@@ -1057,13 +1122,60 @@ app.get('/families/:id/balance', async (c) => {
     const parentAId = family.parent_a_id;
     const parentBId = family.parent_b_id;
 
-    // Get all included expenses (posted, resolved, resolved_creator_decided)
-    const includedExpenses = await c.env.DB.prepare(
+    // Get current period (calendar month) boundaries
+    const now = new Date();
+    const periodStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const periodEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`;
+
+    // Get current period expenses (posted, resolved, resolved_creator_decided)
+    const currentPeriodExpenses = await c.env.DB.prepare(
+      `SELECT * FROM expenses
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND status IN ('posted', 'resolved', 'resolved_creator_decided')
+       AND expense_date >= ? AND expense_date < ?`
+    ).bind(familyId, periodStart, periodEnd).all<Expense>();
+
+    // Get prior period expenses (before current period)
+    const priorPeriodExpenses = await c.env.DB.prepare(
+      `SELECT * FROM expenses
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND status IN ('posted', 'resolved', 'resolved_creator_decided')
+       AND expense_date < ?`
+    ).bind(familyId, periodStart).all<Expense>();
+
+    // Get current period payments
+    const currentPeriodPayments = await c.env.DB.prepare(
+      `SELECT * FROM payments
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND payment_date >= ? AND payment_date < ?`
+    ).bind(familyId, periodStart, periodEnd).all<Payment>();
+
+    // Get prior period payments
+    const priorPeriodPayments = await c.env.DB.prepare(
+      `SELECT * FROM payments
+       WHERE family_id = ?
+       AND deleted_at IS NULL
+       AND payment_date < ?`
+    ).bind(familyId, periodStart).all<Payment>();
+
+    // Get all included expenses for overall totals
+    const allIncludedExpenses = await c.env.DB.prepare(
       `SELECT * FROM expenses
        WHERE family_id = ?
        AND deleted_at IS NULL
        AND status IN ('posted', 'resolved', 'resolved_creator_decided')`
     ).bind(familyId).all<Expense>();
+
+    // Get all payments
+    const allPayments = await c.env.DB.prepare(
+      `SELECT * FROM payments
+       WHERE family_id = ?
+       AND deleted_at IS NULL`
+    ).bind(familyId).all<Payment>();
 
     // Get questioned expenses for the metric
     const questionedExpenses = await c.env.DB.prepare(
@@ -1073,59 +1185,49 @@ app.get('/families/:id/balance', async (c) => {
        AND status IN ('questioned', 'pending_satisfaction')`
     ).bind(familyId).all<Expense>();
 
-    // Get all payments
-    const payments = await c.env.DB.prepare(
-      `SELECT * FROM payments
-       WHERE family_id = ?
-       AND deleted_at IS NULL`
-    ).bind(familyId).all<Payment>();
+    // Calculate current period breakdown per parent
+    const currentExpensesList = currentPeriodExpenses.results || [];
+    const currentPaymentsList = currentPeriodPayments.results || [];
 
-    // Calculate balance
-    // Positive = A owes B, Negative = B owes A
-    let balance = 0;
-    let totalExpensesCents = 0;
-    let aShareCents = 0;
-    let bShareCents = 0;
-    let aPaidCents = 0;
-    let bPaidCents = 0;
+    // Parent A's expenses and payments this period
+    let aExpensesThisPeriod = 0;
+    let aPaymentsThisPeriod = 0;
+    let bExpensesThisPeriod = 0;
+    let bPaymentsThisPeriod = 0;
 
-    for (const expense of includedExpenses.results || []) {
-      totalExpensesCents += expense.amount_cents;
-      const aShare = Math.floor(expense.amount_cents * parentARatio);
-      const bShare = expense.amount_cents - aShare;
-      aShareCents += aShare;
-      bShareCents += bShare;
-
+    for (const expense of currentExpensesList) {
       if (expense.paid_by === parentAId) {
-        aPaidCents += expense.amount_cents;
-        // A paid full amount, but only owes aShare
-        // So A is owed (amount - aShare) = bShare from B
-        // balance -= bShare means B owes A more
-        balance += (aShare - expense.amount_cents);
+        aExpensesThisPeriod += expense.amount_cents;
       } else if (expense.paid_by === parentBId) {
-        bPaidCents += expense.amount_cents;
-        // B paid full amount, but only owes bShare
-        // So B is owed (amount - bShare) = aShare from A
-        // balance += aShare means A owes B more
-        balance += aShare;
+        bExpensesThisPeriod += expense.amount_cents;
       }
     }
 
-    // Calculate payments
-    let paymentsAToBCents = 0;
-    let paymentsBToACents = 0;
-
-    for (const payment of payments.results || []) {
+    for (const payment of currentPaymentsList) {
       if (payment.paid_by === parentAId) {
-        // A paid B, reduces A's debt to B
-        paymentsAToBCents += payment.amount_cents;
-        balance -= payment.amount_cents;
+        aPaymentsThisPeriod += payment.amount_cents;
       } else if (payment.paid_by === parentBId) {
-        // B paid A, increases A's debt to B (or reduces B's debt to A)
-        paymentsBToACents += payment.amount_cents;
-        balance += payment.amount_cents;
+        bPaymentsThisPeriod += payment.amount_cents;
       }
     }
+
+    // Calculate prior period balance (rollover)
+    const priorCalc = calculateBalanceFromData(
+      priorPeriodExpenses.results || [],
+      priorPeriodPayments.results || [],
+      parentAId,
+      parentBId,
+      parentARatio
+    );
+
+    // Calculate overall balance
+    const overallCalc = calculateBalanceFromData(
+      allIncludedExpenses.results || [],
+      allPayments.results || [],
+      parentAId,
+      parentBId,
+      parentARatio
+    );
 
     // Calculate questioned totals
     let questionedTotalCents = 0;
@@ -1137,36 +1239,64 @@ app.get('/families/:id/balance', async (c) => {
     let payerId: string | null = null;
     let payeeId: string | null = null;
 
-    if (balance > 0) {
+    if (overallCalc.balance > 0) {
       // A owes B
       payerId = parentAId;
       payeeId = parentBId;
-    } else if (balance < 0) {
+    } else if (overallCalc.balance < 0) {
       // B owes A
       payerId = parentBId;
       payeeId = parentAId;
     }
 
+    // Prior balance: positive means A owes B, negative means B owes A
+    let priorPayerId: string | null = null;
+    let priorPayeeId: string | null = null;
+    if (priorCalc.balance > 0) {
+      priorPayerId = parentAId;
+      priorPayeeId = parentBId;
+    } else if (priorCalc.balance < 0) {
+      priorPayerId = parentBId;
+      priorPayeeId = parentAId;
+    }
+
     const breakdown: BalanceBreakdown = {
-      total_expenses_cents: totalExpensesCents,
-      included_expenses_count: (includedExpenses.results || []).length,
-      a_share_cents: aShareCents,
-      b_share_cents: bShareCents,
-      a_paid_cents: aPaidCents,
-      b_paid_cents: bPaidCents,
-      payments_a_to_b_cents: paymentsAToBCents,
-      payments_b_to_a_cents: paymentsBToACents,
+      total_expenses_cents: overallCalc.totalExpensesCents,
+      included_expenses_count: (allIncludedExpenses.results || []).length,
+      a_share_cents: overallCalc.aShareCents,
+      b_share_cents: overallCalc.bShareCents,
+      a_paid_cents: overallCalc.aPaidCents,
+      b_paid_cents: overallCalc.bPaidCents,
+      payments_a_to_b_cents: overallCalc.paymentsAToBCents,
+      payments_b_to_a_cents: overallCalc.paymentsBToACents,
       questioned_total_cents: questionedTotalCents,
       questioned_count: (questionedExpenses.results || []).length,
     };
 
     return c.json({
-      balance_cents: Math.abs(balance),
+      balance_cents: Math.abs(overallCalc.balance),
       payer_id: payerId,
       payee_id: payeeId,
       parent_a_id: parentAId,
       parent_b_id: parentBId,
       breakdown,
+      // Period-based breakdown
+      period: {
+        start: periodStart,
+        end: periodEnd,
+        label: now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      },
+      current_period: {
+        a_expenses_cents: aExpensesThisPeriod,
+        a_payments_cents: aPaymentsThisPeriod,
+        b_expenses_cents: bExpensesThisPeriod,
+        b_payments_cents: bPaymentsThisPeriod,
+      },
+      prior_balance: {
+        balance_cents: Math.abs(priorCalc.balance),
+        payer_id: priorPayerId,
+        payee_id: priorPayeeId,
+      },
     });
   } catch (error) {
     console.error('Get balance error:', error);
@@ -2392,21 +2522,116 @@ app.get('/families/:id/activity', async (c) => {
 
     const limit = parseInt(c.req.query('limit') || '20');
     const offset = parseInt(c.req.query('offset') || '0');
+    const typeFilter = c.req.query('type'); // expenses, payments, fixed_expenses, disputes, children
+    const search = c.req.query('search');
+    const startDate = c.req.query('startDate');
+    const endDate = c.req.query('endDate');
 
-    // Get activity events with user info
-    const result = await c.env.DB.prepare(
-      `SELECT ae.*, u.email as user_email, u.name as user_name
+    // Build query with filters
+    let query = `SELECT ae.*, u.email as user_email, u.name as user_name
        FROM activity_events ae
        LEFT JOIN users u ON ae.user_id = u.id
-       WHERE ae.family_id = ?
-       ORDER BY ae.created_at DESC
-       LIMIT ? OFFSET ?`
-    ).bind(familyId, limit, offset).all<ActivityEventWithUser>();
+       WHERE ae.family_id = ?`;
+    const params: (string | number)[] = [familyId];
+
+    // Type filter - map category to event types
+    if (typeFilter) {
+      let eventTypes: string[] = [];
+      switch (typeFilter) {
+        case 'expenses':
+          eventTypes = ['expense.created', 'expense.edited', 'expense.generated'];
+          break;
+        case 'payments':
+          eventTypes = ['payment.created'];
+          break;
+        case 'fixed_expenses':
+          eventTypes = ['fixed_expense.created', 'fixed_expense.updated', 'fixed_expense.ended'];
+          break;
+        case 'disputes':
+          eventTypes = ['expense.questioned', 'expense.resolved', 'expense.satisfied'];
+          break;
+        case 'children':
+          eventTypes = ['child.created', 'child.deleted'];
+          break;
+      }
+      if (eventTypes.length > 0) {
+        query += ` AND ae.event_type IN (${eventTypes.map(() => '?').join(', ')})`;
+        params.push(...eventTypes);
+      }
+    }
+
+    // Date filters
+    if (startDate) {
+      query += ` AND ae.created_at >= ?`;
+      params.push(startDate);
+    }
+    if (endDate) {
+      // Add time to include the whole end date
+      query += ` AND ae.created_at <= ?`;
+      params.push(endDate + 'T23:59:59.999Z');
+    }
+
+    // Search filter - search in JSON snapshots
+    if (search) {
+      query += ` AND (ae.after_snapshot LIKE ? OR ae.before_snapshot LIKE ? OR u.name LIKE ? OR u.email LIKE ?)`;
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern, searchPattern);
+    }
+
+    query += ` ORDER BY ae.created_at DESC LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    // Get activity events with user info
+    const result = await c.env.DB.prepare(query).bind(...params).all<ActivityEventWithUser>();
+
+    // Build count query with same filters (excluding limit/offset)
+    let countQuery = `SELECT COUNT(*) as count FROM activity_events ae
+       LEFT JOIN users u ON ae.user_id = u.id
+       WHERE ae.family_id = ?`;
+    const countParams: (string | number)[] = [familyId];
+
+    if (typeFilter) {
+      let eventTypes: string[] = [];
+      switch (typeFilter) {
+        case 'expenses':
+          eventTypes = ['expense.created', 'expense.edited', 'expense.generated'];
+          break;
+        case 'payments':
+          eventTypes = ['payment.created'];
+          break;
+        case 'fixed_expenses':
+          eventTypes = ['fixed_expense.created', 'fixed_expense.updated', 'fixed_expense.ended'];
+          break;
+        case 'disputes':
+          eventTypes = ['expense.questioned', 'expense.resolved', 'expense.satisfied'];
+          break;
+        case 'children':
+          eventTypes = ['child.created', 'child.deleted'];
+          break;
+      }
+      if (eventTypes.length > 0) {
+        countQuery += ` AND ae.event_type IN (${eventTypes.map(() => '?').join(', ')})`;
+        countParams.push(...eventTypes);
+      }
+    }
+
+    if (startDate) {
+      countQuery += ` AND ae.created_at >= ?`;
+      countParams.push(startDate);
+    }
+    if (endDate) {
+      countQuery += ` AND ae.created_at <= ?`;
+      countParams.push(endDate + 'T23:59:59.999Z');
+    }
+
+    if (search) {
+      countQuery += ` AND (ae.after_snapshot LIKE ? OR ae.before_snapshot LIKE ? OR u.name LIKE ? OR u.email LIKE ?)`;
+      const searchPattern = `%${search}%`;
+      countParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
+    }
 
     // Get total count for pagination
-    const countResult = await c.env.DB.prepare(
-      'SELECT COUNT(*) as count FROM activity_events WHERE family_id = ?'
-    ).bind(familyId).first<{ count: number }>();
+    const countResult = await c.env.DB.prepare(countQuery).bind(...countParams).first<{ count: number }>();
 
     // Parse JSON fields for each event
     const events = (result.results || []).map(event => ({

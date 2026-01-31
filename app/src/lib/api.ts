@@ -309,6 +309,25 @@ export interface BalanceBreakdown {
   questioned_count: number;
 }
 
+export interface BalancePeriod {
+  start: string;
+  end: string;
+  label: string;
+}
+
+export interface CurrentPeriodBreakdown {
+  a_expenses_cents: number;
+  a_payments_cents: number;
+  b_expenses_cents: number;
+  b_payments_cents: number;
+}
+
+export interface PriorBalance {
+  balance_cents: number;
+  payer_id: string | null;
+  payee_id: string | null;
+}
+
 export interface BalanceResponse {
   balance_cents: number;
   payer_id: string | null;
@@ -316,6 +335,9 @@ export interface BalanceResponse {
   parent_a_id: string;
   parent_b_id: string | null;
   breakdown: BalanceBreakdown;
+  period: BalancePeriod;
+  current_period: CurrentPeriodBreakdown;
+  prior_balance: PriorBalance;
 }
 
 export async function getBalance(
@@ -477,15 +499,35 @@ export interface ActivityListResponse {
   };
 }
 
+export type ActivityTypeFilter =
+  | "all"
+  | "expenses"
+  | "payments"
+  | "fixed_expenses"
+  | "disputes"
+  | "children";
+
+export interface ActivityFilters {
+  type?: ActivityTypeFilter;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export async function getActivity(
   userId: string,
   familyId: string,
-  limit?: number,
-  offset?: number
+  filters?: ActivityFilters
 ): Promise<ActivityListResponse> {
   const params = new URLSearchParams();
-  if (limit) params.set("limit", limit.toString());
-  if (offset) params.set("offset", offset.toString());
+  if (filters?.type && filters.type !== "all") params.set("type", filters.type);
+  if (filters?.search) params.set("search", filters.search);
+  if (filters?.startDate) params.set("startDate", filters.startDate);
+  if (filters?.endDate) params.set("endDate", filters.endDate);
+  if (filters?.limit) params.set("limit", filters.limit.toString());
+  if (filters?.offset) params.set("offset", filters.offset.toString());
 
   const queryString = params.toString();
   const path = `/families/${familyId}/activity${queryString ? `?${queryString}` : ""}`;
