@@ -433,7 +433,7 @@ export default function DashboardPage() {
                         {allStepsComplete ? 'Setup Settings' : 'Complete Your Setup'}
                       </h2>
                       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        {allStepsComplete ? 'Review and edit your setup.' : 'Finish these steps to start tracking expenses with your co-parent.'}
+                        {allStepsComplete ? 'Review and edit your setup.' : 'Finish these steps to start tracking expenses.'}
                       </p>
                     </div>
                     {allStepsComplete && (
