@@ -90,7 +90,7 @@ export default function FixedExpensesSettingsPage() {
       setTier(data.tier);
     } catch (err) {
       console.error("Failed to fetch fixed expenses:", err);
-      setError("Failed to load fixed expenses. Please try again.");
+      setError("Failed to load recurring expenses. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +162,7 @@ export default function FixedExpensesSettingsPage() {
       setAddMemo("");
     } catch (err) {
       console.error("Failed to add fixed expense:", err);
-      setAddError(err instanceof Error ? err.message : "Failed to add fixed expense");
+      setAddError(err instanceof Error ? err.message : "Failed to add recurring expense");
     } finally {
       setIsAdding(false);
     }
@@ -210,7 +210,7 @@ export default function FixedExpensesSettingsPage() {
       setEditingExpense(null);
     } catch (err) {
       console.error("Failed to update fixed expense:", err);
-      setEditError(err instanceof Error ? err.message : "Failed to update fixed expense");
+      setEditError(err instanceof Error ? err.message : "Failed to update recurring expense");
     } finally {
       setIsEditing(false);
     }
@@ -241,7 +241,7 @@ export default function FixedExpensesSettingsPage() {
       setShowEndConfirm(null);
     } catch (err) {
       console.error("Failed to end fixed expense:", err);
-      setError(err instanceof Error ? err.message : "Failed to end fixed expense");
+      setError(err instanceof Error ? err.message : "Failed to end recurring expense");
     } finally {
       setEndingId(null);
     }
@@ -286,7 +286,7 @@ export default function FixedExpensesSettingsPage() {
                 </svg>
               </Link>
               <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                Fixed Expenses
+                Recurring Expenses
               </h1>
             </div>
             <UserButton afterSignOutUrl="/" />
@@ -333,7 +333,7 @@ export default function FixedExpensesSettingsPage() {
               </svg>
             </Link>
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Fixed Expenses
+              Recurring Expenses
             </h1>
           </div>
           <UserButton afterSignOutUrl="/" />
@@ -357,8 +357,8 @@ export default function FixedExpensesSettingsPage() {
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               {tier && (
                 tier.limit === -1
-                  ? `${tier.current} active fixed expenses (Pro: Unlimited)`
-                  : `${tier.current} of ${tier.limit} fixed expenses used (Free tier)`
+                  ? `${tier.current} active recurring expenses (Pro: Unlimited)`
+                  : `${tier.current} of ${tier.limit} recurring expenses used (Free tier)`
               )}
             </p>
           </div>
@@ -367,7 +367,7 @@ export default function FixedExpensesSettingsPage() {
             disabled={tier !== null && !tier.canAdd}
             className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            Add Fixed Expense
+            Add Recurring Expense
           </button>
         </div>
 
@@ -390,10 +390,10 @@ export default function FixedExpensesSettingsPage() {
               </svg>
               <div>
                 <p className="font-medium text-yellow-800 dark:text-yellow-300">
-                  Fixed expense limit reached
+                  Recurring expense limit reached
                 </p>
                 <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
-                  Free tier allows up to {tier.limit} fixed expenses. Upgrade to Pro for unlimited.
+                  Free tier allows up to {tier.limit} recurring expenses. Upgrade to Pro for unlimited.
                 </p>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function FixedExpensesSettingsPage() {
         {showAddForm && (
           <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
             <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
-              Add Fixed Expense
+              Add Recurring Expense
             </h2>
 
             {addError && (
@@ -530,7 +530,7 @@ export default function FixedExpensesSettingsPage() {
                   disabled={isAdding || !addDescription.trim() || !addAmount}
                   className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                 >
-                  {isAdding ? "Adding..." : "Add Fixed Expense"}
+                  {isAdding ? "Adding..." : "Add Recurring Expense"}
                 </button>
               </div>
             </form>
@@ -547,15 +547,15 @@ export default function FixedExpensesSettingsPage() {
             className="h-4 w-4 rounded border-zinc-300 text-zinc-900"
           />
           <label htmlFor="includeEnded" className="text-sm text-zinc-600 dark:text-zinc-400">
-            Show ended fixed expenses
+            Show ended recurring expenses
           </label>
         </div>
 
-        {/* Fixed Expenses List */}
+        {/* Recurring Expenses List */}
         <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
             <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-              Fixed Expenses ({fixedExpenses.length})
+              Recurring Expenses ({fixedExpenses.length})
             </h2>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               These templates auto-generate expenses on the 1st of each month.
@@ -564,7 +564,7 @@ export default function FixedExpensesSettingsPage() {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-zinc-500">Loading fixed expenses...</p>
+              <p className="text-zinc-500">Loading recurring expenses...</p>
             </div>
           ) : fixedExpenses.length === 0 ? (
             <div className="py-12 text-center">
@@ -583,7 +583,7 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </svg>
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400">No fixed expenses yet</p>
+              <p className="text-zinc-600 dark:text-zinc-400">No recurring expenses yet</p>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Add recurring monthly expenses like rent, tuition, or subscriptions.
               </p>
@@ -671,7 +671,7 @@ export default function FixedExpensesSettingsPage() {
                           <button
                             onClick={() => setShowEndConfirm(expense.id)}
                             className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
-                            title="End fixed expense"
+                            title="End recurring expense"
                           >
                             <svg
                               className="h-5 w-5"
@@ -715,10 +715,10 @@ export default function FixedExpensesSettingsPage() {
             </svg>
             <div>
               <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                How fixed expenses work
+                How recurring expenses work
               </p>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
-                Fixed expenses automatically generate regular expenses on the 1st of each month (or when you first open the app that month). Only active templates within their effective date range will generate expenses.
+                Recurring expenses automatically generate regular expenses on the 1st of each month (or when you first open the app that month). Only active templates within their effective date range will generate expenses.
               </p>
             </div>
           </div>
@@ -730,7 +730,7 @@ export default function FixedExpensesSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
             <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Edit Fixed Expense
+              Edit Recurring Expense
             </h3>
 
             {editError && (

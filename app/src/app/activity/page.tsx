@@ -1,16 +1,30 @@
 "use client";
 
 import { useUser, UserButton } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   getMe,
   getActivity,
   type MeResponse,
   type ActivityEvent,
+  type ActivityTypeFilter,
+  type ActivityFilters,
 } from "@/lib/api";
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 25;
+
+// Get date 30 days ago in YYYY-MM-DD format
+function getDefaultStartDate(): string {
+  const date = new Date();
+  date.setDate(date.getDate() - 30);
+  return date.toISOString().split("T")[0];
+}
+
+// Get today's date in YYYY-MM-DD format
+function getTodayDate(): string {
+  return new Date().toISOString().split("T")[0];
+}
 
 // Format relative time
 function formatRelativeTime(dateString: string): string {
@@ -264,21 +278,21 @@ function getEventDescription(
       const fixed = event.after_snapshot as { description?: string; amount_cents?: number } | null;
       const amount = fixed?.amount_cents ? formatCurrency(fixed.amount_cents) : "";
       return {
-        action: `${userName} created a fixed expense`,
+        action: `${userName} created a recurring expense`,
         details: fixed?.description ? `${fixed.description}${amount ? ` - ${amount}/month` : ""}` : null,
       };
     }
     case "fixed_expense.updated": {
       const fixed = event.after_snapshot as { description?: string } | null;
       return {
-        action: `${userName} updated a fixed expense`,
+        action: `${userName} updated a recurring expense`,
         details: fixed?.description || null,
       };
     }
     case "fixed_expense.ended": {
       const fixed = event.before_snapshot as { description?: string } | null;
       return {
-        action: `${userName} ended a fixed expense`,
+        action: `${userName} ended a recurring expense`,
         details: fixed?.description || null,
       };
     }
@@ -306,6 +320,16 @@ function getEventLink(event: ActivityEvent): string | null {
   }
 }
 
+// Type filter options
+const TYPE_FILTER_OPTIONS: { value: ActivityTypeFilter; label: string }[] = [
+  { value: "all", label: "All Activity" },
+  { value: "expenses", label: "Expenses" },
+  { value: "payments", label: "Payments" },
+  { value: "fixed_expenses", label: "Fixed Expenses" },
+  { value: "disputes", label: "Disputes" },
+  { value: "children", label: "Children" },
+];
+
 export default function ActivityFeedPage() {
   const { user, isLoaded } = useUser();
   const [meData, setMeData] = useState<MeResponse | null>(null);
@@ -315,6 +339,31 @@ export default function ActivityFeedPage() {
   const [totalEvents, setTotalEvents] = useState(0);
   const [currentOffset, setCurrentOffset] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter state
+  const [typeFilter, setTypeFilter] = useState<ActivityTypeFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [startDate, setStartDate] = useState(getDefaultStartDate());
+  const [endDate, setEndDate] = useState(getTodayDate());
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Build filters object
+  const filters: ActivityFilters = useMemo(() => ({
+    type: typeFilter,
+    search: debouncedSearch || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+    limit: ITEMS_PER_PAGE,
+    offset: 0,
+  }), [typeFilter, debouncedSearch, startDate, endDate]);
 
   const fetchActivity = useCallback(
     async (offset: number = 0, append: boolean = false) => {
@@ -327,7 +376,10 @@ export default function ActivityFeedPage() {
       }
 
       try {
-        const data = await getActivity(user.id, meData.family.id, ITEMS_PER_PAGE, offset);
+        const data = await getActivity(user.id, meData.family.id, {
+          ...filters,
+          offset,
+        });
 
         if (append) {
           setEvents((prev) => [...prev, ...data.events]);
@@ -344,7 +396,7 @@ export default function ActivityFeedPage() {
         setIsLoadingMore(false);
       }
     },
-    [user, meData?.family]
+    [user, meData?.family, filters]
   );
 
   // Fetch user data on load
@@ -365,7 +417,7 @@ export default function ActivityFeedPage() {
     }
   }, [isLoaded, user]);
 
-  // Fetch activity when user data is loaded
+  // Fetch activity when user data is loaded or filters change
   useEffect(() => {
     if (meData?.family) {
       fetchActivity(0, false);
@@ -376,7 +428,15 @@ export default function ActivityFeedPage() {
     fetchActivity(currentOffset, true);
   };
 
+  const handleClearFilters = () => {
+    setTypeFilter("all");
+    setSearchQuery("");
+    setStartDate(getDefaultStartDate());
+    setEndDate(getTodayDate());
+  };
+
   const hasMore = currentOffset < totalEvents;
+  const hasActiveFilters = typeFilter !== "all" || debouncedSearch || startDate !== getDefaultStartDate() || endDate !== getTodayDate();
 
   if (!isLoaded) {
     return (
@@ -473,6 +533,103 @@ export default function ActivityFeedPage() {
           </div>
         )}
 
+        {/* Filters Section */}
+        <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+          {/* Search Input */}
+          <div className="mb-4">
+            <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search activity..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+              />
+            </div>
+          </div>
+
+          {/* Filter Row */}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Type Filter Dropdown */}
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="type-filter"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Type:
+              </label>
+              <select
+                id="type-filter"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as ActivityTypeFilter)}
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              >
+                {TYPE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date Range */}
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="start-date"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                From:
+              </label>
+              <input
+                type="date"
+                id="start-date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="end-date"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                To:
+              </label>
+              <input
+                type="date"
+                id="end-date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              />
+            </div>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Results Summary */}
         <div className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
           {isLoading ? (
@@ -480,6 +637,7 @@ export default function ActivityFeedPage() {
           ) : (
             <>
               Showing {events.length} of {totalEvents} event{totalEvents !== 1 ? "s" : ""}
+              {hasActiveFilters && " (filtered)"}
             </>
           )}
         </div>
@@ -507,11 +665,21 @@ export default function ActivityFeedPage() {
               </svg>
             </div>
             <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-              No activity yet
+              {hasActiveFilters ? "No matching activity" : "No activity yet"}
             </p>
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-              Activity will appear here when you or your co-parent add expenses, payments, or children.
+              {hasActiveFilters
+                ? "Try adjusting your filters to see more results."
+                : "Activity will appear here when you or your co-parent add expenses, payments, or children."}
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="mt-4 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
@@ -612,7 +780,7 @@ export default function ActivityFeedPage() {
                 About Activity Feed
               </p>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                This feed shows all actions taken by you and your co-parent, including expenses added, edited, questioned, resolved, payments made, and children added or removed.
+                This feed shows all actions taken by you and your co-parent, including expenses added, edited, questioned, resolved, payments made, and children added or removed. By default, it shows activity from the last 30 days.
               </p>
             </div>
           </div>
