@@ -212,8 +212,8 @@ export default function DashboardPage() {
 
       if (navigator.share) {
         await navigator.share({
-          title: 'Join KidExpenses',
-          text: 'Track our shared kid expenses together',
+          title: 'Join me on KidExpenses',
+          text: 'Join me on KidExpenses to track our shared kid expenses together.',
           url: shareUrl
         });
         setInviteSuccess(true);
