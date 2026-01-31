@@ -466,9 +466,11 @@ export default function DashboardPage() {
                               <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">1</span>
                             )}
                           </div>
-                          <h3 className={`font-medium ${stepCompletion.kids ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
-                            {stepCompletion.kids ? `${children.length} kid${children.length > 1 ? 's' : ''} added` : 'Add your kids'}
-                          </h3>
+                          <div className="flex-1">
+                            <h3 className={`font-medium ${stepCompletion.kids ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                              {stepCompletion.kids ? `Kids: ${children.map(c => c.name).join(', ')}` : 'Add your kids'}
+                            </h3>
+                          </div>
                         </div>
                         <svg
                           className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('kids') ? 'rotate-180' : ''}`}
@@ -482,20 +484,15 @@ export default function DashboardPage() {
                       {isSectionExpanded('kids') && (
                         <div className="mt-4 ml-12">
                           {stepCompletion.kids ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-green-700 dark:text-green-400">
-                                {children.map(c => c.name).join(', ')}
-                              </span>
-                              <Link
-                                href="/settings/children"
-                                className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
-                              >
-                                Edit
-                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </Link>
-                            </div>
+                            <Link
+                              href="/settings/children"
+                              className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                            >
+                              Edit kids
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </Link>
                           ) : (
                             <>
                               <p className="text-sm text-zinc-500 dark:text-zinc-400">
