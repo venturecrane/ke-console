@@ -8,15 +8,17 @@ import {
   generateInviteCode,
   getExpenses,
   getBalance,
-  sendEmailInvite,
   getPendingInvites,
   cancelInvite,
   getChildren,
+  updateFamily,
+  getFixedExpenses,
   type MeResponse,
   type Expense,
   type BalanceResponse,
   type PendingInvite,
   type Child,
+  type FixedExpense,
 } from "@/lib/api";
 
 // Format cents to dollars display
@@ -63,19 +65,24 @@ export default function DashboardPage() {
   const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  // Email invite state
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  // Invite state
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [showCodeFallback, setShowCodeFallback] = useState(false);
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copyLinkSuccess, setCopyLinkSuccess] = useState(false);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [balance, setBalance] = useState<BalanceResponse | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
+  const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
+  // Split ratio editing state
+  const [isEditingSplitRatio, setIsEditingSplitRatio] = useState(false);
+  const [splitRatioA, setSplitRatioA] = useState(50);
+  const [isSavingSplitRatio, setIsSavingSplitRatio] = useState(false);
+  // Setup wizard expand/collapse state
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [setupExpandedForEdits, setSetupExpandedForEdits] = useState(false);
 
   const fetchUserData = useCallback(async () => {
     if (!user) return;
@@ -91,7 +98,7 @@ export default function DashboardPage() {
         setIsLoadingExpenses(true);
         setIsLoadingBalance(true);
         try {
-          const [expenseData, balanceData, invitesData, childrenData] = await Promise.all([
+          const [expenseData, balanceData, invitesData, childrenData, fixedExpenseData] = await Promise.all([
             getExpenses(user.id, data.family.id, { limit: 5 }),
             getBalance(user.id, data.family.id),
             // Only fetch pending invites if user is parent_a and no parent_b
@@ -99,11 +106,13 @@ export default function DashboardPage() {
               ? getPendingInvites(user.id, data.family.id)
               : Promise.resolve({ invites: [] }),
             getChildren(user.id, data.family.id),
+            getFixedExpenses(user.id, data.family.id),
           ]);
           setExpenses(expenseData.expenses);
           setBalance(balanceData);
           setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
           setChildren(childrenData.children);
+          setFixedExpenses(fixedExpenseData.fixedExpenses);
         } catch (err) {
           console.error("Failed to fetch data:", err);
         } finally {
@@ -172,31 +181,6 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleSendEmailInvite(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !meData?.family || !inviteEmail.trim()) return;
-
-    setIsSendingInvite(true);
-    setInviteError(null);
-    setInviteSuccess(false);
-
-    try {
-      const result = await sendEmailInvite(user.id, meData.family.id, inviteEmail.trim());
-      setInviteCode(result.inviteCode);
-      setInviteLink(result.inviteLink);
-      setInviteExpiresAt(result.expiresAt);
-      setInviteSuccess(true);
-      setInviteEmail("");
-      // Refresh pending invites
-      const invitesData = await getPendingInvites(user.id, meData.family.id);
-      setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
-    } catch (error) {
-      setInviteError(error instanceof Error ? error.message : "Failed to send invite");
-    } finally {
-      setIsSendingInvite(false);
-    }
-  }
-
   async function handleCancelInvite(inviteId: string) {
     if (!user || !meData?.family) return;
 
@@ -208,15 +192,80 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleCopyLink() {
-    if (!inviteLink) return;
+  async function handleShareInvite() {
+    if (!user || !meData?.family) return;
+
+    setIsGeneratingInvite(true);
+    setInviteError(null);
 
     try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopyLinkSuccess(true);
-      setTimeout(() => setCopyLinkSuccess(false), 2000);
-    } catch {
-      console.error("Failed to copy invite link");
+      // Generate invite code if we don't have one
+      let code = inviteCode;
+      if (!code) {
+        const result = await generateInviteCode(user.id, meData.family.id);
+        code = result.inviteCode;
+        setInviteCode(result.inviteCode);
+        setInviteExpiresAt(result.expiresAt);
+      }
+
+      const shareUrl = `${window.location.origin}/family/join?code=${code}`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Join me on KidExpenses',
+          text: 'Join me on KidExpenses to track our shared kid expenses together.',
+          url: shareUrl
+        });
+        setInviteSuccess(true);
+        setTimeout(() => setInviteSuccess(false), 3000);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        setCopyLinkSuccess(true);
+        setTimeout(() => setCopyLinkSuccess(false), 2000);
+      }
+    } catch (error) {
+      // User cancelled share dialog is not an error
+      if (error instanceof Error && error.name !== 'AbortError') {
+        setInviteError("Failed to share invite");
+      }
+    } finally {
+      setIsGeneratingInvite(false);
+    }
+  }
+
+  function handleEditSplitRatio() {
+    if (meData?.family) {
+      setSplitRatioA(Math.round((meData.family.parent_a_ratio || 0.5) * 100));
+      setIsEditingSplitRatio(true);
+    }
+  }
+
+  async function handleSaveSplitRatio() {
+    if (!user || !meData?.family) return;
+
+    setIsSavingSplitRatio(true);
+    try {
+      const result = await updateFamily(user.id, meData.family.id, {
+        parent_a_ratio: splitRatioA / 100,
+      });
+      // Update local state with new family data
+      setMeData({
+        ...meData,
+        family: result.family,
+      });
+      setIsEditingSplitRatio(false);
+    } catch (error) {
+      console.error("Failed to update split ratio:", error);
+    } finally {
+      setIsSavingSplitRatio(false);
+    }
+  }
+
+  function handleCancelSplitRatio() {
+    setIsEditingSplitRatio(false);
+    if (meData?.family) {
+      setSplitRatioA(Math.round((meData.family.parent_a_ratio || 0.5) * 100));
     }
   }
 
@@ -232,8 +281,37 @@ export default function DashboardPage() {
   const isParentA = meData?.role === "parent_a";
   const hasPartner = meData?.family?.parent_b_id !== null;
   const hasChildren = children.length > 0;
+  const hasFixedExpenses = fixedExpenses.length > 0;
   // Setup is complete when co-parent has joined AND at least one child is added
   const isSetupComplete = hasPartner && hasChildren;
+
+  // Step completion states
+  const stepCompletion = {
+    kids: hasChildren,
+    recurring: hasFixedExpenses,
+    coparent: hasPartner,
+    split: true, // Always complete (has default)
+  };
+
+  // All steps complete
+  const allStepsComplete = stepCompletion.kids && stepCompletion.recurring && stepCompletion.coparent && stepCompletion.split;
+
+  // Toggle section expand/collapse
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // Determine if a section is expanded (incomplete sections default to expanded, completed default to collapsed)
+  const isSectionExpanded = (section: keyof typeof stepCompletion) => {
+    if (expandedSections[section] !== undefined) {
+      return expandedSections[section];
+    }
+    // Default: incomplete sections are expanded, completed sections are collapsed
+    return !stepCompletion[section];
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
@@ -318,226 +396,468 @@ export default function DashboardPage() {
           <>
             {/* Setup Wizard Card */}
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <h2 className="mb-2 text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                Complete Your Setup
-              </h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-                Finish these steps to start tracking expenses with your co-parent.
-              </p>
-
-              {/* Setup Steps */}
-              <div className="space-y-4">
-                {/* Step 1: Invite Co-parent */}
-                <div className={`flex items-start gap-4 rounded-lg border p-4 ${hasPartner ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'}`}>
-                  <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${hasPartner ? 'bg-green-100 dark:bg-green-900/50' : 'bg-amber-100 dark:bg-amber-900/50'}`}>
-                    {hasPartner ? (
-                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {allStepsComplete && !setupExpandedForEdits ? (
+                /* All steps complete - minimal state */
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+                      <svg className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                    ) : (
-                      <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">1</span>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-medium text-green-800 dark:text-green-300">
+                        Setup Complete
+                      </h2>
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        All steps finished. You&apos;re ready to track expenses!
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSetupExpandedForEdits(true)}
+                    className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                  >
+                    Edit settings
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                /* Show setup steps */
+                <>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="mb-2 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                        {allStepsComplete ? 'Setup Settings' : 'Complete Your Setup'}
+                      </h2>
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                        {allStepsComplete ? 'Review and edit your setup.' : 'Finish these steps to start tracking expenses.'}
+                      </p>
+                    </div>
+                    {allStepsComplete && (
+                      <button
+                        onClick={() => setSetupExpandedForEdits(false)}
+                        className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                      >
+                        Collapse
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                      </button>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className={`font-medium ${hasPartner ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'}`}>
-                      {hasPartner ? 'Co-parent joined' : 'Invite your co-parent'}
-                    </h3>
-                    {!hasPartner && (
-                      <>
-                        <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
-                          Send an invitation so you can both track expenses together.
-                        </p>
-                        {isParentA && (
-                          <div className="mt-3 space-y-3">
-                            {/* Pending Invites */}
-                            {pendingInvites.length > 0 && (
-                              <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/30">
-                                <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
-                                  Pending Invite{pendingInvites.length > 1 ? 's' : ''}
-                                </p>
-                                {pendingInvites.map((invite) => (
-                                  <div key={invite.id} className="flex items-center justify-between gap-3 py-1">
-                                    <span className="text-sm text-blue-800 dark:text-blue-200">{invite.invited_email}</span>
-                                    <button
-                                      onClick={() => handleCancelInvite(invite.id)}
-                                      className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
 
-                            {/* Success Message */}
-                            {inviteSuccess && inviteLink && (
-                              <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Invitation sent!</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="text"
-                                    readOnly
-                                    value={inviteLink}
-                                    className="flex-1 rounded border border-green-200 bg-white px-2 py-1 text-xs text-zinc-900 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-100"
-                                  />
-                                  <button
-                                    onClick={handleCopyLink}
-                                    className="rounded bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700"
-                                  >
-                                    {copyLinkSuccess ? 'Copied!' : 'Copy'}
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Email Invite Form */}
-                            <form onSubmit={handleSendEmailInvite} className="flex gap-2">
-                              <input
-                                type="email"
-                                value={inviteEmail}
-                                onChange={(e) => setInviteEmail(e.target.value)}
-                                placeholder="co-parent@email.com"
-                                className="flex-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-amber-500 focus:outline-none dark:border-amber-600 dark:bg-zinc-800 dark:text-zinc-100"
-                              />
-                              <button
-                                type="submit"
-                                disabled={isSendingInvite || !inviteEmail.trim()}
-                                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
-                              >
-                                {isSendingInvite ? 'Sending...' : 'Send'}
-                              </button>
-                            </form>
-                            {inviteError && (
-                              <p className="text-sm text-red-600 dark:text-red-400">{inviteError}</p>
-                            )}
-
-                            {/* Code Fallback */}
-                            <button
-                              onClick={() => setShowCodeFallback(!showCodeFallback)}
-                              className="text-xs text-amber-600 hover:text-amber-800 dark:text-amber-400"
-                            >
-                              {showCodeFallback ? 'Hide' : 'Show'} invite code option
-                            </button>
-                            {showCodeFallback && (
-                              <div className="rounded-lg bg-zinc-100 p-3 dark:bg-zinc-800">
-                                {inviteCode ? (
-                                  <div className="flex items-center gap-2">
-                                    <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-lg tracking-widest text-center border dark:bg-zinc-900 dark:text-zinc-100">
-                                      {inviteCode}
-                                    </code>
-                                    <button
-                                      onClick={handleCopyInvite}
-                                      className="rounded bg-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200"
-                                    >
-                                      {copySuccess ? 'Copied!' : 'Copy'}
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={handleGenerateInvite}
-                                    disabled={isGeneratingInvite}
-                                    className="rounded bg-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-300 disabled:opacity-50 dark:bg-zinc-700 dark:text-zinc-200"
-                                  >
-                                    {isGeneratingInvite ? 'Generating...' : 'Generate Code'}
-                                  </button>
-                                )}
-                              </div>
+                  {/* Setup Steps */}
+                  <div className="space-y-4">
+                    {/* Step 1: Add Kids */}
+                    <div className={`rounded-lg border p-4 ${stepCompletion.kids ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800'}`}>
+                      <button
+                        onClick={() => toggleSection('kids')}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.kids ? 'bg-green-100 dark:bg-green-900/50' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
+                            {stepCompletion.kids ? (
+                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">1</span>
                             )}
                           </div>
-                        )}
-                        {!isParentA && (
-                          <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                            Waiting for the family creator to send an invite.
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 2: Add Children */}
-                <div className={`flex items-start gap-4 rounded-lg border p-4 ${hasChildren ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800'}`}>
-                  <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${hasChildren ? 'bg-green-100 dark:bg-green-900/50' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
-                    {hasChildren ? (
-                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">2</span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`font-medium ${hasChildren ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
-                      {hasChildren ? `${children.length} child${children.length > 1 ? 'ren' : ''} added` : 'Add your children'}
-                    </h3>
-                    {!hasChildren && (
-                      <>
-                        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                          Add your children to track expenses by child.
-                        </p>
-                        <Link
-                          href="/settings/children"
-                          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                          <div className="flex-1">
+                            <h3 className={`font-medium ${stepCompletion.kids ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                              {stepCompletion.kids ? `Kids: ${children.map(c => c.name).join(', ')}` : 'Add your kids'}
+                            </h3>
+                          </div>
+                        </div>
+                        <svg
+                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('kids') ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          Add children
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 3: Set Split Ratio */}
-                <div className="flex items-start gap-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
-                    <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-green-800 dark:text-green-300">
-                      Split ratio set
-                    </h3>
-                    <p className="mt-1 text-sm text-green-700 dark:text-green-400">
-                      {Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%
-                    </p>
-                  </div>
-                </div>
-
-                {/* Step 4: Recurring Expenses (Optional) */}
-                <div className="flex items-start gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
-                    <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">4</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-zinc-700 dark:text-zinc-300">
-                        Set up recurring expenses
-                      </h3>
-                      <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">Optional</span>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isSectionExpanded('kids') && (
+                        <div className="mt-4 ml-12">
+                          {stepCompletion.kids ? (
+                            <Link
+                              href="/settings/children"
+                              className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                            >
+                              Edit kids
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </Link>
+                          ) : (
+                            <>
+                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                Add your kids to track expenses by kid.
+                              </p>
+                              <Link
+                                href="/settings/children"
+                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                              >
+                                Add kids
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </Link>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                      Automatically track regular monthly expenses like tuition or childcare.
-                    </p>
-                    <Link
-                      href="/settings/fixed-expenses"
-                      className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
-                    >
-                      Set up recurring expenses
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
+
+                    {/* Step 2: Recurring Expenses */}
+                    <div className={`rounded-lg border p-4 ${stepCompletion.recurring ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800'}`}>
+                      <button
+                        onClick={() => toggleSection('recurring')}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.recurring ? 'bg-green-100 dark:bg-green-900/50' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
+                            {stepCompletion.recurring ? (
+                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">2</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <h3 className={`font-medium ${stepCompletion.recurring ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                              {stepCompletion.recurring ? `${fixedExpenses.length} recurring expense${fixedExpenses.length > 1 ? 's' : ''} set up` : 'Set up recurring expenses'}
+                            </h3>
+                            {!stepCompletion.recurring && (
+                              <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">Optional</span>
+                            )}
+                          </div>
+                        </div>
+                        <svg
+                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('recurring') ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isSectionExpanded('recurring') && (
+                        <div className="mt-4 ml-12">
+                          {stepCompletion.recurring ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-green-700 dark:text-green-400">
+                                {fixedExpenses.map(e => e.description).join(', ')}
+                              </span>
+                              <Link
+                                href="/settings/fixed-expenses"
+                                className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                              >
+                                Edit
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                              </Link>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                Automatically track regular monthly expenses like tuition or childcare.
+                              </p>
+                              <Link
+                                href="/settings/fixed-expenses"
+                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                              >
+                                Set up recurring expenses
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </Link>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Step 3: Invite Co-parent */}
+                    <div className={`rounded-lg border p-4 ${stepCompletion.coparent ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'}`}>
+                      <button
+                        onClick={() => toggleSection('coparent')}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.coparent ? 'bg-green-100 dark:bg-green-900/50' : 'bg-amber-100 dark:bg-amber-900/50'}`}>
+                            {stepCompletion.coparent ? (
+                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">3</span>
+                            )}
+                          </div>
+                          <h3 className={`font-medium ${stepCompletion.coparent ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'}`}>
+                            {stepCompletion.coparent ? 'Co-parent joined' : 'Invite your co-parent'}
+                          </h3>
+                        </div>
+                        <svg
+                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('coparent') ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isSectionExpanded('coparent') && (
+                        <div className="mt-4 ml-12">
+                          {stepCompletion.coparent ? (
+                            <p className="text-sm text-green-700 dark:text-green-400">
+                              Your co-parent has joined the family.
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-sm text-amber-700 dark:text-amber-400">
+                                Send an invitation.
+                              </p>
+                              {isParentA && (
+                                <div className="mt-3 space-y-3">
+                                  {/* Pending Invites */}
+                                  {pendingInvites.length > 0 && (
+                                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/30">
+                                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
+                                        Pending Invite{pendingInvites.length > 1 ? 's' : ''}
+                                      </p>
+                                      {pendingInvites.map((invite) => (
+                                        <div key={invite.id} className="flex items-center justify-between gap-3 py-1">
+                                          <span className="text-sm text-blue-800 dark:text-blue-200">{invite.invited_email}</span>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); handleCancelInvite(invite.id); }}
+                                            className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Success/Feedback Messages */}
+                                  {inviteSuccess && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
+                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite shared!</p>
+                                    </div>
+                                  )}
+                                  {copyLinkSuccess && !inviteSuccess && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
+                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite link copied!</p>
+                                    </div>
+                                  )}
+                                  {inviteError && (
+                                    <p className="text-sm text-red-600 dark:text-red-400">{inviteError}</p>
+                                  )}
+
+                                  {/* Share Invite Button */}
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleShareInvite(); }}
+                                    disabled={isGeneratingInvite}
+                                    className="w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                                  >
+                                    {isGeneratingInvite ? (
+                                      'Preparing invite...'
+                                    ) : (
+                                      <>
+                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        Invite Co-Parent
+                                      </>
+                                    )}
+                                  </button>
+
+                                  {/* Code Fallback */}
+                                  <button
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      if (!showCodeFallback && !inviteCode) {
+                                        await handleGenerateInvite();
+                                      }
+                                      setShowCodeFallback(!showCodeFallback);
+                                    }}
+                                    disabled={isGeneratingInvite}
+                                    className="text-xs text-amber-600 hover:text-amber-800 dark:text-amber-400 disabled:opacity-50"
+                                  >
+                                    {isGeneratingInvite ? 'Loading...' : (showCodeFallback ? 'Hide invite code' : 'Or share code manually')}
+                                  </button>
+                                  {showCodeFallback && inviteCode && (
+                                    <div className="rounded-lg bg-zinc-100 p-3 dark:bg-zinc-800">
+                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+                                        Your co-parent can enter this code at the &quot;Join a Family&quot; page.
+                                      </p>
+                                      <div className="flex items-center gap-2">
+                                        <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-lg tracking-widest text-center border dark:bg-zinc-900 dark:text-zinc-100">
+                                          {inviteCode}
+                                        </code>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); handleCopyInvite(); }}
+                                          className="rounded bg-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200"
+                                        >
+                                          {copySuccess ? 'Copied!' : 'Copy'}
+                                        </button>
+                                      </div>
+                                      {inviteExpiresAt && (
+                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+                                          Expires {new Date(inviteExpiresAt).toLocaleDateString()}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {!isParentA && (
+                                <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                                  Waiting for the family creator to send an invite.
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Step 4: Set Split Ratio */}
+                    <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                      <button
+                        onClick={() => toggleSection('split')}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+                            <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <h3 className="font-medium text-green-800 dark:text-green-300">
+                            Split ratio set ({Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%)
+                          </h3>
+                        </div>
+                        <svg
+                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('split') ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isSectionExpanded('split') && (
+                        <div className="mt-4 ml-12">
+                          {isEditingSplitRatio ? (
+                            <div className="space-y-4">
+                              {/* Slider */}
+                              <div className="space-y-2">
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  value={splitRatioA}
+                                  onChange={(e) => setSplitRatioA(Number(e.target.value))}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-full h-2 rounded-lg cursor-pointer accent-green-600"
+                                />
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-green-700 dark:text-green-400">
+                                    You: {splitRatioA}%
+                                  </span>
+                                  <span className="text-green-700 dark:text-green-400">
+                                    Co-parent: {100 - splitRatioA}%
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Number inputs */}
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1">
+                                  <label className="block text-xs text-green-600 dark:text-green-500 mb-1">You</label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={splitRatioA}
+                                    onChange={(e) => {
+                                      const val = Math.max(0, Math.min(100, Number(e.target.value)));
+                                      setSplitRatioA(val);
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.target.select()}
+                                    className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
+                                  />
+                                </div>
+                                <span className="text-green-600 dark:text-green-400 mt-5">/</span>
+                                <div className="flex-1">
+                                  <label className="block text-xs text-green-600 dark:text-green-500 mb-1">Co-parent</label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={100 - splitRatioA}
+                                    onChange={(e) => {
+                                      const val = Math.max(0, Math.min(100, Number(e.target.value)));
+                                      setSplitRatioA(100 - val);
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.target.select()}
+                                    className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
+                                  />
+                                </div>
+                              </div>
+                              {/* Action buttons */}
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleSaveSplitRatio(); }}
+                                  disabled={isSavingSplitRatio}
+                                  className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                                >
+                                  {isSavingSplitRatio ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleCancelSplitRatio(); }}
+                                  disabled={isSavingSplitRatio}
+                                  className="rounded-lg border border-green-300 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-900/30"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleEditSplitRatio(); }}
+                              className="inline-flex items-center gap-1.5 text-sm text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors group"
+                            >
+                              <span className="font-medium">
+                                {Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%
+                              </span>
+                              <svg className="h-4 w-4 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             {/* Quick Actions during setup - always show Add Expense */}
@@ -744,7 +1064,7 @@ export default function DashboardPage() {
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                 </svg>
-                Children
+                Kids
               </Link>
               <Link
                 href="/settings/fixed-expenses"

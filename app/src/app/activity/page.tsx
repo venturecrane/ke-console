@@ -263,14 +263,14 @@ function getEventDescription(
     case "child.created": {
       const child = event.after_snapshot as { name?: string } | null;
       return {
-        action: `${userName} added a child`,
+        action: `${userName} added a kid`,
         details: child?.name || null,
       };
     }
     case "child.deleted": {
       const child = event.before_snapshot as { name?: string } | null;
       return {
-        action: `${userName} removed a child`,
+        action: `${userName} removed a kid`,
         details: child?.name || null,
       };
     }
@@ -327,7 +327,7 @@ const TYPE_FILTER_OPTIONS: { value: ActivityTypeFilter; label: string }[] = [
   { value: "payments", label: "Payments" },
   { value: "fixed_expenses", label: "Fixed Expenses" },
   { value: "disputes", label: "Disputes" },
-  { value: "children", label: "Children" },
+  { value: "children", label: "Kids" },
 ];
 
 export default function ActivityFeedPage() {
@@ -670,7 +670,7 @@ export default function ActivityFeedPage() {
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">
               {hasActiveFilters
                 ? "Try adjusting your filters to see more results."
-                : "Activity will appear here when you or your co-parent add expenses, payments, or children."}
+                : "Activity will appear here when you or your co-parent add expenses, payments, or kids."}
             </p>
             {hasActiveFilters && (
               <button
@@ -780,7 +780,7 @@ export default function ActivityFeedPage() {
                 About Activity Feed
               </p>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                This feed shows all actions taken by you and your co-parent, including expenses added, edited, questioned, resolved, payments made, and children added or removed. By default, it shows activity from the last 30 days.
+                This feed shows all actions taken by you and your co-parent, including expenses added, edited, questioned, resolved, payments made, and kids added or removed. By default, it shows activity from the last 30 days.
               </p>
             </div>
           </div>

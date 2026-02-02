@@ -145,7 +145,7 @@ export default function ChildrenSettingsPage() {
                 </svg>
               </Link>
               <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                Manage Children
+                Manage Kids
               </h1>
             </div>
             <UserButton afterSignOutUrl="/" />
@@ -192,7 +192,7 @@ export default function ChildrenSettingsPage() {
               </svg>
             </Link>
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Manage Children
+              Manage Kids
             </h1>
           </div>
           <UserButton afterSignOutUrl="/" />
@@ -210,7 +210,7 @@ export default function ChildrenSettingsPage() {
         {/* Add Child Form */}
         <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
           <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
-            Add a Child
+            Add a Kid
           </h2>
           <form onSubmit={handleAddChild} className="flex gap-3">
             <div className="flex-1">
@@ -221,7 +221,7 @@ export default function ChildrenSettingsPage() {
                   setNewChildName(e.target.value);
                   setAddError(null);
                 }}
-                placeholder="Child's name"
+                placeholder="Kid's name"
                 maxLength={100}
                 className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
               />
@@ -236,7 +236,7 @@ export default function ChildrenSettingsPage() {
               disabled={isAdding || !newChildName.trim()}
               className="rounded-lg bg-zinc-900 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
-              {isAdding ? "Adding..." : "Add Child"}
+              {isAdding ? "Adding..." : "Add Kid"}
             </button>
           </form>
         </div>
@@ -245,16 +245,16 @@ export default function ChildrenSettingsPage() {
         <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
             <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-              Children ({children.length})
+              Kids ({children.length})
             </h2>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Add children to tag expenses to specific family members.
+              Add kids to tag expenses to specific family members.
             </p>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-zinc-500">Loading children...</p>
+              <p className="text-zinc-500">Loading kids...</p>
             </div>
           ) : children.length === 0 ? (
             <div className="py-12 text-center">
@@ -273,9 +273,9 @@ export default function ChildrenSettingsPage() {
                   />
                 </svg>
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400">No children added yet</p>
+              <p className="text-zinc-600 dark:text-zinc-400">No kids added yet</p>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                Add your children above to tag expenses to them.
+                Add your kids above to tag expenses to them.
               </p>
             </div>
           ) : (
@@ -325,7 +325,7 @@ export default function ChildrenSettingsPage() {
                     <button
                       onClick={() => setShowDeleteConfirm(child.id)}
                       className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
-                      title="Delete child"
+                      title="Delete kid"
                     >
                       <svg
                         className="h-5 w-5"
@@ -366,10 +366,10 @@ export default function ChildrenSettingsPage() {
             </svg>
             <div>
               <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                Note about deleted children
+                Note about deleted kids
               </p>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
-                When you delete a child, they are hidden from this list but preserved for historical expense records. Any expenses tagged to a deleted child will still show that association.
+                When you delete a kid, they are hidden from this list but preserved for historical expense records. Any expenses tagged to a deleted kid will still show that association.
               </p>
             </div>
           </div>

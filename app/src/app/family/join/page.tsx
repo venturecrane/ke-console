@@ -50,12 +50,23 @@ function JoinFamilyForm() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-900">
       <div className="w-full max-w-md">
+        {/* App branding */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Join a Family
+          {/* TODO: Replace with logo when available */}
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+            KidExpenses
           </h1>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Enter the invite code shared by your co-parent
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Shared expense tracking for co-parents
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            Join a Family
+          </h2>
+          <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+            Enter the invite code to get started.
           </p>
         </div>
 
@@ -111,14 +122,6 @@ function JoinFamilyForm() {
           </p>
         </div>
 
-        <div className="mt-4 text-center">
-          <Link
-            href="/dashboard"
-            className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
-          >
-            Back to Dashboard
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -169,6 +169,25 @@ export async function getFamily(
   );
 }
 
+export interface UpdateFamilyRequest {
+  parent_a_ratio?: number;
+}
+
+export async function updateFamily(
+  userId: string,
+  familyId: string,
+  updates: UpdateFamilyRequest
+): Promise<{ success: boolean; family: Family }> {
+  return apiRequest(
+    `/families/${familyId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    },
+    userId
+  );
+}
+
 export async function generateInviteCode(
   userId: string,
   familyId: string
@@ -614,6 +633,8 @@ export async function satisfyExpense(
 // FIXED EXPENSES API
 // ============================================
 
+export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
+
 export interface FixedExpense {
   id: string;
   family_id: string;
@@ -624,6 +645,7 @@ export interface FixedExpense {
   child_ids: string | null;
   link_url: string | null;
   memo: string | null;
+  frequency: RecurringFrequency;
   effective_from: string;
   effective_until: string | null;
   created_at: string;
@@ -635,6 +657,7 @@ export interface CreateFixedExpenseRequest {
   description: string;
   amount: number; // in dollars
   category: ExpenseCategory;
+  frequency?: RecurringFrequency; // defaults to 'monthly'
   effectiveFrom: string; // YYYY-MM-DD
   effectiveUntil?: string; // YYYY-MM-DD
   linkUrl?: string;
@@ -645,6 +668,7 @@ export interface UpdateFixedExpenseRequest {
   description?: string;
   amount?: number; // in dollars
   category?: ExpenseCategory;
+  frequency?: RecurringFrequency;
   effectiveUntil?: string | null;
   linkUrl?: string | null;
   memo?: string | null;

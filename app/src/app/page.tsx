@@ -25,7 +25,7 @@ export default async function Home() {
 
         <div className="mb-12 max-w-lg text-zinc-600 dark:text-zinc-400">
           <p className="mb-4">
-            A shared space to track child-related expenses. Log costs, set up
+            A shared space to track kid-related expenses. Log costs, set up
             recurring expenses, and always know where things stand.
           </p>
           <ul className="inline-flex flex-col items-start space-y-2">

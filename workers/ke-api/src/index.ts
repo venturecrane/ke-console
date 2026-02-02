@@ -241,7 +241,7 @@ const app = new Hono<{ Bindings: Env }>();
 // CORS middleware
 app.use('*', cors({
   origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
 }));
 
@@ -418,8 +418,8 @@ app.get('/families/:id', async (c) => {
   }
 });
 
-// Generate invite code for a family
-app.post('/families/:id/invite', async (c) => {
+// Update family settings (e.g., parent_a_ratio)
+app.patch('/families/:id', async (c) => {
   const familyId = c.req.param('id');
   const userId = c.req.header('X-User-Id');
 
@@ -428,6 +428,8 @@ app.post('/families/:id/invite', async (c) => {
   }
 
   try {
+    const body = await c.req.json<{ parent_a_ratio?: number }>();
+
     const family = await c.env.DB.prepare(
       'SELECT * FROM families WHERE id = ?'
     ).bind(familyId).first<Family>();
@@ -436,54 +438,53 @@ app.post('/families/:id/invite', async (c) => {
       return c.json({ error: 'Family not found' }, 404);
     }
 
-    // Only parent_a can generate invite code
-    if (family.parent_a_id !== userId) {
-      return c.json({ error: 'Only the family creator can generate invite codes' }, 403);
+    // Check if user belongs to this family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to update this family' }, 403);
     }
 
-    // Check if family already has parent_b
-    if (family.parent_b_id) {
-      return c.json({ error: 'Family already has two parents' }, 400);
+    // Validate parent_a_ratio if provided
+    if (body.parent_a_ratio !== undefined) {
+      if (typeof body.parent_a_ratio !== 'number' || body.parent_a_ratio < 0 || body.parent_a_ratio > 1) {
+        return c.json({ error: 'parent_a_ratio must be a number between 0 and 1' }, 400);
+      }
     }
 
-    // Generate unique invite code
-    let inviteCode = generateInviteCode();
-    let attempts = 0;
-    const maxAttempts = 10;
+    // Build update query
+    const updates: string[] = [];
+    const values: (string | number)[] = [];
 
-    while (attempts < maxAttempts) {
-      const existing = await c.env.DB.prepare(
-        'SELECT id FROM families WHERE invite_code = ?'
-      ).bind(inviteCode).first();
-
-      if (!existing) break;
-      inviteCode = generateInviteCode();
-      attempts++;
+    if (body.parent_a_ratio !== undefined) {
+      updates.push('parent_a_ratio = ?');
+      values.push(body.parent_a_ratio);
     }
 
-    if (attempts >= maxAttempts) {
-      return c.json({ error: 'Failed to generate unique invite code' }, 500);
+    if (updates.length === 0) {
+      return c.json({ error: 'No valid fields to update' }, 400);
     }
 
-    const expiresAt = getInviteExpiry();
+    updates.push("updated_at = datetime('now')");
+    values.push(familyId);
 
     await c.env.DB.prepare(
-      `UPDATE families SET invite_code = ?, invite_expires_at = ?, updated_at = datetime('now')
-       WHERE id = ?`
-    ).bind(inviteCode, expiresAt, familyId).run();
+      `UPDATE families SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...values).run();
+
+    const updatedFamily = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
 
     return c.json({
       success: true,
-      inviteCode,
-      expiresAt,
+      family: updatedFamily,
     });
   } catch (error) {
-    console.error('Generate invite error:', error);
-    return c.json({ error: 'Failed to generate invite code', details: String(error) }, 500);
+    console.error('Update family error:', error);
+    return c.json({ error: 'Failed to update family', details: String(error) }, 500);
   }
 });
 
-// Send email invite for a family
+// Send email invite for a family (must be before /families/:id/invite for Hono routing)
 app.post('/families/:id/invite/email', async (c) => {
   const familyId = c.req.param('id');
   const userId = c.req.header('X-User-Id');
@@ -629,6 +630,71 @@ app.post('/families/:id/invite/email', async (c) => {
   } catch (error) {
     console.error('Send email invite error:', error);
     return c.json({ error: 'Failed to send invite', details: String(error) }, 500);
+  }
+});
+
+// Generate invite code for a family
+app.post('/families/:id/invite', async (c) => {
+  const familyId = c.req.param('id');
+  const userId = c.req.header('X-User-Id');
+
+  if (!userId) {
+    return c.json({ error: 'Missing X-User-Id header' }, 401);
+  }
+
+  try {
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Only parent_a can generate invite code
+    if (family.parent_a_id !== userId) {
+      return c.json({ error: 'Only the family creator can generate invite codes' }, 403);
+    }
+
+    // Check if family already has parent_b
+    if (family.parent_b_id) {
+      return c.json({ error: 'Family already has two parents' }, 400);
+    }
+
+    // Generate unique invite code
+    let inviteCode = generateInviteCode();
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      const existing = await c.env.DB.prepare(
+        'SELECT id FROM families WHERE invite_code = ?'
+      ).bind(inviteCode).first();
+
+      if (!existing) break;
+      inviteCode = generateInviteCode();
+      attempts++;
+    }
+
+    if (attempts >= maxAttempts) {
+      return c.json({ error: 'Failed to generate unique invite code' }, 500);
+    }
+
+    const expiresAt = getInviteExpiry();
+
+    await c.env.DB.prepare(
+      `UPDATE families SET invite_code = ?, invite_expires_at = ?, updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(inviteCode, expiresAt, familyId).run();
+
+    return c.json({
+      success: true,
+      inviteCode,
+      expiresAt,
+    });
+  } catch (error) {
+    console.error('Generate invite error:', error);
+    return c.json({ error: 'Failed to generate invite code', details: String(error) }, 500);
   }
 });
 
@@ -2004,6 +2070,8 @@ app.get('/expenses/:id', async (c) => {
 // FIXED EXPENSES ENDPOINTS
 // ============================================
 
+type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
+
 interface FixedExpense {
   id: string;
   family_id: string;
@@ -2014,6 +2082,7 @@ interface FixedExpense {
   child_ids: string | null;
   link_url: string | null;
   memo: string | null;
+  frequency: RecurringFrequency;
   effective_from: string;
   effective_until: string | null;
   created_at: string;
@@ -2025,6 +2094,7 @@ interface CreateFixedExpenseRequest {
   description: string;
   amount: number; // in dollars
   category: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  frequency?: RecurringFrequency; // defaults to 'monthly'
   effectiveFrom: string; // YYYY-MM-DD
   effectiveUntil?: string; // YYYY-MM-DD
   linkUrl?: string;
@@ -2035,6 +2105,7 @@ interface UpdateFixedExpenseRequest {
   description?: string;
   amount?: number; // in dollars
   category?: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  frequency?: RecurringFrequency;
   effectiveUntil?: string | null;
   linkUrl?: string | null;
   memo?: string | null;
@@ -2174,7 +2245,8 @@ app.post('/families/:id/fixed-expenses', async (c) => {
     }
 
     const body = await c.req.json<CreateFixedExpenseRequest>();
-    const { description, amount, category, effectiveFrom, effectiveUntil, linkUrl, memo } = body;
+    const { description, amount, category, frequency, effectiveFrom, effectiveUntil, linkUrl, memo } = body;
+    const validFrequency = frequency || 'monthly';
 
     // Validate required fields
     if (!description || description.length === 0) {
@@ -2202,8 +2274,8 @@ app.post('/families/:id/fixed-expenses', async (c) => {
     await c.env.DB.prepare(
       `INSERT INTO fixed_expenses (
         id, family_id, created_by, description, amount_cents, category,
-        link_url, memo, effective_from, effective_until, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+        frequency, link_url, memo, effective_from, effective_until, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
     ).bind(
       fixedExpenseId,
       familyId,
@@ -2211,6 +2283,7 @@ app.post('/families/:id/fixed-expenses', async (c) => {
       description,
       amountCents,
       category,
+      validFrequency,
       linkUrl || null,
       memo || null,
       effectiveFrom,
@@ -2329,7 +2402,7 @@ app.patch('/families/:id/fixed-expenses/:fixedExpenseId', async (c) => {
     }
 
     const body = await c.req.json<UpdateFixedExpenseRequest>();
-    const { description, amount, category, effectiveUntil, linkUrl, memo } = body;
+    const { description, amount, category, frequency, effectiveUntil, linkUrl, memo } = body;
 
     // Build update query
     const updates: string[] = [];
@@ -2357,6 +2430,14 @@ app.patch('/families/:id/fixed-expenses/:fixedExpenseId', async (c) => {
       }
       updates.push('category = ?');
       params.push(category);
+    }
+
+    if (frequency !== undefined) {
+      if (!['weekly', 'biweekly', 'monthly', 'quarterly', 'annually'].includes(frequency)) {
+        return c.json({ error: 'Frequency must be: weekly, biweekly, monthly, quarterly, or annually' }, 400);
+      }
+      updates.push('frequency = ?');
+      params.push(frequency);
     }
 
     if (effectiveUntil !== undefined) {

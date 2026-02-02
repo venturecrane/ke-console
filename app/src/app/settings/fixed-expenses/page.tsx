@@ -13,6 +13,7 @@ import {
   type FixedExpense,
   type ExpenseCategory,
   type FixedExpenseTier,
+  type RecurringFrequency,
 } from "@/lib/api";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
@@ -21,6 +22,14 @@ const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "activities", label: "Activities" },
   { value: "childcare", label: "Childcare" },
   { value: "other", label: "Other" },
+];
+
+const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
+  { value: "weekly", label: "Weekly" },
+  { value: "biweekly", label: "Bi-weekly" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "annually", label: "Annually" },
 ];
 
 // Format cents to dollars display
@@ -35,6 +44,18 @@ function formatCurrency(cents: number): string {
 // Format category for display
 function formatCategory(category: string): string {
   return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+// Format frequency for display
+function formatFrequency(frequency: string): string {
+  const labels: Record<string, string> = {
+    weekly: "week",
+    biweekly: "2 weeks",
+    monthly: "month",
+    quarterly: "quarter",
+    annually: "year",
+  };
+  return labels[frequency] || frequency;
 }
 
 // Get today's date in YYYY-MM-DD format
@@ -56,6 +77,7 @@ export default function FixedExpensesSettingsPage() {
   const [addDescription, setAddDescription] = useState("");
   const [addAmount, setAddAmount] = useState("");
   const [addCategory, setAddCategory] = useState<ExpenseCategory>("other");
+  const [addFrequency, setAddFrequency] = useState<RecurringFrequency>("monthly");
   const [addEffectiveFrom, setAddEffectiveFrom] = useState(getTodayDate());
   const [addEffectiveUntil, setAddEffectiveUntil] = useState("");
   const [addLinkUrl, setAddLinkUrl] = useState("");
@@ -68,6 +90,7 @@ export default function FixedExpensesSettingsPage() {
   const [editDescription, setEditDescription] = useState("");
   const [editAmount, setEditAmount] = useState("");
   const [editCategory, setEditCategory] = useState<ExpenseCategory>("other");
+  const [editFrequency, setEditFrequency] = useState<RecurringFrequency>("monthly");
   const [editEffectiveUntil, setEditEffectiveUntil] = useState("");
   const [editLinkUrl, setEditLinkUrl] = useState("");
   const [editMemo, setEditMemo] = useState("");
@@ -140,6 +163,7 @@ export default function FixedExpensesSettingsPage() {
         description: addDescription.trim(),
         amount,
         category: addCategory,
+        frequency: addFrequency,
         effectiveFrom: addEffectiveFrom,
         effectiveUntil: addEffectiveUntil || undefined,
         linkUrl: addLinkUrl || undefined,
@@ -156,6 +180,7 @@ export default function FixedExpensesSettingsPage() {
       setAddDescription("");
       setAddAmount("");
       setAddCategory("other");
+      setAddFrequency("monthly");
       setAddEffectiveFrom(getTodayDate());
       setAddEffectiveUntil("");
       setAddLinkUrl("");
@@ -173,6 +198,7 @@ export default function FixedExpensesSettingsPage() {
     setEditDescription(expense.description);
     setEditAmount((expense.amount_cents / 100).toString());
     setEditCategory(expense.category as ExpenseCategory);
+    setEditFrequency(expense.frequency || "monthly");
     setEditEffectiveUntil(expense.effective_until || "");
     setEditLinkUrl(expense.link_url || "");
     setEditMemo(expense.memo || "");
@@ -198,6 +224,7 @@ export default function FixedExpensesSettingsPage() {
         description: editDescription.trim(),
         amount,
         category: editCategory,
+        frequency: editFrequency,
         effectiveUntil: editEffectiveUntil || null,
         linkUrl: editLinkUrl || null,
         memo: editMemo || null,
@@ -465,6 +492,23 @@ export default function FixedExpensesSettingsPage() {
 
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Frequency *
+                  </label>
+                  <select
+                    value={addFrequency}
+                    onChange={(e) => setAddFrequency(e.target.value as RecurringFrequency)}
+                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  >
+                    {FREQUENCIES.map((freq) => (
+                      <option key={freq.value} value={freq.value}>
+                        {freq.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     Effective From *
                   </label>
                   <input
@@ -609,7 +653,7 @@ export default function FixedExpensesSettingsPage() {
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
                         <span>
-                          {formatCurrency(expense.amount_cents)}/month
+                          {formatCurrency(expense.amount_cents)}/{formatFrequency(expense.frequency || "monthly")}
                         </span>
                         <span>
                           From: {new Date(expense.effective_from).toLocaleDateString()}
@@ -781,6 +825,23 @@ export default function FixedExpensesSettingsPage() {
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
                       {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Frequency *
+                </label>
+                <select
+                  value={editFrequency}
+                  onChange={(e) => setEditFrequency(e.target.value as RecurringFrequency)}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                >
+                  {FREQUENCIES.map((freq) => (
+                    <option key={freq.value} value={freq.value}>
+                      {freq.label}
                     </option>
                   ))}
                 </select>

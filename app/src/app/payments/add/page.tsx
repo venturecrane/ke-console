@@ -88,10 +88,17 @@ export default function AddPaymentPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 py-8 dark:bg-zinc-900">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Record Payment
-          </h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+              Record Payment
+            </h1>
+          </div>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
             Log a payment you made to your co-parent
           </p>
@@ -176,14 +183,6 @@ export default function AddPaymentPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <Link
-            href="/dashboard"
-            className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
-          >
-            Cancel
-          </Link>
-        </div>
       </div>
     </div>
   );
