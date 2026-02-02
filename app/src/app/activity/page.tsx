@@ -296,11 +296,28 @@ function getEventDescription(
         details: fixed?.description || null,
       };
     }
-    default:
+    case "family.ratio_updated": {
+      const after = event.after_snapshot as { parent_a_ratio?: number } | null;
+      const ratio = after?.parent_a_ratio;
       return {
-        action: `${userName} performed an action`,
-        details: null,
+        action: `${userName} updated the split ratio`,
+        details: ratio !== undefined ? `${Math.round(ratio * 100)}% / ${Math.round((1 - ratio) * 100)}%` : null,
       };
+    }
+    default: {
+      // Handle unknown event types gracefully (for forward compatibility)
+      const after = event.after_snapshot as { description?: string; name?: string; amount_cents?: number } | null;
+      const before = event.before_snapshot as { description?: string; name?: string } | null;
+      const eventTypeStr = event.event_type as string;
+      const eventAction = eventTypeStr.includes('.') ? eventTypeStr.split('.')[1] : 'updated';
+      const targetName = event.target_type.replace(/_/g, ' ');
+      const itemName = after?.description || after?.name || before?.description || before?.name;
+
+      return {
+        action: `${userName} ${eventAction} a ${targetName}`,
+        details: itemName || null,
+      };
+    }
   }
 }
 

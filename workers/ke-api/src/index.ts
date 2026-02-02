@@ -418,7 +418,7 @@ app.get('/families/:id', async (c) => {
   }
 });
 
-// Update family settings (e.g., parent_a_ratio)
+// Update family settings (e.g., split ratio)
 app.patch('/families/:id', async (c) => {
   const familyId = c.req.param('id');
   const userId = c.req.header('X-User-Id');
@@ -428,8 +428,6 @@ app.patch('/families/:id', async (c) => {
   }
 
   try {
-    const body = await c.req.json<{ parent_a_ratio?: number }>();
-
     const family = await c.env.DB.prepare(
       'SELECT * FROM families WHERE id = ?'
     ).bind(familyId).first<Family>();
@@ -438,29 +436,32 @@ app.patch('/families/:id', async (c) => {
       return c.json({ error: 'Family not found' }, 404);
     }
 
-    // Check if user belongs to this family
+    // Only allow members of the family to update
     if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
       return c.json({ error: 'Not authorized to update this family' }, 403);
     }
 
-    // Validate parent_a_ratio if provided
-    if (body.parent_a_ratio !== undefined) {
-      if (typeof body.parent_a_ratio !== 'number' || body.parent_a_ratio < 0 || body.parent_a_ratio > 1) {
-        return c.json({ error: 'parent_a_ratio must be a number between 0 and 1' }, 400);
-      }
-    }
+    const body = await c.req.json<{ parentARatio?: number; name?: string }>();
+    const { parentARatio, name } = body;
 
-    // Build update query
     const updates: string[] = [];
     const values: (string | number)[] = [];
 
-    if (body.parent_a_ratio !== undefined) {
+    if (parentARatio !== undefined) {
+      if (parentARatio < 0 || parentARatio > 1) {
+        return c.json({ error: 'parentARatio must be between 0 and 1' }, 400);
+      }
       updates.push('parent_a_ratio = ?');
-      values.push(body.parent_a_ratio);
+      values.push(parentARatio);
+    }
+
+    if (name !== undefined) {
+      updates.push('name = ?');
+      values.push(name || null as unknown as string);
     }
 
     if (updates.length === 0) {
-      return c.json({ error: 'No valid fields to update' }, 400);
+      return c.json({ error: 'No updates provided' }, 400);
     }
 
     updates.push("updated_at = datetime('now')");
@@ -470,14 +471,25 @@ app.patch('/families/:id', async (c) => {
       `UPDATE families SET ${updates.join(', ')} WHERE id = ?`
     ).bind(...values).run();
 
+    // Log activity for ratio change
+    if (parentARatio !== undefined) {
+      await createActivityEvent(
+        c.env.DB,
+        familyId,
+        userId,
+        'family.ratio_updated',
+        'family',
+        familyId,
+        { parent_a_ratio: family.parent_a_ratio },
+        { parent_a_ratio: parentARatio }
+      );
+    }
+
     const updatedFamily = await c.env.DB.prepare(
       'SELECT * FROM families WHERE id = ?'
     ).bind(familyId).first<Family>();
 
-    return c.json({
-      success: true,
-      family: updatedFamily,
-    });
+    return c.json({ success: true, family: updatedFamily });
   } catch (error) {
     console.error('Update family error:', error);
     return c.json({ error: 'Failed to update family', details: String(error) }, 500);
@@ -2192,7 +2204,7 @@ async function generateMonthlyExpenses(db: D1Database, familyId: string): Promis
       fixed.memo
     ).run();
 
-    // Log activity
+    // Log activity - include expense details for better activity feed display
     await createActivityEvent(
       db,
       fixed.family_id,
@@ -2201,7 +2213,12 @@ async function generateMonthlyExpenses(db: D1Database, familyId: string): Promis
       'expense',
       expenseId,
       null,
-      { fixed_expense_id: fixed.id }
+      {
+        fixed_expense_id: fixed.id,
+        description: fixed.description,
+        amount_cents: fixed.amount_cents,
+        category: fixed.category,
+      }
     );
 
     generated++;

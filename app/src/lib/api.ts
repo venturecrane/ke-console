@@ -170,7 +170,8 @@ export async function getFamily(
 }
 
 export interface UpdateFamilyRequest {
-  parent_a_ratio?: number;
+  parentARatio?: number;
+  name?: string;
 }
 
 export async function updateFamily(
@@ -492,7 +493,8 @@ export type ActivityEventType =
   | "child.deleted"
   | "fixed_expense.created"
   | "fixed_expense.updated"
-  | "fixed_expense.ended";
+  | "fixed_expense.ended"
+  | "family.ratio_updated";
 
 export interface ActivityEvent {
   id: string;

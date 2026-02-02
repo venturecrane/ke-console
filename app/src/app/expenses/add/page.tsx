@@ -120,6 +120,7 @@ export default function AddExpensePage() {
         memo: memo.trim() || undefined,
         childIds: selectedChildIds.length > 0 ? selectedChildIds : undefined,
       });
+      router.refresh();
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add expense");

@@ -65,6 +65,7 @@ export default function AddPaymentPage() {
         paymentDate,
         notes: notes.trim() || undefined,
       });
+      router.refresh();
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to record payment");

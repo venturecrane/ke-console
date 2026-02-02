@@ -247,7 +247,7 @@ export default function DashboardPage() {
     setIsSavingSplitRatio(true);
     try {
       const result = await updateFamily(user.id, meData.family.id, {
-        parent_a_ratio: splitRatioA / 100,
+        parentARatio: splitRatioA / 100,
       });
       // Update local state with new family data
       setMeData({

@@ -15,7 +15,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Kid Expenses",
-  description: "Co-parent expense tracking with dispute resolution",
+  description: "Co-parent expense tracking made simple. Split expenses, track payments, and stay balanced.",
+  openGraph: {
+    title: "Kid Expenses",
+    description: "Co-parent expense tracking made simple. Split expenses, track payments, and stay balanced.",
+    images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kid Expenses",
+    description: "Co-parent expense tracking made simple. Split expenses, track payments, and stay balanced.",
+    images: ["/og-image.svg"],
+  },
 };
 
 export const viewport = {

@@ -1,0 +1,34 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#18181b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#27272a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Logo Icon - Dollar sign in circle -->
+  <circle cx="600" cy="240" r="80" fill="none" stroke="#22c55e" stroke-width="6"/>
+  <text x="600" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="90" font-weight="600" fill="#22c55e" text-anchor="middle">$</text>
+
+  <!-- App Name -->
+  <text x="600" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#fafafa" text-anchor="middle">Kid Expenses</text>
+
+  <!-- Tagline -->
+  <text x="600" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a1a1aa" text-anchor="middle">Co-parent expense tracking made simple</text>
+
+  <!-- Decorative elements -->
+  <line x1="400" y1="500" x2="800" y2="500" stroke="#3f3f46" stroke-width="2"/>
+
+  <!-- Feature pills -->
+  <rect x="310" y="530" width="160" height="40" rx="20" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="390" y="557" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Split Expenses</text>
+
+  <rect x="520" y="530" width="160" height="40" rx="20" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="600" y="557" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Track Payments</text>
+
+  <rect x="730" y="530" width="160" height="40" rx="20" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+  <text x="810" y="557" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Stay Balanced</text>
+</svg>
