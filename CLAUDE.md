@@ -77,6 +77,44 @@ priceInCents = 150050
 
 All `amount_cents` columns are INTEGER. UI converts dollars ↔ cents.
 
+## Testing Requirements
+
+### Unit Tests
+```bash
+cd workers/ke-api
+npm test           # Run all tests
+npm run test:watch # Watch mode
+```
+
+**Test files location:** `workers/ke-api/src/__tests__/`
+
+### test:required Label Enforcement
+
+Issues involving calculations, money math, or state transitions are automatically labeled `test:required` by crane-classifier. When working on these issues:
+
+1. **PR must include test file changes** - CI will block merge otherwise
+2. **Escape hatch**: Add `test:exempt` label with comment explaining why
+
+### What Requires Tests
+
+| Change Type | Tests Required? |
+|-------------|----------------|
+| Balance calculations | ✅ Yes |
+| Dollar/cents conversion | ✅ Yes |
+| Share splitting logic | ✅ Yes |
+| Status transitions | ✅ Yes |
+| UI styling/layout | ❌ No |
+| Documentation | ❌ No |
+
+### Core Calculation Module
+
+Money math logic lives in `workers/ke-api/src/calculations.ts`:
+- `dollarsToCents()` - Currency conversion
+- `calculateShares()` - Split expense between parents
+- `calculateBalanceFromData()` - Running balance calculation
+
+These functions are pure and fully tested. When modifying, update tests first (TDD).
+
 ## Security Requirements
 
 - Never commit secrets to the repository

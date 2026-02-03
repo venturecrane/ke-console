@@ -1,5 +1,11 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import {
+  dollarsToCents,
+  calculateBalanceFromData,
+  type Expense as CalcExpense,
+  type Payment as CalcPayment,
+} from './calculations';
 
 export interface Env {
   DB: D1Database;
@@ -113,10 +119,7 @@ function getInviteExpiry(): string {
   return date.toISOString();
 }
 
-// Convert dollars to cents (multiply by 100 and round)
-function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
-}
+// dollarsToCents imported from ./calculations
 
 // Get today's date in ISO format (YYYY-MM-DD)
 function getTodayDate(): string {
@@ -1108,70 +1111,7 @@ interface BalanceBreakdown {
   questioned_count: number;
 }
 
-// Helper function to calculate balance from expenses and payments
-function calculateBalanceFromData(
-  expenses: Expense[],
-  payments: Payment[],
-  parentAId: string,
-  parentBId: string | null,
-  parentARatio: number
-): {
-  balance: number;
-  totalExpensesCents: number;
-  aShareCents: number;
-  bShareCents: number;
-  aPaidCents: number;
-  bPaidCents: number;
-  paymentsAToBCents: number;
-  paymentsBToACents: number;
-} {
-  let balance = 0;
-  let totalExpensesCents = 0;
-  let aShareCents = 0;
-  let bShareCents = 0;
-  let aPaidCents = 0;
-  let bPaidCents = 0;
-
-  for (const expense of expenses) {
-    totalExpensesCents += expense.amount_cents;
-    const aShare = Math.floor(expense.amount_cents * parentARatio);
-    const bShare = expense.amount_cents - aShare;
-    aShareCents += aShare;
-    bShareCents += bShare;
-
-    if (expense.paid_by === parentAId) {
-      aPaidCents += expense.amount_cents;
-      balance += (aShare - expense.amount_cents);
-    } else if (expense.paid_by === parentBId) {
-      bPaidCents += expense.amount_cents;
-      balance += aShare;
-    }
-  }
-
-  let paymentsAToBCents = 0;
-  let paymentsBToACents = 0;
-
-  for (const payment of payments) {
-    if (payment.paid_by === parentAId) {
-      paymentsAToBCents += payment.amount_cents;
-      balance -= payment.amount_cents;
-    } else if (payment.paid_by === parentBId) {
-      paymentsBToACents += payment.amount_cents;
-      balance += payment.amount_cents;
-    }
-  }
-
-  return {
-    balance,
-    totalExpensesCents,
-    aShareCents,
-    bShareCents,
-    aPaidCents,
-    bPaidCents,
-    paymentsAToBCents,
-    paymentsBToACents,
-  };
-}
+// calculateBalanceFromData imported from ./calculations
 
 // Get balance for family
 app.get('/families/:id/balance', async (c) => {
