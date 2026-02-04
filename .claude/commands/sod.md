@@ -1,37 +1,112 @@
 # /sod - Start of Day
 
-This script will prepare your session by loading context, caching documentation, and displaying current work priorities from GitHub.
+This command prepares your session using MCP tools to validate context, show work priorities, and ensure you're ready to code.
 
 ## Execution
 
-First, ensure the SOD script exists locally. If not, bootstrap it from crane-context:
+### Step 1: Cache Documentation (Background)
+
+Run silently to cache docs for the session:
 
 ```bash
-mkdir -p scripts
-if [ ! -f scripts/sod-universal.sh ]; then
-  echo "Bootstrapping sod-universal.sh from crane-context..."
-  curl -sS "https://crane-context.automation-ab6.workers.dev/sod" \
-    -H "X-Relay-Key: $CRANE_CONTEXT_KEY" \
-    -H "Content-Type: application/json" \
-    -X POST \
-    -d '{"agent":"bootstrap","venture":"kidexpenses","repo":"kidexpenses/ke-console","include_docs":false}' \
-    | jq -r '.scripts.scripts[] | select(.script_name == "sod-universal.sh") | .content' > scripts/sod-universal.sh
-  chmod +x scripts/sod-universal.sh
-fi
+bash scripts/cache-docs.sh 2>/dev/null || true
 ```
 
-Then run the SOD script:
+### Step 2: Run Preflight Checks
 
-```bash
-bash scripts/sod-universal.sh
+Call the `crane_preflight` MCP tool to validate environment:
+
+- CRANE_CONTEXT_KEY is set
+- gh CLI is authenticated
+- Git repository detected
+- API connectivity
+
+**If any critical check fails**, show the error and stop. The user needs to fix their environment.
+
+### Step 3: Start Session
+
+Call the `crane_sod` MCP tool to initialize the session.
+
+The tool returns:
+- Session context (venture, repo, branch)
+- Last handoff summary
+- P0 issues (if any)
+- Weekly plan status
+- Active sessions (conflict detection)
+
+### Step 4: Display Context Confirmation
+
+Present a clear context confirmation box:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  VENTURE:  {venture_name} ({venture_code})                  │
+│  REPO:     {repo}                                           │
+│  BRANCH:   {branch}                                         │
+│  SESSION:  {session_id}                                     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## After Running
+State: "You're in the correct repository and on the {branch} branch."
 
-1. **CONFIRM CONTEXT**: State the venture and repo shown in the Context Confirmation box. Verify with user this is correct.
-2. **STOP** and wait for user direction. Do NOT automatically start working on issues.
-3. Present a brief summary and ask "What would you like to focus on?"
+### Step 5: Handle P0 Issues
+
+If `p0_issues` is not empty:
+
+1. Display prominently with warning icon
+2. Say: "**There are P0 issues that need immediate attention.**"
+3. List each issue
+
+### Step 6: Check Weekly Plan
+
+Based on `weekly_plan.status`:
+
+- **valid**: Note the priority venture and proceed
+- **stale**: Warn user: "Weekly plan is {age_days} days old. Consider updating."
+- **missing**: Ask user:
+  - "What venture is priority this week? (vc/dfg/sc/ke)"
+  - "Any specific issues to target? (optional)"
+  - "Any capacity constraints? (optional)"
+
+  Then create `docs/planning/WEEKLY_PLAN.md`:
+  ```markdown
+  # Weekly Plan - Week of {DATE}
+
+  ## Priority Venture
+  {venture code}
+
+  ## Target Issues
+  {list or "None specified"}
+
+  ## Capacity Notes
+  {notes or "Normal capacity"}
+
+  ## Created
+  {ISO timestamp}
+  ```
+
+### Step 7: Warn About Active Sessions
+
+If `active_sessions` is not empty:
+
+Display: "**Warning:** Other agents are active on this venture."
+List each session.
+
+### Step 8: STOP and Wait
+
+**CRITICAL**: Do NOT automatically start working.
+
+Present a brief summary and ask: **"What would you like to focus on?"**
+
+If user wants to see the full work queue, call `crane_status` MCP tool.
 
 ## Wrong Repo Prevention
 
-If you create any GitHub issues during this session, they MUST go to the repo shown in Context Confirmation. If you find yourself targeting a different repo, STOP and verify with the user before proceeding.
+All GitHub issues created this session MUST target the repo shown in context confirmation. If you find yourself targeting a different repo, STOP and verify with the user.
+
+## Troubleshooting
+
+If MCP tools aren't available:
+1. Check `claude mcp list` shows crane connected
+2. Ensure started with: `infisical run --path /vc -- claude`
+3. Try: `cd ~/dev/crane-mcp && npm run build && npm link`
