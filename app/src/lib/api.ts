@@ -535,6 +535,7 @@ export interface ActivityFilters {
   endDate?: string;
   limit?: number;
   offset?: number;
+  expenseId?: string;
 }
 
 export async function getActivity(
@@ -549,6 +550,7 @@ export async function getActivity(
   if (filters?.endDate) params.set("endDate", filters.endDate);
   if (filters?.limit) params.set("limit", filters.limit.toString());
   if (filters?.offset) params.set("offset", filters.offset.toString());
+  if (filters?.expenseId) params.set("expense_id", filters.expenseId);
 
   const queryString = params.toString();
   const path = `/families/${familyId}/activity${queryString ? `?${queryString}` : ""}`;

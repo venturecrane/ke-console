@@ -573,6 +573,7 @@ export default function ExpenseListPage() {
             {expenses.map((expense) => (
               <Card key={expense.id}>
                 <CardBody>
+                  <Link href={`/expenses/${expense.id}`} className="block">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -621,6 +622,7 @@ export default function ExpenseListPage() {
                       </p>
                     </div>
                   </div>
+                  </Link>
 
                   {/* Dispute Info for questioned expenses */}
                   {expense.status === "questioned" && expense.question_reason && (
