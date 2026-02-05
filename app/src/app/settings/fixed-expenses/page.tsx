@@ -283,20 +283,20 @@ export default function FixedExpensesSettingsPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
 
   if (!meData?.family) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-        <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 <svg
                   className="h-5 w-5"
@@ -312,7 +312,7 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                 Recurring Expenses
               </h1>
             </div>
@@ -320,13 +320,13 @@ export default function FixedExpensesSettingsPage() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-zinc-600 dark:text-zinc-400">
+          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-slate-600 dark:text-slate-400">
               You need to create or join a family first.
             </p>
             <Link
               href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
             >
               Go to Dashboard
             </Link>
@@ -337,13 +337,13 @@ export default function FixedExpensesSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               <svg
                 className="h-5 w-5"
@@ -359,7 +359,7 @@ export default function FixedExpensesSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Recurring Expenses
             </h1>
           </div>
@@ -376,12 +376,12 @@ export default function FixedExpensesSettingsPage() {
         )}
 
         {/* Tier Info & Add Button */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <div>
-            <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
+            <h2 className="font-medium text-slate-900 dark:text-slate-100">
               Recurring Monthly Templates
             </h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {tier && (
                 tier.limit === -1
                   ? `${tier.current} active recurring expenses (Pro: Unlimited)`
@@ -392,7 +392,7 @@ export default function FixedExpensesSettingsPage() {
           <button
             onClick={() => setShowAddForm(true)}
             disabled={tier !== null && !tier.canAdd}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add Recurring Expense
           </button>
@@ -429,8 +429,8 @@ export default function FixedExpensesSettingsPage() {
 
         {/* Add Form */}
         {showAddForm && (
-          <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-            <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+          <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
               Add Recurring Expense
             </h2>
 
@@ -443,7 +443,7 @@ export default function FixedExpensesSettingsPage() {
             <form onSubmit={handleAddFixedExpense} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Description *
                   </label>
                   <input
@@ -453,12 +453,12 @@ export default function FixedExpensesSettingsPage() {
                     placeholder="e.g., Monthly tuition"
                     maxLength={200}
                     required
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Amount ($) *
                   </label>
                   <input
@@ -469,18 +469,18 @@ export default function FixedExpensesSettingsPage() {
                     onChange={(e) => setAddAmount(e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Category *
                   </label>
                   <select
                     value={addCategory}
                     onChange={(e) => setAddCategory(e.target.value as ExpenseCategory)}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat.value} value={cat.value}>
@@ -491,13 +491,13 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Frequency *
                   </label>
                   <select
                     value={addFrequency}
                     onChange={(e) => setAddFrequency(e.target.value as RecurringFrequency)}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   >
                     {FREQUENCIES.map((freq) => (
                       <option key={freq.value} value={freq.value}>
@@ -508,7 +508,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Effective From *
                   </label>
                   <input
@@ -516,24 +516,24 @@ export default function FixedExpensesSettingsPage() {
                     value={addEffectiveFrom}
                     onChange={(e) => setAddEffectiveFrom(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Effective Until (optional)
                   </label>
                   <input
                     type="date"
                     value={addEffectiveUntil}
                     onChange={(e) => setAddEffectiveUntil(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Link URL (optional)
                   </label>
                   <input
@@ -541,13 +541,13 @@ export default function FixedExpensesSettingsPage() {
                     value={addLinkUrl}
                     onChange={(e) => setAddLinkUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Memo (optional)
                 </label>
                 <textarea
@@ -556,7 +556,7 @@ export default function FixedExpensesSettingsPage() {
                   placeholder="Additional notes..."
                   rows={2}
                   maxLength={500}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
                 />
               </div>
 
@@ -565,14 +565,14 @@ export default function FixedExpensesSettingsPage() {
                   type="button"
                   onClick={() => setShowAddForm(false)}
                   disabled={isAdding}
-                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isAdding || !addDescription.trim() || !addAmount}
-                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isAdding ? "Adding..." : "Add Recurring Expense"}
                 </button>
@@ -588,33 +588,33 @@ export default function FixedExpensesSettingsPage() {
             id="includeEnded"
             checked={includeEnded}
             onChange={(e) => setIncludeEnded(e.target.checked)}
-            className="h-4 w-4 rounded border-zinc-300 text-zinc-900"
+            className="h-4 w-4 rounded border-slate-300 text-slate-900"
           />
-          <label htmlFor="includeEnded" className="text-sm text-zinc-600 dark:text-zinc-400">
+          <label htmlFor="includeEnded" className="text-sm text-slate-600 dark:text-slate-400">
             Show ended recurring expenses
           </label>
         </div>
 
         {/* Recurring Expenses List */}
-        <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-            <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">
               Recurring Expenses ({fixedExpenses.length})
             </h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               These templates auto-generate expenses on the 1st of each month.
             </p>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-zinc-500">Loading recurring expenses...</p>
+              <p className="text-slate-500">Loading recurring expenses...</p>
             </div>
           ) : fixedExpenses.length === 0 ? (
             <div className="py-12 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
                 <svg
-                  className="h-6 w-6 text-zinc-400"
+                  className="h-6 w-6 text-slate-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -627,22 +627,22 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </svg>
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400">No recurring expenses yet</p>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-slate-600 dark:text-slate-400">No recurring expenses yet</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Add recurring monthly expenses like rent, tuition, or subscriptions.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
               {fixedExpenses.map((expense) => (
                 <li key={expense.id} className="px-6 py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                        <p className="font-medium text-slate-900 dark:text-slate-100">
                           {expense.description}
                         </p>
-                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                           {formatCategory(expense.category)}
                         </span>
                         {isExpenseEnded(expense) && (
@@ -651,8 +651,8 @@ export default function FixedExpensesSettingsPage() {
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        <span>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                        <span className="font-mono">
                           {formatCurrency(expense.amount_cents)}/{formatFrequency(expense.frequency || "monthly")}
                         </span>
                         <span>
@@ -665,7 +665,7 @@ export default function FixedExpensesSettingsPage() {
                         )}
                       </div>
                       {expense.memo && (
-                        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
                           {expense.memo}
                         </p>
                       )}
@@ -675,7 +675,7 @@ export default function FixedExpensesSettingsPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => openEditModal(expense)}
-                          className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                           title="Edit"
                         >
                           <svg
@@ -695,7 +695,7 @@ export default function FixedExpensesSettingsPage() {
 
                         {showEndConfirm === expense.id ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-500">End?</span>
+                            <span className="text-xs text-slate-500">End?</span>
                             <button
                               onClick={() => handleEndFixedExpense(expense.id)}
                               disabled={endingId === expense.id}
@@ -706,7 +706,7 @@ export default function FixedExpensesSettingsPage() {
                             <button
                               onClick={() => setShowEndConfirm(null)}
                               disabled={endingId === expense.id}
-                              className="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                              className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                             >
                               No
                             </button>
@@ -714,7 +714,7 @@ export default function FixedExpensesSettingsPage() {
                         ) : (
                           <button
                             onClick={() => setShowEndConfirm(expense.id)}
-                            className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
+                            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
                             title="End recurring expense"
                           >
                             <svg
@@ -772,8 +772,8 @@ export default function FixedExpensesSettingsPage() {
       {/* Edit Modal */}
       {editingExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
-            <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
+            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
               Edit Recurring Expense
             </h3>
 
@@ -785,7 +785,7 @@ export default function FixedExpensesSettingsPage() {
 
             <form onSubmit={handleEditFixedExpense} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Description *
                 </label>
                 <input
@@ -794,12 +794,12 @@ export default function FixedExpensesSettingsPage() {
                   onChange={(e) => setEditDescription(e.target.value)}
                   maxLength={200}
                   required
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Amount ($) *
                 </label>
                 <input
@@ -809,18 +809,18 @@ export default function FixedExpensesSettingsPage() {
                   value={editAmount}
                   onChange={(e) => setEditAmount(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Category *
                 </label>
                 <select
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value as ExpenseCategory)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
@@ -831,13 +831,13 @@ export default function FixedExpensesSettingsPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Frequency *
                 </label>
                 <select
                   value={editFrequency}
                   onChange={(e) => setEditFrequency(e.target.value as RecurringFrequency)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {FREQUENCIES.map((freq) => (
                     <option key={freq.value} value={freq.value}>
@@ -848,19 +848,19 @@ export default function FixedExpensesSettingsPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Effective Until (optional)
                 </label>
                 <input
                   type="date"
                   value={editEffectiveUntil}
                   onChange={(e) => setEditEffectiveUntil(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Link URL (optional)
                 </label>
                 <input
@@ -868,12 +868,12 @@ export default function FixedExpensesSettingsPage() {
                   value={editLinkUrl}
                   onChange={(e) => setEditLinkUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Memo (optional)
                 </label>
                 <textarea
@@ -881,7 +881,7 @@ export default function FixedExpensesSettingsPage() {
                   onChange={(e) => setEditMemo(e.target.value)}
                   rows={2}
                   maxLength={500}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
 
@@ -890,14 +890,14 @@ export default function FixedExpensesSettingsPage() {
                   type="button"
                   onClick={() => setEditingExpense(null)}
                   disabled={isEditing}
-                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isEditing || !editDescription.trim() || !editAmount}
-                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isEditing ? "Saving..." : "Save Changes"}
                 </button>

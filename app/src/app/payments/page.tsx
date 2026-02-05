@@ -93,19 +93,19 @@ export default function PaymentListPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               <svg
                 className="h-5 w-5"
@@ -121,14 +121,14 @@ export default function PaymentListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Payments
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <Link
               href="/payments/add"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
             >
               Record Payment
             </Link>
@@ -147,7 +147,7 @@ export default function PaymentListPage() {
         </div>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
           {isLoading ? (
             "Loading..."
           ) : (
@@ -160,19 +160,19 @@ export default function PaymentListPage() {
         {/* Payment List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-zinc-500">Loading payments...</p>
+            <p className="text-slate-500">Loading payments...</p>
           </div>
         ) : payments.length === 0 ? (
-          <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
               No payments recorded
             </p>
-            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+            <p className="mt-2 text-slate-500 dark:text-slate-400">
               Record your first payment when you settle up with your co-parent
             </p>
             <Link
               href="/payments/add"
-              className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="mt-4 inline-block rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
             >
               Record First Payment
             </Link>
@@ -182,7 +182,7 @@ export default function PaymentListPage() {
             {payments.map((payment) => (
               <div
                 key={payment.id}
-                className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -203,22 +203,22 @@ export default function PaymentListPage() {
                         </svg>
                       </span>
                       <div>
-                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                        <p className="font-medium text-slate-900 dark:text-slate-100">
                           {payment.paid_by === user?.id ? "You paid" : "Partner paid"}
                         </p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                        <p className="text-sm font-mono text-slate-500 dark:text-slate-400">
                           {new Date(payment.payment_date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     {payment.notes && (
-                      <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 pl-10">
+                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 pl-10">
                         {payment.notes}
                       </p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                    <p className="text-lg font-semibold font-mono text-green-600 dark:text-green-400">
                       {formatCurrency(payment.amount_cents)}
                     </p>
                   </div>
@@ -234,7 +234,7 @@ export default function PaymentListPage() {
             <button
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="rounded-lg border border-zinc-300 px-6 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {isLoadingMore ? "Loading..." : "Load More"}
             </button>

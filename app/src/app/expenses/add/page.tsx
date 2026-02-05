@@ -132,7 +132,7 @@ export default function AddExpensePage() {
   if (!isLoaded || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
@@ -142,33 +142,33 @@ export default function AddExpensePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 py-8 dark:bg-zinc-900">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-8 dark:bg-slate-900">
       <div className="w-full max-w-md">
         <div className="mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300">
+            <Link href="/dashboard" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
               Add Expense
             </h1>
           </div>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             Log a kid-related expense
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+          className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
         >
           {/* Description */}
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Description <span className="text-red-500">*</span>
             </label>
@@ -180,9 +180,9 @@ export default function AddExpensePage() {
               placeholder="e.g., School supplies"
               maxLength={200}
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
             />
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               {description.length}/200 characters
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function AddExpensePage() {
           <div className="mb-4">
             <label
               htmlFor="amount"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Amount ($) <span className="text-red-500">*</span>
             </label>
@@ -203,9 +203,9 @@ export default function AddExpensePage() {
               placeholder="0.00"
               step="0.01"
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
             />
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Use negative amount for refunds/credits
             </p>
           </div>
@@ -214,7 +214,7 @@ export default function AddExpensePage() {
           <div className="mb-4">
             <label
               htmlFor="category"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Category <span className="text-red-500">*</span>
             </label>
@@ -223,7 +223,7 @@ export default function AddExpensePage() {
               value={category}
               onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
@@ -236,19 +236,19 @@ export default function AddExpensePage() {
           {/* Children */}
           {children.length > 0 && (
             <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Kids <span className="text-zinc-400">(optional)</span>
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Kids <span className="text-slate-400">(optional)</span>
               </label>
-              <div className="rounded-lg border border-zinc-300 p-3 dark:border-zinc-700">
+              <div className="rounded-lg border border-slate-300 p-3 dark:border-slate-700">
                 {/* All Children option */}
-                <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-zinc-200 pb-2 dark:border-zinc-700">
+                <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-slate-200 pb-2 dark:border-slate-700">
                   <input
                     type="checkbox"
                     checked={allChildrenSelected}
                     onChange={(e) => handleAllChildrenChange(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-800"
                   />
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">
                     All Kids
                   </span>
                 </label>
@@ -265,16 +265,16 @@ export default function AddExpensePage() {
                         onChange={(e) =>
                           handleChildToggle(child.id, e.target.checked)
                         }
-                        className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                        className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-800"
                       />
-                      <span className="text-zinc-700 dark:text-zinc-300">
+                      <span className="text-slate-700 dark:text-slate-300">
                         {child.name}
                       </span>
                     </label>
                   ))}
                 </div>
               </div>
-              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Select which kids this expense applies to
               </p>
             </div>
@@ -284,7 +284,7 @@ export default function AddExpensePage() {
           <div className="mb-4">
             <label
               htmlFor="expenseDate"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Date <span className="text-red-500">*</span>
             </label>
@@ -294,7 +294,7 @@ export default function AddExpensePage() {
               value={expenseDate}
               onChange={(e) => setExpenseDate(e.target.value)}
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
@@ -302,9 +302,9 @@ export default function AddExpensePage() {
           <div className="mb-4">
             <label
               htmlFor="linkUrl"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
-              Link URL <span className="text-zinc-400">(optional)</span>
+              Link URL <span className="text-slate-400">(optional)</span>
             </label>
             <input
               type="url"
@@ -312,7 +312,7 @@ export default function AddExpensePage() {
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
             />
           </div>
 
@@ -320,9 +320,9 @@ export default function AddExpensePage() {
           <div className="mb-6">
             <label
               htmlFor="memo"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
-              Memo <span className="text-zinc-400">(optional)</span>
+              Memo <span className="text-slate-400">(optional)</span>
             </label>
             <textarea
               id="memo"
@@ -331,9 +331,9 @@ export default function AddExpensePage() {
               placeholder="Additional notes..."
               maxLength={500}
               rows={3}
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
             />
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               {memo.length}/500 characters
             </p>
           </div>
@@ -347,7 +347,7 @@ export default function AddExpensePage() {
           <button
             type="submit"
             disabled={isSubmitting || !description.trim() || !amount}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Adding..." : "Add Expense"}
           </button>
