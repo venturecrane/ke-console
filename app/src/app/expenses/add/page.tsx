@@ -12,6 +12,15 @@ import {
   type ExpenseCategory,
   type Child,
 } from "@/lib/api";
+import {
+  Button,
+  Card,
+  CardBody,
+  Alert,
+  Input,
+  Select,
+  Textarea,
+} from "@/components/ui";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "school", label: "School" },
@@ -132,7 +141,7 @@ export default function AddExpensePage() {
   if (!isLoaded || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
@@ -142,216 +151,175 @@ export default function AddExpensePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-8 dark:bg-slate-900">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-8">
       <div className="w-full max-w-md">
         <div className="mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
+            <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-2xl font-semibold text-ke-primary">
               Add Expense
             </h1>
           </div>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">
+          <p className="mt-2 text-ke-secondary">
             Log a kid-related expense
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
-        >
-          {/* Description */}
-          <div className="mb-4">
-            <label
-              htmlFor="description"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Description <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g., School supplies"
-              maxLength={200}
-              required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-            />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {description.length}/200 characters
-            </p>
-          </div>
+        <Card>
+          <CardBody>
+            <form onSubmit={handleSubmit}>
+              {/* Description */}
+              <div className="mb-4">
+                <Input
+                  label={<>Description <span className="text-ke-negative">*</span></>}
+                  id="description"
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="e.g., School supplies"
+                  maxLength={200}
+                  required
+                  hint={`${description.length}/200 characters`}
+                />
+              </div>
 
-          {/* Amount */}
-          <div className="mb-4">
-            <label
-              htmlFor="amount"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Amount ($) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-            />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Use negative amount for refunds/credits
-            </p>
-          </div>
+              {/* Amount */}
+              <div className="mb-4">
+                <Input
+                  label={<>Amount ($) <span className="text-ke-negative">*</span></>}
+                  id="amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  step="0.01"
+                  required
+                  hint="Use negative amount for refunds/credits"
+                />
+              </div>
 
-          {/* Category */}
-          <div className="mb-4">
-            <label
-              htmlFor="category"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-              required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* Category */}
+              <div className="mb-4">
+                <Select
+                  label={<>Category <span className="text-ke-negative">*</span></>}
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+                  required
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </Select>
+              </div>
 
-          {/* Children */}
-          {children.length > 0 && (
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Kids <span className="text-slate-400">(optional)</span>
-              </label>
-              <div className="rounded-lg border border-slate-300 p-3 dark:border-slate-700">
-                {/* All Children option */}
-                <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-slate-200 pb-2 dark:border-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={allChildrenSelected}
-                    onChange={(e) => handleAllChildrenChange(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-800"
-                  />
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    All Kids
-                  </span>
-                </label>
-                {/* Individual children */}
-                <div className="mt-2 space-y-2">
-                  {children.map((child) => (
-                    <label
-                      key={child.id}
-                      className="flex cursor-pointer items-center gap-2"
-                    >
+              {/* Children */}
+              {children.length > 0 && (
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-ke-primary">
+                    Kids <span className="text-ke-muted">(optional)</span>
+                  </label>
+                  <div className="rounded-lg border border-ke-border p-3">
+                    {/* All Children option */}
+                    <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-ke-divider pb-2">
                       <input
                         type="checkbox"
-                        checked={selectedChildIds.includes(child.id)}
-                        onChange={(e) =>
-                          handleChildToggle(child.id, e.target.checked)
-                        }
-                        className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-800"
+                        checked={allChildrenSelected}
+                        onChange={(e) => handleAllChildrenChange(e.target.checked)}
+                        className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
                       />
-                      <span className="text-slate-700 dark:text-slate-300">
-                        {child.name}
+                      <span className="font-medium text-ke-primary">
+                        All Kids
                       </span>
                     </label>
-                  ))}
+                    {/* Individual children */}
+                    <div className="mt-2 space-y-2">
+                      {children.map((child) => (
+                        <label
+                          key={child.id}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedChildIds.includes(child.id)}
+                            onChange={(e) =>
+                              handleChildToggle(child.id, e.target.checked)
+                            }
+                            className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
+                          />
+                          <span className="text-ke-secondary">
+                            {child.name}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-ke-muted">
+                    Select which kids this expense applies to
+                  </p>
                 </div>
+              )}
+
+              {/* Date */}
+              <div className="mb-4">
+                <Input
+                  label={<>Date <span className="text-ke-negative">*</span></>}
+                  id="expenseDate"
+                  type="date"
+                  value={expenseDate}
+                  onChange={(e) => setExpenseDate(e.target.value)}
+                  required
+                />
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Select which kids this expense applies to
-              </p>
-            </div>
-          )}
 
-          {/* Date */}
-          <div className="mb-4">
-            <label
-              htmlFor="expenseDate"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              id="expenseDate"
-              value={expenseDate}
-              onChange={(e) => setExpenseDate(e.target.value)}
-              required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </div>
+              {/* Link URL (optional) */}
+              <div className="mb-4">
+                <Input
+                  label={<>Link URL <span className="text-ke-muted">(optional)</span></>}
+                  id="linkUrl"
+                  type="url"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
 
-          {/* Link URL (optional) */}
-          <div className="mb-4">
-            <label
-              htmlFor="linkUrl"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Link URL <span className="text-slate-400">(optional)</span>
-            </label>
-            <input
-              type="url"
-              id="linkUrl"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-            />
-          </div>
+              {/* Memo (optional) */}
+              <div className="mb-6">
+                <Textarea
+                  label={<>Memo <span className="text-ke-muted">(optional)</span></>}
+                  id="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="Additional notes..."
+                  maxLength={500}
+                  rows={3}
+                  hint={`${memo.length}/500 characters`}
+                />
+              </div>
 
-          {/* Memo (optional) */}
-          <div className="mb-6">
-            <label
-              htmlFor="memo"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Memo <span className="text-slate-400">(optional)</span>
-            </label>
-            <textarea
-              id="memo"
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="Additional notes..."
-              maxLength={500}
-              rows={3}
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-            />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {memo.length}/500 characters
-            </p>
-          </div>
+              {error && (
+                <Alert variant="error" className="mb-4">
+                  {error}
+                </Alert>
+              )}
 
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting || !description.trim() || !amount}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSubmitting ? "Adding..." : "Add Expense"}
-          </button>
-        </form>
+              <Button
+                type="submit"
+                fullWidth
+                disabled={isSubmitting || !description.trim() || !amount}
+              >
+                {isSubmitting ? "Adding..." : "Add Expense"}
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
 
       </div>
     </div>
