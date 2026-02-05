@@ -1,26 +1,194 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-}
+/* ============================================
+   KID EXPENSES DESIGN TOKENS
+   ============================================
+   All semantic colors are defined here as CSS custom properties.
+   Light mode = :root, Dark mode = .dark or prefers-color-scheme.
+   Mapped to Tailwind via @theme so you can use bg-ke-bg, text-ke-primary, etc.
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+   Rule: No raw Tailwind color classes (bg-indigo-600, text-slate-500) in page code.
+   Use token classes or component primitives instead.
+   ============================================ */
+
+:root {
+  /* Surfaces (3 tiers for depth) */
+  --ke-bg: #f8fafc;           /* slate-50 — page background */
+  --ke-surface: #ffffff;       /* white — card background */
+  --ke-elevated: #f1f5f9;     /* slate-100 — elevated/active surface */
+
+  /* Borders & dividers */
+  --ke-border: #e2e8f0;       /* slate-200 — card borders */
+  --ke-divider: #f1f5f9;      /* slate-100 — subtle dividers */
+
+  /* Text tiers */
+  --ke-text-primary: #0f172a;   /* slate-900 */
+  --ke-text-secondary: #475569; /* slate-600 */
+  --ke-text-muted: #64748b;     /* slate-500 */
+  --ke-text-inverse: #ffffff;   /* white — text on accent bg */
+
+  /* Accent (actions only) */
+  --ke-accent: #4f46e5;       /* indigo-600 */
+  --ke-accent-hover: #4338ca; /* indigo-700 */
+  --ke-accent-soft: #e0e7ff;  /* indigo-100 — subtle accent bg */
+  --ke-accent-soft-text: #4338ca; /* indigo-700 — text on soft accent bg */
+
+  /* Focus */
+  --ke-focus: #6366f1;        /* indigo-500 — focus ring */
+
+  /* Secondary button */
+  --ke-secondary-border: #cbd5e1; /* slate-300 */
+  --ke-secondary-text: #334155;   /* slate-700 */
+  --ke-secondary-hover: #f8fafc;  /* slate-50 */
+
+  /* Status: posted */
+  --ke-status-posted-bg: #d1fae5;    /* emerald-100 */
+  --ke-status-posted-text: #047857;   /* emerald-700 */
+
+  /* Status: questioned */
+  --ke-status-questioned-bg: #fef3c7;  /* amber-100 */
+  --ke-status-questioned-text: #b45309; /* amber-700 */
+
+  /* Status: pending_satisfaction, resolved, resolved_creator_decided */
+  --ke-status-resolved-bg: #e0e7ff;    /* indigo-100 */
+  --ke-status-resolved-text: #4338ca;   /* indigo-700 */
+
+  /* Status: resolved_personal, resolved_deleted */
+  --ke-status-settled-bg: #f1f5f9;     /* slate-100 */
+  --ke-status-settled-text: #64748b;    /* slate-500 */
+
+  /* Status: closed_unresolved */
+  --ke-status-closed-bg: #fee2e2;      /* red-100 */
+  --ke-status-closed-text: #dc2626;     /* red-600 */
+
+  /* Semantic: attention */
+  --ke-attention-border: #fbbf24;  /* amber-400 */
+  --ke-attention-bg: #fffbeb;      /* amber-50 */
+
+  /* Semantic: positive/negative amounts */
+  --ke-positive: #059669;     /* emerald-600 */
+  --ke-negative: #dc2626;     /* red-600 */
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #ededed;
-  }
+:root {
+  /* Surfaces */
+  --ke-bg: #020617;            /* slate-950 — page background */
+  --ke-surface: #0f172a;       /* slate-900 — card background */
+  --ke-elevated: #1e293b;      /* slate-800 — elevated/active surface */
+
+  /* Borders & dividers */
+  --ke-border: #1e293b;        /* slate-800 */
+  --ke-divider: #1e293b;       /* slate-800 */
+
+  /* Text tiers */
+  --ke-text-primary: #f1f5f9;   /* slate-100 */
+  --ke-text-secondary: #94a3b8; /* slate-400 */
+  --ke-text-muted: #64748b;     /* slate-500 */
+  --ke-text-inverse: #ffffff;
+
+  /* Accent */
+  --ke-accent: #6366f1;        /* indigo-500 (brighter for dark) */
+  --ke-accent-hover: #4f46e5;  /* indigo-600 */
+  --ke-accent-soft: rgba(99, 102, 241, 0.15);  /* indigo-500/15 */
+  --ke-accent-soft-text: #a5b4fc; /* indigo-300 */
+
+  /* Focus */
+  --ke-focus: #818cf8;         /* indigo-400 */
+
+  /* Secondary button */
+  --ke-secondary-border: #334155; /* slate-700 */
+  --ke-secondary-text: #cbd5e1;   /* slate-300 */
+  --ke-secondary-hover: #1e293b;  /* slate-800 */
+
+  /* Status: posted */
+  --ke-status-posted-bg: rgba(16, 185, 129, 0.15);  /* emerald-500/15 */
+  --ke-status-posted-text: #34d399;                   /* emerald-400 */
+
+  /* Status: questioned */
+  --ke-status-questioned-bg: rgba(245, 158, 11, 0.15);  /* amber-500/15 */
+  --ke-status-questioned-text: #fbbf24;                   /* amber-400 */
+
+  /* Status: resolved */
+  --ke-status-resolved-bg: rgba(99, 102, 241, 0.15);  /* indigo-500/15 */
+  --ke-status-resolved-text: #a5b4fc;                   /* indigo-300 */
+
+  /* Status: settled */
+  --ke-status-settled-bg: #1e293b;       /* slate-800 */
+  --ke-status-settled-text: #94a3b8;      /* slate-400 */
+
+  /* Status: closed */
+  --ke-status-closed-bg: rgba(239, 68, 68, 0.15);  /* red-500/15 */
+  --ke-status-closed-text: #f87171;                  /* red-400 */
+
+  /* Semantic: attention */
+  --ke-attention-border: #f59e0b;  /* amber-500 */
+  --ke-attention-bg: rgba(245, 158, 11, 0.08);
+
+  /* Semantic: positive/negative */
+  --ke-positive: #34d399;     /* emerald-400 */
+  --ke-negative: #f87171;     /* red-400 */
+}
+}
+
+@theme inline {
+  --color-background: var(--ke-bg);
+  --color-foreground: var(--ke-text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Surfaces */
+  --color-ke-bg: var(--ke-bg);
+  --color-ke-surface: var(--ke-surface);
+  --color-ke-elevated: var(--ke-elevated);
+
+  /* Borders */
+  --color-ke-border: var(--ke-border);
+  --color-ke-divider: var(--ke-divider);
+
+  /* Text */
+  --color-ke-primary: var(--ke-text-primary);
+  --color-ke-secondary: var(--ke-text-secondary);
+  --color-ke-muted: var(--ke-text-muted);
+  --color-ke-inverse: var(--ke-text-inverse);
+
+  /* Accent */
+  --color-ke-accent: var(--ke-accent);
+  --color-ke-accent-hover: var(--ke-accent-hover);
+  --color-ke-accent-soft: var(--ke-accent-soft);
+  --color-ke-accent-soft-text: var(--ke-accent-soft-text);
+
+  /* Focus */
+  --color-ke-focus: var(--ke-focus);
+
+  /* Secondary */
+  --color-ke-secondary-border: var(--ke-secondary-border);
+  --color-ke-secondary-text: var(--ke-secondary-text);
+  --color-ke-secondary-hover: var(--ke-secondary-hover);
+
+  /* Status colors */
+  --color-ke-status-posted-bg: var(--ke-status-posted-bg);
+  --color-ke-status-posted-text: var(--ke-status-posted-text);
+  --color-ke-status-questioned-bg: var(--ke-status-questioned-bg);
+  --color-ke-status-questioned-text: var(--ke-status-questioned-text);
+  --color-ke-status-resolved-bg: var(--ke-status-resolved-bg);
+  --color-ke-status-resolved-text: var(--ke-status-resolved-text);
+  --color-ke-status-settled-bg: var(--ke-status-settled-bg);
+  --color-ke-status-settled-text: var(--ke-status-settled-text);
+  --color-ke-status-closed-bg: var(--ke-status-closed-bg);
+  --color-ke-status-closed-text: var(--ke-status-closed-text);
+
+  /* Attention */
+  --color-ke-attention-border: var(--ke-attention-border);
+  --color-ke-attention-bg: var(--ke-attention-bg);
+
+  /* Semantic amounts */
+  --color-ke-positive: var(--ke-positive);
+  --color-ke-negative: var(--ke-negative);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--ke-bg);
+  color: var(--ke-text-primary);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
