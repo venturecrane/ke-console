@@ -11,6 +11,7 @@ import {
   type MeResponse,
   type Child,
 } from "@/lib/api";
+import { Button, Card, CardHeader, CardBody, Alert, EmptyState } from "@/components/ui";
 
 export default function ChildrenSettingsPage() {
   const { user, isLoaded } = useUser();
@@ -115,20 +116,20 @@ export default function ChildrenSettingsPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
 
   if (!meData?.family) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="min-h-screen bg-ke-bg">
+        <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                className="text-ke-muted hover:text-ke-primary"
               >
                 <svg
                   className="h-5 w-5"
@@ -144,7 +145,7 @@ export default function ChildrenSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-xl font-semibold text-ke-primary">
                 Manage Kids
               </h1>
             </div>
@@ -152,30 +153,29 @@ export default function ChildrenSettingsPage() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-slate-600 dark:text-slate-400">
-              You need to create or join a family first.
-            </p>
-            <Link
-              href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-            >
-              Go to Dashboard
-            </Link>
-          </div>
+          <Card>
+            <CardBody className="text-center">
+              <p className="text-ke-secondary">
+                You need to create or join a family first.
+              </p>
+              <Link href="/dashboard" className="mt-4 inline-block">
+                <Button>Go to Dashboard</Button>
+              </Link>
+            </CardBody>
+          </Card>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-ke-bg">
+      <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-ke-muted hover:text-ke-primary"
             >
               <svg
                 className="h-5 w-5"
@@ -191,7 +191,7 @@ export default function ChildrenSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-semibold text-ke-primary">
               Manage Kids
             </h1>
           </div>
@@ -202,100 +202,85 @@ export default function ChildrenSettingsPage() {
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Error Display */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
+          <Alert variant="error" className="mb-6">
+            <p>{error}</p>
+          </Alert>
         )}
 
         {/* Add Child Form */}
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
-            Add a Kid
-          </h2>
-          <form onSubmit={handleAddChild} className="flex gap-3">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={newChildName}
-                onChange={(e) => {
-                  setNewChildName(e.target.value);
-                  setAddError(null);
-                }}
-                placeholder="Kid's name"
-                maxLength={100}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-              />
-              {addError && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {addError}
-                </p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={isAdding || !newChildName.trim()}
-              className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isAdding ? "Adding..." : "Add Kid"}
-            </button>
-          </form>
-        </div>
+        <Card className="mb-6">
+          <CardBody>
+            <h2 className="mb-4 text-lg font-medium text-ke-primary">
+              Add a Kid
+            </h2>
+            <form onSubmit={handleAddChild} className="flex gap-3">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={newChildName}
+                  onChange={(e) => {
+                    setNewChildName(e.target.value);
+                    setAddError(null);
+                  }}
+                  placeholder="Kid's name"
+                  maxLength={100}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                />
+                {addError && (
+                  <p className="mt-1 text-sm text-ke-negative">
+                    {addError}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                disabled={isAdding || !newChildName.trim()}
+              >
+                {isAdding ? "Adding..." : "Add Kid"}
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
 
         {/* Children List */}
-        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
-            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">
+        <Card>
+          <CardHeader className="border-b border-ke-border">
+            <h2 className="text-lg font-medium text-ke-primary">
               Kids ({children.length})
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm text-ke-muted">
               Add kids to tag expenses to specific family members.
             </p>
-          </div>
+          </CardHeader>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-slate-500">Loading kids...</p>
+              <p className="text-ke-muted">Loading kids...</p>
             </div>
           ) : children.length === 0 ? (
-            <div className="py-12 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-                <svg
-                  className="h-6 w-6 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                  />
-                </svg>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400">No kids added yet</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Add your kids above to tag expenses to them.
-              </p>
-            </div>
+            <EmptyState
+              title="No kids added yet"
+              description="Add your kids above to tag expenses to them."
+              className="border-0 rounded-none"
+            />
           ) : (
-            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+            <ul className="divide-y divide-ke-divider">
               {children.map((child) => (
                 <li
                   key={child.id}
                   className="flex items-center justify-between px-6 py-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-                      <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ke-elevated">
+                      <span className="text-lg font-medium text-ke-secondary">
                         {child.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-slate-100">
+                      <p className="font-medium text-ke-primary">
                         {child.name}
                       </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                      <p className="text-sm font-mono text-ke-muted">
                         Added {new Date(child.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -303,28 +288,30 @@ export default function ChildrenSettingsPage() {
 
                   {showDeleteConfirm === child.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                      <span className="text-sm text-ke-muted">
                         Delete?
                       </span>
-                      <button
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDeleteChild(child.id)}
                         disabled={deletingChildId === child.id}
-                        className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {deletingChildId === child.id ? "..." : "Yes"}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => setShowDeleteConfirm(null)}
                         disabled={deletingChildId === child.id}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
                         No
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setShowDeleteConfirm(child.id)}
-                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                      className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-negative"
                       title="Delete kid"
                     >
                       <svg
@@ -346,13 +333,13 @@ export default function ChildrenSettingsPage() {
               ))}
             </ul>
           )}
-        </div>
+        </Card>
 
         {/* Info Note */}
-        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+        <Alert variant="info" className="mt-6">
           <div className="flex gap-3">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400"
+              className="h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -365,15 +352,15 @@ export default function ChildrenSettingsPage() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+              <p className="font-medium">
                 Note about deleted kids
               </p>
-              <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+              <p className="mt-1">
                 When you delete a kid, they are hidden from this list but preserved for historical expense records. Any expenses tagged to a deleted kid will still show that association.
               </p>
             </div>
           </div>
-        </div>
+        </Alert>
       </main>
     </div>
   );

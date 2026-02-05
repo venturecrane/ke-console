@@ -15,6 +15,8 @@ import {
   type FixedExpenseTier,
   type RecurringFrequency,
 } from "@/lib/api";
+import { formatCurrency, formatCategory } from "@/lib/statusColors";
+import { Button, Card, CardHeader, CardBody, Alert, EmptyState } from "@/components/ui";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "school", label: "School" },
@@ -31,20 +33,6 @@ const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
   { value: "quarterly", label: "Quarterly" },
   { value: "annually", label: "Annually" },
 ];
-
-// Format cents to dollars display
-function formatCurrency(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(dollars);
-}
-
-// Format category for display
-function formatCategory(category: string): string {
-  return category.charAt(0).toUpperCase() + category.slice(1);
-}
 
 // Format frequency for display
 function formatFrequency(frequency: string): string {
@@ -283,20 +271,20 @@ export default function FixedExpensesSettingsPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
 
   if (!meData?.family) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="min-h-screen bg-ke-bg">
+        <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                className="text-ke-muted hover:text-ke-primary"
               >
                 <svg
                   className="h-5 w-5"
@@ -312,7 +300,7 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-xl font-semibold text-ke-primary">
                 Recurring Expenses
               </h1>
             </div>
@@ -320,30 +308,31 @@ export default function FixedExpensesSettingsPage() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-slate-600 dark:text-slate-400">
-              You need to create or join a family first.
-            </p>
-            <Link
-              href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-            >
-              Go to Dashboard
-            </Link>
-          </div>
+          <Card>
+            <CardBody className="text-center">
+              <p className="text-ke-secondary">
+                You need to create or join a family first.
+              </p>
+              <div className="mt-4">
+                <Link href="/dashboard">
+                  <Button>Go to Dashboard</Button>
+                </Link>
+              </div>
+            </CardBody>
+          </Card>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-ke-bg">
+      <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-ke-muted hover:text-ke-primary"
             >
               <svg
                 className="h-5 w-5"
@@ -359,7 +348,7 @@ export default function FixedExpensesSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-semibold text-ke-primary">
               Recurring Expenses
             </h1>
           </div>
@@ -370,40 +359,41 @@ export default function FixedExpensesSettingsPage() {
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Error Display */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
+          <Alert variant="error" className="mb-6">
+            <p>{error}</p>
+          </Alert>
         )}
 
         {/* Tier Info & Add Button */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div>
-            <h2 className="font-medium text-slate-900 dark:text-slate-100">
-              Recurring Monthly Templates
-            </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {tier && (
-                tier.limit === -1
-                  ? `${tier.current} active recurring expenses (Pro: Unlimited)`
-                  : `${tier.current} of ${tier.limit} recurring expenses used (Free tier)`
-              )}
-            </p>
-          </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            disabled={tier !== null && !tier.canAdd}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Add Recurring Expense
-          </button>
-        </div>
+        <Card className="mb-6">
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="font-medium text-ke-primary">
+                Recurring Monthly Templates
+              </h2>
+              <p className="mt-1 text-sm text-ke-muted">
+                {tier && (
+                  tier.limit === -1
+                    ? `${tier.current} active recurring expenses (Pro: Unlimited)`
+                    : `${tier.current} of ${tier.limit} recurring expenses used (Free tier)`
+                )}
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowAddForm(true)}
+              disabled={tier !== null && !tier.canAdd}
+            >
+              Add Recurring Expense
+            </Button>
+          </CardBody>
+        </Card>
 
         {/* Tier Limit Warning */}
         {tier && !tier.canAdd && tier.limit !== -1 && (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <Alert variant="attention" className="mb-6">
             <div className="flex gap-3">
               <svg
-                className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400"
+                className="h-5 w-5 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -416,169 +406,170 @@ export default function FixedExpensesSettingsPage() {
                 />
               </svg>
               <div>
-                <p className="font-medium text-yellow-800 dark:text-yellow-300">
+                <p className="font-medium">
                   Recurring expense limit reached
                 </p>
-                <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
+                <p className="mt-1 text-sm">
                   Free tier allows up to {tier.limit} recurring expenses. Upgrade to Pro for unlimited.
                 </p>
               </div>
             </div>
-          </div>
+          </Alert>
         )}
 
         {/* Add Form */}
         {showAddForm && (
-          <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
-              Add Recurring Expense
-            </h2>
+          <Card className="mb-6">
+            <CardBody>
+              <h2 className="mb-4 text-lg font-medium text-ke-primary">
+                Add Recurring Expense
+              </h2>
 
-            {addError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">{addError}</p>
-              </div>
-            )}
+              {addError && (
+                <Alert variant="error" className="mb-4">
+                  <p>{addError}</p>
+                </Alert>
+              )}
 
-            <form onSubmit={handleAddFixedExpense} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Description *
-                  </label>
-                  <input
-                    type="text"
-                    value={addDescription}
-                    onChange={(e) => setAddDescription(e.target.value)}
-                    placeholder="e.g., Monthly tuition"
-                    maxLength={200}
-                    required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-                  />
+              <form onSubmit={handleAddFixedExpense} className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Description *
+                    </label>
+                    <input
+                      type="text"
+                      value={addDescription}
+                      onChange={(e) => setAddDescription(e.target.value)}
+                      placeholder="e.g., Monthly tuition"
+                      maxLength={200}
+                      required
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Amount ($) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={addAmount}
+                      onChange={(e) => setAddAmount(e.target.value)}
+                      placeholder="0.00"
+                      required
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Category *
+                    </label>
+                    <select
+                      value={addCategory}
+                      onChange={(e) => setAddCategory(e.target.value as ExpenseCategory)}
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Frequency *
+                    </label>
+                    <select
+                      value={addFrequency}
+                      onChange={(e) => setAddFrequency(e.target.value as RecurringFrequency)}
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    >
+                      {FREQUENCIES.map((freq) => (
+                        <option key={freq.value} value={freq.value}>
+                          {freq.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Effective From *
+                    </label>
+                    <input
+                      type="date"
+                      value={addEffectiveFrom}
+                      onChange={(e) => setAddEffectiveFrom(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Effective Until (optional)
+                    </label>
+                    <input
+                      type="date"
+                      value={addEffectiveUntil}
+                      onChange={(e) => setAddEffectiveUntil(e.target.value)}
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Link URL (optional)
+                    </label>
+                    <input
+                      type="url"
+                      value={addLinkUrl}
+                      onChange={(e) => setAddLinkUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Amount ($) *
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Memo (optional)
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={addAmount}
-                    onChange={(e) => setAddAmount(e.target.value)}
-                    placeholder="0.00"
-                    required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+                  <textarea
+                    value={addMemo}
+                    onChange={(e) => setAddMemo(e.target.value)}
+                    placeholder="Additional notes..."
+                    rows={2}
+                    maxLength={500}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
                 </div>
 
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Category *
-                  </label>
-                  <select
-                    value={addCategory}
-                    onChange={(e) => setAddCategory(e.target.value as ExpenseCategory)}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowAddForm(false)}
+                    disabled={isAdding}
                   >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Frequency *
-                  </label>
-                  <select
-                    value={addFrequency}
-                    onChange={(e) => setAddFrequency(e.target.value as RecurringFrequency)}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isAdding || !addDescription.trim() || !addAmount}
                   >
-                    {FREQUENCIES.map((freq) => (
-                      <option key={freq.value} value={freq.value}>
-                        {freq.label}
-                      </option>
-                    ))}
-                  </select>
+                    {isAdding ? "Adding..." : "Add Recurring Expense"}
+                  </Button>
                 </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Effective From *
-                  </label>
-                  <input
-                    type="date"
-                    value={addEffectiveFrom}
-                    onChange={(e) => setAddEffectiveFrom(e.target.value)}
-                    required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Effective Until (optional)
-                  </label>
-                  <input
-                    type="date"
-                    value={addEffectiveUntil}
-                    onChange={(e) => setAddEffectiveUntil(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Link URL (optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={addLinkUrl}
-                    onChange={(e) => setAddLinkUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Memo (optional)
-                </label>
-                <textarea
-                  value={addMemo}
-                  onChange={(e) => setAddMemo(e.target.value)}
-                  placeholder="Additional notes..."
-                  rows={2}
-                  maxLength={500}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  disabled={isAdding}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isAdding || !addDescription.trim() || !addAmount}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isAdding ? "Adding..." : "Add Recurring Expense"}
-                </button>
-              </div>
-            </form>
-          </div>
+              </form>
+            </CardBody>
+          </Card>
         )}
 
         {/* Include Ended Toggle */}
@@ -588,84 +579,68 @@ export default function FixedExpensesSettingsPage() {
             id="includeEnded"
             checked={includeEnded}
             onChange={(e) => setIncludeEnded(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-slate-900"
+            className="h-4 w-4 rounded border-ke-border text-ke-primary"
           />
-          <label htmlFor="includeEnded" className="text-sm text-slate-600 dark:text-slate-400">
+          <label htmlFor="includeEnded" className="text-sm text-ke-secondary">
             Show ended recurring expenses
           </label>
         </div>
 
         {/* Recurring Expenses List */}
-        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
-            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">
+        <Card>
+          <CardHeader className="border-b border-ke-border">
+            <h2 className="text-lg font-medium text-ke-primary">
               Recurring Expenses ({fixedExpenses.length})
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm text-ke-muted">
               These templates auto-generate expenses on the 1st of each month.
             </p>
-          </div>
+          </CardHeader>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-slate-500">Loading recurring expenses...</p>
+              <p className="text-ke-muted">Loading recurring expenses...</p>
             </div>
           ) : fixedExpenses.length === 0 ? (
-            <div className="py-12 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-                <svg
-                  className="h-6 w-6 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400">No recurring expenses yet</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Add recurring monthly expenses like rent, tuition, or subscriptions.
-              </p>
-            </div>
+            <EmptyState
+              title="No recurring expenses yet"
+              description="Add recurring monthly expenses like rent, tuition, or subscriptions."
+              className="border-0 rounded-none"
+            />
           ) : (
-            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+            <ul className="divide-y divide-ke-divider">
               {fixedExpenses.map((expense) => (
                 <li key={expense.id} className="px-6 py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
+                        <p className="font-medium text-ke-primary">
                           {expense.description}
                         </p>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        <span className="rounded-full bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary">
                           {formatCategory(expense.category)}
                         </span>
                         {isExpenseEnded(expense) && (
-                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                          <span className="rounded-full bg-ke-status-closed-bg px-2 py-0.5 text-xs font-medium text-ke-status-closed-text">
                             Ended
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
                         <span className="font-mono">
                           {formatCurrency(expense.amount_cents)}/{formatFrequency(expense.frequency || "monthly")}
                         </span>
-                        <span>
+                        <span className="font-mono">
                           From: {new Date(expense.effective_from).toLocaleDateString()}
                         </span>
                         {expense.effective_until && (
-                          <span>
+                          <span className="font-mono">
                             Until: {new Date(expense.effective_until).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                       {expense.memo && (
-                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                        <p className="mt-2 text-sm text-ke-muted line-clamp-2">
                           {expense.memo}
                         </p>
                       )}
@@ -675,7 +650,7 @@ export default function FixedExpensesSettingsPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => openEditModal(expense)}
-                          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                          className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-secondary"
                           title="Edit"
                         >
                           <svg
@@ -695,26 +670,28 @@ export default function FixedExpensesSettingsPage() {
 
                         {showEndConfirm === expense.id ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-500">End?</span>
-                            <button
+                            <span className="text-xs text-ke-muted">End?</span>
+                            <Button
+                              variant="danger"
+                              size="sm"
                               onClick={() => handleEndFixedExpense(expense.id)}
                               disabled={endingId === expense.id}
-                              className="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                             >
                               {endingId === expense.id ? "..." : "Yes"}
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
                               onClick={() => setShowEndConfirm(null)}
                               disabled={endingId === expense.id}
-                              className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                             >
                               No
-                            </button>
+                            </Button>
                           </div>
                         ) : (
                           <button
                             onClick={() => setShowEndConfirm(expense.id)}
-                            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                            className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-negative"
                             title="End recurring expense"
                           >
                             <svg
@@ -739,13 +716,13 @@ export default function FixedExpensesSettingsPage() {
               ))}
             </ul>
           )}
-        </div>
+        </Card>
 
         {/* Info Note */}
-        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+        <Alert variant="info" className="mt-6">
           <div className="flex gap-3">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400"
+              className="h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -758,152 +735,153 @@ export default function FixedExpensesSettingsPage() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+              <p className="font-medium">
                 How recurring expenses work
               </p>
-              <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+              <p className="mt-1 text-sm">
                 Recurring expenses automatically generate regular expenses on the 1st of each month (or when you first open the app that month). Only active templates within their effective date range will generate expenses.
               </p>
             </div>
           </div>
-        </div>
+        </Alert>
       </main>
 
       {/* Edit Modal */}
       {editingExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
-            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Edit Recurring Expense
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md">
+            <CardBody>
+              <h3 className="mb-4 text-lg font-semibold text-ke-primary">
+                Edit Recurring Expense
+              </h3>
 
-            {editError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">{editError}</p>
-              </div>
-            )}
+              {editError && (
+                <Alert variant="error" className="mb-4">
+                  <p>{editError}</p>
+                </Alert>
+              )}
 
-            <form onSubmit={handleEditFixedExpense} className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Description *
-                </label>
-                <input
-                  type="text"
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  maxLength={200}
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
+              <form onSubmit={handleEditFixedExpense} className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Description *
+                  </label>
+                  <input
+                    type="text"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    maxLength={200}
+                    required
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Amount ($) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Amount ($) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={editAmount}
+                    onChange={(e) => setEditAmount(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Category *
-                </label>
-                <select
-                  value={editCategory}
-                  onChange={(e) => setEditCategory(e.target.value as ExpenseCategory)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Category *
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value as ExpenseCategory)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Frequency *
-                </label>
-                <select
-                  value={editFrequency}
-                  onChange={(e) => setEditFrequency(e.target.value as RecurringFrequency)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                >
-                  {FREQUENCIES.map((freq) => (
-                    <option key={freq.value} value={freq.value}>
-                      {freq.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Frequency *
+                  </label>
+                  <select
+                    value={editFrequency}
+                    onChange={(e) => setEditFrequency(e.target.value as RecurringFrequency)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  >
+                    {FREQUENCIES.map((freq) => (
+                      <option key={freq.value} value={freq.value}>
+                        {freq.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Effective Until (optional)
-                </label>
-                <input
-                  type="date"
-                  value={editEffectiveUntil}
-                  onChange={(e) => setEditEffectiveUntil(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Effective Until (optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={editEffectiveUntil}
+                    onChange={(e) => setEditEffectiveUntil(e.target.value)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Link URL (optional)
-                </label>
-                <input
-                  type="url"
-                  value={editLinkUrl}
-                  onChange={(e) => setEditLinkUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
-                />
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Link URL (optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={editLinkUrl}
+                    onChange={(e) => setEditLinkUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Memo (optional)
-                </label>
-                <textarea
-                  value={editMemo}
-                  onChange={(e) => setEditMemo(e.target.value)}
-                  rows={2}
-                  maxLength={500}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Memo (optional)
+                  </label>
+                  <textarea
+                    value={editMemo}
+                    onChange={(e) => setEditMemo(e.target.value)}
+                    rows={2}
+                    maxLength={500}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingExpense(null)}
-                  disabled={isEditing}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isEditing || !editDescription.trim() || !editAmount}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isEditing ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setEditingExpense(null)}
+                    disabled={isEditing}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isEditing || !editDescription.trim() || !editAmount}
+                  >
+                    {isEditing ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            </CardBody>
+          </Card>
         </div>
       )}
     </div>
