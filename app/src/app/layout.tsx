@@ -56,11 +56,33 @@ export default function RootLayout({
           colorBackground: "#0f172a",
           colorInputBackground: "#1e293b",
           colorInputText: "#e2e8f0",
+          colorText: "#f1f5f9",
+          colorTextSecondary: "#94a3b8",
+          colorNeutral: "#94a3b8",
+          borderRadius: "0.5rem",
           fontFamily: "var(--font-geist-sans), Arial, Helvetica, sans-serif",
         },
         elements: {
-          card: "shadow-none border border-slate-800",
-          formButtonPrimary: "bg-indigo-600 hover:bg-indigo-700",
+          card: "shadow-none border border-ke-border rounded-lg bg-ke-surface",
+          formButtonPrimary:
+            "bg-ke-accent hover:bg-ke-accent-hover text-ke-inverse rounded-lg",
+          formFieldInput:
+            "border-ke-border bg-ke-surface text-ke-primary rounded-lg focus:border-ke-focus focus:ring-1 focus:ring-ke-focus",
+          formFieldLabel: "text-ke-primary",
+          footerActionLink: "text-ke-accent hover:text-ke-accent-hover",
+          headerTitle: "text-ke-primary",
+          headerSubtitle: "text-ke-secondary",
+          socialButtonsBlockButton:
+            "border-ke-border text-ke-primary hover:bg-ke-elevated",
+          dividerLine: "bg-ke-border",
+          dividerText: "text-ke-muted",
+          userButtonPopoverCard:
+            "shadow-lg border border-ke-border rounded-lg bg-ke-surface",
+          userButtonPopoverActionButton: "hover:bg-ke-elevated",
+          userButtonPopoverActionButtonText: "text-ke-primary",
+          userButtonPopoverFooter: "hidden",
+          modalBackdrop: "bg-black/60 backdrop-blur-sm",
+          modalContent: "shadow-lg border border-ke-border rounded-lg",
         },
       }}
     >
