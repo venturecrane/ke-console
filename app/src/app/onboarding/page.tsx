@@ -12,6 +12,7 @@ import {
   type MeResponse,
   type Child,
 } from "@/lib/api";
+import { Button, Card, Alert } from "@/components/ui";
 
 type WizardStep = "syncing" | "welcome" | "children" | "split" | "invite";
 
@@ -173,33 +174,32 @@ export default function OnboardingPage() {
   // Syncing / error states
   if (!isLoaded || step === "syncing") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg">
         <div className="text-center">
           {syncError ? (
             <>
-              <h1 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="mb-4 text-2xl font-semibold text-ke-primary">
                 Welcome to Kid Expenses
               </h1>
-              <p className="mb-6 text-slate-600 dark:text-slate-400">
+              <p className="mb-6 text-ke-secondary">
                 There was a problem setting up your account. Please try again.
               </p>
-              <button
+              <Button
                 onClick={() => {
                   setSyncError(false);
                   setStep("syncing");
                   syncAndLoad();
                 }}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
               >
                 Retry
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <h1 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="mb-4 text-2xl font-semibold text-ke-primary">
                 Setting up your account...
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-ke-secondary">
                 Please wait while we prepare everything for you.
               </p>
             </>
@@ -210,41 +210,42 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-8 dark:bg-slate-950">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-8">
       <div className="w-full max-w-md">
         {/* Welcome Step */}
         {step === "welcome" && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <Card className="p-8 shadow-sm">
             <div className="mb-6 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-600 text-lg font-bold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-ke-accent text-lg font-bold text-ke-inverse">
                 KE
               </div>
             </div>
-            <h1 className="mb-2 text-center text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="mb-2 text-center text-2xl font-bold text-ke-primary">
               Set Up Your Family Ledger
             </h1>
-            <p className="mb-8 text-center text-slate-600 dark:text-slate-400">
+            <p className="mb-8 text-center text-ke-secondary">
               A neutral space to track shared costs. Setup takes about 2 minutes.
             </p>
-            <button
+            <Button
               onClick={() => setStep("children")}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700"
+              fullWidth
+              size="lg"
             >
               Start Setup
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
 
         {/* Step 1: Add Children */}
         {step === "children" && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          <Card className="p-8 shadow-sm">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-ke-muted">
               Step 1 of 3
             </p>
-            <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="mb-2 text-xl font-bold text-ke-primary">
               Add Your Children
             </h2>
-            <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mb-6 text-sm text-ke-secondary">
               Add at least one child to tag expenses to.
             </p>
 
@@ -254,12 +255,12 @@ export default function OnboardingPage() {
                 {children.map((child) => (
                   <div
                     key={child.id}
-                    className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800"
+                    className="flex items-center gap-3 rounded-lg border border-ke-border bg-ke-elevated px-4 py-2.5"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ke-accent/10 text-sm font-medium text-ke-accent">
                       {child.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    <span className="text-sm font-medium text-ke-primary">
                       {child.name}
                     </span>
                   </div>
@@ -284,41 +285,42 @@ export default function OnboardingPage() {
                 }}
                 placeholder="Child's name"
                 maxLength={100}
-                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
+                className="flex-1 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
               />
-              <button
+              <Button
                 onClick={handleAddChild}
                 disabled={isAddingChild || !childName.trim()}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                variant="secondary"
               >
                 {isAddingChild ? "..." : "+ Add"}
-              </button>
+              </Button>
             </div>
 
             {childError && (
-              <p className="mb-4 text-sm text-red-600 dark:text-red-400">{childError}</p>
+              <p className="mb-4 text-sm text-ke-negative">{childError}</p>
             )}
 
-            <button
+            <Button
               onClick={() => setStep("split")}
               disabled={children.length === 0}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              fullWidth
+              size="lg"
             >
               Continue
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
 
         {/* Step 2: Split Ratio */}
         {step === "split" && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          <Card className="p-8 shadow-sm">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-ke-muted">
               Step 2 of 3
             </p>
-            <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="mb-2 text-xl font-bold text-ke-primary">
               Expense Split Ratio
             </h2>
-            <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mb-6 text-sm text-ke-secondary">
               How should shared expenses be divided? This can be adjusted per expense later.
             </p>
 
@@ -331,8 +333,8 @@ export default function OnboardingPage() {
                 }}
                 className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                   splitMode === "even"
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
-                    : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    ? "border-ke-accent bg-ke-accent/10 text-ke-accent"
+                    : "border-ke-border text-ke-secondary hover:bg-ke-elevated"
                 }`}
               >
                 50 / 50
@@ -341,8 +343,8 @@ export default function OnboardingPage() {
                 onClick={() => setSplitMode("custom")}
                 className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                   splitMode === "custom"
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
-                    : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    ? "border-ke-accent bg-ke-accent/10 text-ke-accent"
+                    : "border-ke-border text-ke-secondary hover:bg-ke-elevated"
                 }`}
               >
                 Custom
@@ -358,81 +360,84 @@ export default function OnboardingPage() {
                   max="100"
                   value={splitRatioA}
                   onChange={(e) => setSplitRatioA(Number(e.target.value))}
-                  className="w-full h-2 rounded-lg cursor-pointer accent-indigo-600"
+                  className="w-full h-2 rounded-lg cursor-pointer accent-[var(--color-ke-accent)]"
                 />
                 <div className="flex justify-between text-sm">
-                  <span className="font-mono text-slate-700 dark:text-slate-300">
+                  <span className="font-mono text-ke-secondary">
                     You: {splitRatioA}%
                   </span>
-                  <span className="font-mono text-slate-700 dark:text-slate-300">
+                  <span className="font-mono text-ke-secondary">
                     Co-parent: {100 - splitRatioA}%
                   </span>
                 </div>
               </div>
             )}
 
-            <button
+            <Button
               onClick={handleSaveSplit}
               disabled={isSavingSplit}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              fullWidth
+              size="lg"
             >
               {isSavingSplit ? "Saving..." : "Continue"}
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
 
         {/* Step 3: Invite Co-parent */}
         {step === "invite" && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          <Card className="p-8 shadow-sm">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-ke-muted">
               Step 3 of 3
             </p>
-            <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="mb-2 text-xl font-bold text-ke-primary">
               Invite Co-parent
             </h2>
-            <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mb-6 text-sm text-ke-secondary">
               Send a secure link to share this ledger and start tracking together.
             </p>
 
             {inviteShared ? (
-              <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center dark:border-emerald-800 dark:bg-emerald-900/20">
-                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <Alert variant="success" className="mb-6 text-center">
+                <p className="text-sm font-medium">
                   Invite shared successfully!
                 </p>
-              </div>
+              </Alert>
             ) : copySuccess ? (
-              <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center dark:border-emerald-800 dark:bg-emerald-900/20">
-                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <Alert variant="success" className="mb-6 text-center">
+                <p className="text-sm font-medium">
                   Invite link copied to clipboard!
                 </p>
-              </div>
+              </Alert>
             ) : null}
 
             {/* Invite code display */}
             {inviteCode && (
-              <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-center dark:border-slate-700 dark:bg-slate-800">
-                <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">Invite code</p>
-                <p className="font-mono text-2xl tracking-widest text-slate-900 dark:text-slate-100">
+              <div className="mb-6 rounded-lg border border-ke-border bg-ke-elevated p-4 text-center">
+                <p className="mb-1 text-xs text-ke-muted">Invite code</p>
+                <p className="font-mono text-2xl tracking-widest text-ke-primary">
                   {inviteCode}
                 </p>
               </div>
             )}
 
-            <button
+            <Button
               onClick={handleShareInvite}
               disabled={isGeneratingInvite}
-              className="mb-3 w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              fullWidth
+              size="lg"
+              className="mb-3"
             >
               {isGeneratingInvite ? "Preparing..." : "Share Invite Link"}
-            </button>
+            </Button>
 
             <button
               onClick={handleFinish}
-              className="w-full py-2 text-center text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="w-full py-2 text-center text-sm text-ke-muted transition-colors hover:text-ke-primary"
             >
               Skip for now
             </button>
-          </div>
+          </Card>
         )}
       </div>
     </div>
