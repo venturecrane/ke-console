@@ -106,8 +106,8 @@ export default function DesignPage() {
         {/* ============================================
             SURFACES
             ============================================ */}
-        <Section title="Surfaces (3 tiers)">
-          <div className="grid grid-cols-3 gap-4">
+        <Section title="Surfaces (4 tiers)">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-lg border border-ke-border bg-ke-bg p-6 text-center">
               <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
                 bg-ke-bg
@@ -125,7 +125,15 @@ export default function DesignPage() {
                 bg-ke-elevated
               </p>
               <p className="mt-1 text-sm text-ke-secondary">
-                Elevated/active
+                Modal/sheet/active
+              </p>
+            </div>
+            <div className="rounded-lg border border-ke-border bg-ke-interactive p-6 text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+                bg-ke-interactive
+              </p>
+              <p className="mt-1 text-sm text-ke-secondary">
+                Hover/pressed
               </p>
             </div>
           </div>
@@ -264,10 +272,11 @@ export default function DesignPage() {
         <Section title="Generic Badges">
           <div className="flex flex-wrap gap-3">
             <Badge>Default</Badge>
-            <Badge variant="posted">Success</Badge>
-            <Badge variant="questioned">Warning</Badge>
-            <Badge variant="resolved">Info</Badge>
-            <Badge variant="closed">Error</Badge>
+            <Badge variant="success">Success</Badge>
+            <Badge variant="warning">Warning</Badge>
+            <Badge variant="info">Info</Badge>
+            <Badge variant="muted">Muted</Badge>
+            <Badge variant="error">Error</Badge>
           </div>
         </Section>
 

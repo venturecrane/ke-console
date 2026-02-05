@@ -4,7 +4,7 @@
    KID EXPENSES DESIGN TOKENS
    ============================================
    All semantic colors are defined here as CSS custom properties.
-   Light mode = :root, Dark mode = .dark or prefers-color-scheme.
+   Light mode = :root, Dark mode = prefers-color-scheme.
    Mapped to Tailwind via @theme so you can use bg-ke-bg, text-ke-primary, etc.
 
    Rule: No raw Tailwind color classes (bg-indigo-600, text-slate-500) in page code.
@@ -12,10 +12,11 @@
    ============================================ */
 
 :root {
-  /* Surfaces (3 tiers for depth) */
+  /* Surfaces (4 tiers for depth) */
   --ke-bg: #f8fafc;           /* slate-50 — page background */
   --ke-surface: #ffffff;       /* white — card background */
-  --ke-elevated: #f1f5f9;     /* slate-100 — elevated/active surface */
+  --ke-elevated: #f1f5f9;     /* slate-100 — modal/sheet/active surface */
+  --ke-interactive: #e2e8f0;  /* slate-200 — hover/pressed states */
 
   /* Borders & dividers */
   --ke-border: #e2e8f0;       /* slate-200 — card borders */
@@ -75,7 +76,8 @@
   /* Surfaces */
   --ke-bg: #020617;            /* slate-950 — page background */
   --ke-surface: #0f172a;       /* slate-900 — card background */
-  --ke-elevated: #1e293b;      /* slate-800 — elevated/active surface */
+  --ke-elevated: #1e293b;      /* slate-800 — modal/sheet/active surface */
+  --ke-interactive: #334155;   /* slate-700 — hover/pressed states */
 
   /* Borders & dividers */
   --ke-border: #1e293b;        /* slate-800 */
@@ -141,6 +143,7 @@
   --color-ke-bg: var(--ke-bg);
   --color-ke-surface: var(--ke-surface);
   --color-ke-elevated: var(--ke-elevated);
+  --color-ke-interactive: var(--ke-interactive);
 
   /* Borders */
   --color-ke-border: var(--ke-border);

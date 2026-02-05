@@ -1,14 +1,12 @@
 export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from "./Button";
 export { Card, CardHeader, CardBody, type CardProps } from "./Card";
+export { Badge, type BadgeProps, type BadgeVariant } from "./Badge";
 export {
-  Badge,
   StatusBadge,
   statusVariantMap,
   statusLabelMap,
-  type BadgeProps,
-  type BadgeVariant,
   type StatusBadgeProps,
-} from "./Badge";
+} from "./StatusBadge";
 export { Input, type InputProps } from "./Input";
 export { Select, type SelectProps } from "./Select";
 export { Textarea, type TextareaProps } from "./Textarea";
