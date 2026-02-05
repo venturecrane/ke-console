@@ -12,6 +12,7 @@ import {
   type BalanceResponse,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
+import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
 import {
   Button,
   Card,
@@ -39,27 +40,27 @@ export default function DashboardPage() {
     try {
       const data = await getMe(user.id);
       setMeData(data);
-      if (data.family) {
+      const family = data.family;
+      if (family) {
         setIsLoadingExpenses(true);
         setIsLoadingBalance(true);
         try {
           const [expenseData, balanceData, ...attentionResults] = await Promise.all([
-            getExpenses(user.id, data.family.id, { limit: 5 }),
-            getBalance(user.id, data.family.id),
-            ...(data.family.parent_b_id !== null
-              ? [
-                  getExpenses(user.id, data.family.id, { status: "questioned", limit: 10 }),
-                  getExpenses(user.id, data.family.id, { status: "pending_satisfaction", limit: 10 }),
-                ]
+            getExpenses(user.id, family.id, { limit: 5 }),
+            getBalance(user.id, family.id),
+            ...(family.parent_b_id !== null
+              ? NEEDS_ATTENTION_STATUSES.map((status) =>
+                  getExpenses(user.id, family.id, { status, limit: 10 })
+                )
               : []),
           ]);
           setExpenses(expenseData.expenses);
           setBalance(balanceData);
 
-          if (data.family.parent_b_id !== null && attentionResults.length === 2) {
-            const questioned = (attentionResults[0] as { expenses: Expense[] }).expenses;
-            const pendingSatisfaction = (attentionResults[1] as { expenses: Expense[] }).expenses;
-            const merged = [...questioned, ...pendingSatisfaction].sort(
+          if (family.parent_b_id !== null && attentionResults.length === NEEDS_ATTENTION_STATUSES.length) {
+            const merged = attentionResults
+              .flatMap((r) => (r as { expenses: Expense[] }).expenses)
+              .sort(
               (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
             );
             setAttentionExpenses(merged);
@@ -281,7 +282,7 @@ export default function DashboardPage() {
                       Needs Attention ({attentionExpenses.length})
                     </h3>
                     <Link
-                      href="/expenses?status=questioned"
+                      href="/expenses?status=needs_attention"
                       className="text-xs font-medium text-ke-status-questioned-text hover:opacity-80"
                     >
                       View all

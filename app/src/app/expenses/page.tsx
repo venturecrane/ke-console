@@ -18,6 +18,7 @@ import {
   type ResolutionAction,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
+import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
 import {
   Button,
   Card,
@@ -38,13 +39,14 @@ const CATEGORIES: { value: ExpenseCategory | ""; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-const STATUS_OPTIONS: { value: ExpenseStatus | ""; label: string }[] = [
+const STATUS_OPTIONS: { value: ExpenseStatus | "" | "needs_attention"; label: string }[] = [
   { value: "", label: "All Statuses" },
+  { value: "needs_attention", label: "Needs Attention" },
   { value: "posted", label: "Posted" },
   { value: "questioned", label: "Questioned" },
   { value: "pending_satisfaction", label: "Pending Satisfaction" },
   { value: "resolved", label: "Resolved" },
-  { value: "resolved_creator_decided", label: "Creator Decided" },
+  { value: "resolved_creator_decided", label: "Resolved (timeout)" },
   { value: "resolved_personal", label: "Personal" },
   { value: "closed_unresolved", label: "Closed Unresolved" },
 ];
@@ -110,7 +112,7 @@ export default function ExpenseListPage() {
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | "">("");
-  const [statusFilter, setStatusFilter] = useState<ExpenseStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<ExpenseStatus | "" | "needs_attention">("");
   const [dateRangePreset, setDateRangePreset] = useState("this-month");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
@@ -131,6 +133,15 @@ export default function ExpenseListPage() {
 
   // Satisfy state
   const [satisfyingExpenseId, setSatisfyingExpenseId] = useState<string | null>(null);
+
+  // Read status filter from URL on mount (e.g., /expenses?status=needs_attention)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlStatus = params.get("status");
+    if (urlStatus) {
+      setStatusFilter(urlStatus as ExpenseStatus | "needs_attention");
+    }
+  }, []);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -153,38 +164,60 @@ export default function ExpenseListPage() {
       }
 
       try {
-        // Build filters
-        const filters: ExpenseFilters = {
+        // Build base filters (everything except status)
+        const baseFilters: Omit<ExpenseFilters, "status"> & { status?: ExpenseStatus } = {
           limit: ITEMS_PER_PAGE,
           offset,
         };
 
         if (categoryFilter) {
-          filters.category = categoryFilter;
-        }
-        if (statusFilter) {
-          filters.status = statusFilter;
+          baseFilters.category = categoryFilter;
         }
 
         // Handle date range
         if (dateRangePreset === "custom") {
-          if (customStartDate) filters.startDate = customStartDate;
-          if (customEndDate) filters.endDate = customEndDate;
+          if (customStartDate) baseFilters.startDate = customStartDate;
+          if (customEndDate) baseFilters.endDate = customEndDate;
         } else if (dateRangePreset !== "all") {
           const { startDate, endDate } = getDateRange(dateRangePreset);
-          if (startDate) filters.startDate = startDate;
-          if (endDate) filters.endDate = endDate;
+          if (startDate) baseFilters.startDate = startDate;
+          if (endDate) baseFilters.endDate = endDate;
         }
 
-        const data = await getExpenses(user.id, meData.family.id, filters);
+        // "Needs Attention" fetches multiple statuses and merges
+        if (statusFilter === "needs_attention") {
+          const results = await Promise.all(
+            NEEDS_ATTENTION_STATUSES.map((status) =>
+              getExpenses(user.id, meData.family!.id, { ...baseFilters, status, limit: 100, offset: 0 })
+            )
+          );
+          const merged = results
+            .flatMap((r) => r.expenses)
+            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+          const total = results.reduce((sum, r) => sum + r.pagination.total, 0);
 
-        if (append) {
-          setExpenses((prev) => [...prev, ...data.expenses]);
+          if (append) {
+            setExpenses((prev) => [...prev, ...merged]);
+          } else {
+            setExpenses(merged);
+          }
+          setTotalExpenses(total);
+          setCurrentOffset(merged.length);
         } else {
-          setExpenses(data.expenses);
+          if (statusFilter) {
+            baseFilters.status = statusFilter;
+          }
+
+          const data = await getExpenses(user.id, meData.family.id, baseFilters);
+
+          if (append) {
+            setExpenses((prev) => [...prev, ...data.expenses]);
+          } else {
+            setExpenses(data.expenses);
+          }
+          setTotalExpenses(data.pagination.total);
+          setCurrentOffset(offset + data.expenses.length);
         }
-        setTotalExpenses(data.pagination.total);
-        setCurrentOffset(offset + data.expenses.length);
       } catch (error) {
         console.error("Failed to fetch expenses:", error);
       } finally {
@@ -429,7 +462,7 @@ export default function ExpenseListPage() {
                 <select
                   id="status"
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | "")}
+                  onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | "" | "needs_attention")}
                   className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {STATUS_OPTIONS.map((opt) => (
