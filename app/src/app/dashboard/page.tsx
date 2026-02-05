@@ -39,18 +39,23 @@ function formatCategory(category: string): string {
 function getStatusColor(status: string): string {
   switch (status) {
     case "posted":
-      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
     case "questioned":
-      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+      return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+    case "pending_satisfaction":
+      return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400";
     case "resolved":
+      return "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400";
     case "resolved_creator_decided":
       return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
     case "resolved_personal":
+      return "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
     case "resolved_deleted":
+      return "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
     case "closed_unresolved":
-      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+      return "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400";
     default:
-      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
   }
 }
 
@@ -83,6 +88,8 @@ export default function DashboardPage() {
   // Setup wizard expand/collapse state
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [setupExpandedForEdits, setSetupExpandedForEdits] = useState(false);
+  // Attention expenses state
+  const [attentionExpenses, setAttentionExpenses] = useState<Expense[]>([]);
 
   const fetchUserData = useCallback(async () => {
     if (!user) return;
@@ -98,7 +105,7 @@ export default function DashboardPage() {
         setIsLoadingExpenses(true);
         setIsLoadingBalance(true);
         try {
-          const [expenseData, balanceData, invitesData, childrenData, fixedExpenseData] = await Promise.all([
+          const [expenseData, balanceData, invitesData, childrenData, fixedExpenseData, ...attentionResults] = await Promise.all([
             getExpenses(user.id, data.family.id, { limit: 5 }),
             getBalance(user.id, data.family.id),
             // Only fetch pending invites if user is parent_a and no parent_b
@@ -107,12 +114,29 @@ export default function DashboardPage() {
               : Promise.resolve({ invites: [] }),
             getChildren(user.id, data.family.id),
             getFixedExpenses(user.id, data.family.id),
+            // Fetch attention expenses only when partner exists
+            ...(data.family.parent_b_id !== null
+              ? [
+                  getExpenses(user.id, data.family.id, { status: "questioned", limit: 10 }),
+                  getExpenses(user.id, data.family.id, { status: "pending_satisfaction", limit: 10 }),
+                ]
+              : []),
           ]);
           setExpenses(expenseData.expenses);
           setBalance(balanceData);
           setPendingInvites(invitesData.invites.filter(i => !i.is_expired));
           setChildren(childrenData.children);
           setFixedExpenses(fixedExpenseData.fixedExpenses);
+
+          // Merge and sort attention expenses
+          if (data.family.parent_b_id !== null && attentionResults.length === 2) {
+            const questioned = (attentionResults[0] as { expenses: Expense[] }).expenses;
+            const pendingSatisfaction = (attentionResults[1] as { expenses: Expense[] }).expenses;
+            const merged = [...questioned, ...pendingSatisfaction].sort(
+              (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
+            setAttentionExpenses(merged);
+          }
         } catch (err) {
           console.error("Failed to fetch data:", err);
         } finally {
@@ -272,7 +296,7 @@ export default function DashboardPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
@@ -314,21 +338,24 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
+              KE
+            </div>
+            <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Kid Expenses
             </h1>
             {isSetupComplete && meData?.family?.name && (
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="hidden text-sm text-slate-500 dark:text-slate-400 sm:inline">
                 {meData.family.name}
               </span>
             )}
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
+            <span className="hidden text-sm text-slate-600 dark:text-slate-400 sm:inline">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
             <UserButton afterSignOutUrl="/" />
@@ -339,12 +366,12 @@ export default function DashboardPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         {/* Loading/Error State */}
         {syncStatus === "pending" && (
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-sm text-zinc-500">Loading your data...</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+            <p className="text-sm text-slate-500">Loading your data...</p>
           </div>
         )}
         {syncStatus === "error" && (
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
             <p className="text-sm text-red-600 dark:text-red-400">
               Failed to load data. Please refresh the page.
             </p>
@@ -354,11 +381,11 @@ export default function DashboardPage() {
         {/* No Family - Show Welcome and Create/Join Options */}
         {syncStatus === "synced" && !hasFamily && (
           <>
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
                 Welcome, {user?.firstName || "there"}!
               </h2>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 Get started by creating a family or joining one with an invite
                 code.
               </p>
@@ -366,24 +393,24 @@ export default function DashboardPage() {
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <Link
                 href="/family/create"
-                className="rounded-lg border border-zinc-200 bg-white p-6 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+                className="rounded-lg border border-slate-200 bg-white p-6 transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
               >
-                <h3 className="mb-2 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                <h3 className="mb-2 text-lg font-medium text-slate-900 dark:text-slate-100">
                   Create a Family
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Start tracking expenses and invite your co-parent to join
                 </p>
               </Link>
 
               <Link
                 href="/family/join"
-                className="rounded-lg border border-zinc-200 bg-white p-6 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
+                className="rounded-lg border border-slate-200 bg-white p-6 transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
               >
-                <h3 className="mb-2 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                <h3 className="mb-2 text-lg font-medium text-slate-900 dark:text-slate-100">
                   Join a Family
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Have an invite code? Join your co-parent&apos;s family
                 </p>
               </Link>
@@ -395,28 +422,28 @@ export default function DashboardPage() {
         {syncStatus === "synced" && hasFamily && !isSetupComplete && (
           <>
             {/* Setup Wizard Card */}
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
               {allStepsComplete && !setupExpandedForEdits ? (
                 /* All steps complete - minimal state */
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
-                      <svg className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                      <svg className="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-lg font-medium text-green-800 dark:text-green-300">
+                      <h2 className="text-lg font-medium text-emerald-800 dark:text-emerald-300">
                         Setup Complete
                       </h2>
-                      <p className="text-sm text-green-600 dark:text-green-400">
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400">
                         All steps finished. You&apos;re ready to track expenses!
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setSetupExpandedForEdits(true)}
-                    className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     Edit settings
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,17 +456,17 @@ export default function DashboardPage() {
                 <>
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="mb-2 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                      <h2 className="mb-2 text-lg font-medium text-slate-900 dark:text-slate-100">
                         {allStepsComplete ? 'Setup Settings' : 'Complete Your Setup'}
                       </h2>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         {allStepsComplete ? 'Review and edit your setup.' : 'Finish these steps to start tracking expenses.'}
                       </p>
                     </div>
                     {allStepsComplete && (
                       <button
                         onClick={() => setSetupExpandedForEdits(false)}
-                        className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                       >
                         Collapse
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,29 +479,29 @@ export default function DashboardPage() {
                   {/* Setup Steps */}
                   <div className="space-y-4">
                     {/* Step 1: Add Kids */}
-                    <div className={`rounded-lg border p-4 ${stepCompletion.kids ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800'}`}>
+                    <div className={`rounded-lg border p-4 ${stepCompletion.kids ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' : 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800'}`}>
                       <button
                         onClick={() => toggleSection('kids')}
                         className="flex w-full items-center justify-between"
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.kids ? 'bg-green-100 dark:bg-green-900/50' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.kids ? 'bg-emerald-100 dark:bg-emerald-900/50' : 'bg-slate-200 dark:bg-slate-700'}`}>
                             {stepCompletion.kids ? (
-                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             ) : (
-                              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">1</span>
+                              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">1</span>
                             )}
                           </div>
                           <div className="flex-1">
-                            <h3 className={`font-medium ${stepCompletion.kids ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                            <h3 className={`font-medium ${stepCompletion.kids ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>
                               {stepCompletion.kids ? `Kids: ${children.map(c => c.name).join(', ')}` : 'Add your kids'}
                             </h3>
                           </div>
                         </div>
                         <svg
-                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('kids') ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 text-slate-400 transition-transform ${isSectionExpanded('kids') ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -487,7 +514,7 @@ export default function DashboardPage() {
                           {stepCompletion.kids ? (
                             <Link
                               href="/settings/children"
-                              className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                              className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-200"
                             >
                               Edit kids
                               <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -496,12 +523,12 @@ export default function DashboardPage() {
                             </Link>
                           ) : (
                             <>
-                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                              <p className="text-sm text-slate-500 dark:text-slate-400">
                                 Add your kids to track expenses by kid.
                               </p>
                               <Link
                                 href="/settings/children"
-                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
                               >
                                 Add kids
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -515,32 +542,32 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Step 2: Recurring Expenses */}
-                    <div className={`rounded-lg border p-4 ${stepCompletion.recurring ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800'}`}>
+                    <div className={`rounded-lg border p-4 ${stepCompletion.recurring ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' : 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800'}`}>
                       <button
                         onClick={() => toggleSection('recurring')}
                         className="flex w-full items-center justify-between"
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.recurring ? 'bg-green-100 dark:bg-green-900/50' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.recurring ? 'bg-emerald-100 dark:bg-emerald-900/50' : 'bg-slate-200 dark:bg-slate-700'}`}>
                             {stepCompletion.recurring ? (
-                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             ) : (
-                              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">2</span>
+                              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">2</span>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <h3 className={`font-medium ${stepCompletion.recurring ? 'text-green-800 dark:text-green-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                            <h3 className={`font-medium ${stepCompletion.recurring ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>
                               {stepCompletion.recurring ? `${fixedExpenses.length} recurring expense${fixedExpenses.length > 1 ? 's' : ''} set up` : 'Set up recurring expenses'}
                             </h3>
                             {!stepCompletion.recurring && (
-                              <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">Optional</span>
+                              <span className="rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">Optional</span>
                             )}
                           </div>
                         </div>
                         <svg
-                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('recurring') ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 text-slate-400 transition-transform ${isSectionExpanded('recurring') ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -552,12 +579,12 @@ export default function DashboardPage() {
                         <div className="mt-4 ml-12">
                           {stepCompletion.recurring ? (
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-green-700 dark:text-green-400">
+                              <span className="text-sm text-emerald-700 dark:text-emerald-400">
                                 {fixedExpenses.map(e => e.description).join(', ')}
                               </span>
                               <Link
                                 href="/settings/fixed-expenses"
-                                className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200"
+                                className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-200"
                               >
                                 Edit
                                 <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -567,12 +594,12 @@ export default function DashboardPage() {
                             </div>
                           ) : (
                             <>
-                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                              <p className="text-sm text-slate-500 dark:text-slate-400">
                                 Automatically track regular monthly expenses like tuition or childcare.
                               </p>
                               <Link
                                 href="/settings/fixed-expenses"
-                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
                               >
                                 Set up recurring expenses
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -586,27 +613,27 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Step 3: Invite Co-parent */}
-                    <div className={`rounded-lg border p-4 ${stepCompletion.coparent ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'}`}>
+                    <div className={`rounded-lg border p-4 ${stepCompletion.coparent ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'}`}>
                       <button
                         onClick={() => toggleSection('coparent')}
                         className="flex w-full items-center justify-between"
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.coparent ? 'bg-green-100 dark:bg-green-900/50' : 'bg-amber-100 dark:bg-amber-900/50'}`}>
+                          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${stepCompletion.coparent ? 'bg-emerald-100 dark:bg-emerald-900/50' : 'bg-amber-100 dark:bg-amber-900/50'}`}>
                             {stepCompletion.coparent ? (
-                              <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             ) : (
                               <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">3</span>
                             )}
                           </div>
-                          <h3 className={`font-medium ${stepCompletion.coparent ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'}`}>
+                          <h3 className={`font-medium ${stepCompletion.coparent ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
                             {stepCompletion.coparent ? 'Co-parent joined' : 'Invite your co-parent'}
                           </h3>
                         </div>
                         <svg
-                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('coparent') ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 text-slate-400 transition-transform ${isSectionExpanded('coparent') ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -617,7 +644,7 @@ export default function DashboardPage() {
                       {isSectionExpanded('coparent') && (
                         <div className="mt-4 ml-12">
                           {stepCompletion.coparent ? (
-                            <p className="text-sm text-green-700 dark:text-green-400">
+                            <p className="text-sm text-emerald-700 dark:text-emerald-400">
                               Your co-parent has joined the family.
                             </p>
                           ) : (
@@ -649,19 +676,19 @@ export default function DashboardPage() {
 
                                   {/* Success/Feedback Messages */}
                                   {inviteSuccess && (
-                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
-                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="flex items-center gap-2 rounded-lg bg-emerald-100 p-3 dark:bg-emerald-900/30">
+                                      <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                       </svg>
-                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite shared!</p>
+                                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Invite shared!</p>
                                     </div>
                                   )}
                                   {copyLinkSuccess && !inviteSuccess && (
-                                    <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
-                                      <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="flex items-center gap-2 rounded-lg bg-emerald-100 p-3 dark:bg-emerald-900/30">
+                                      <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                       </svg>
-                                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Invite link copied!</p>
+                                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Invite link copied!</p>
                                     </div>
                                   )}
                                   {inviteError && (
@@ -701,23 +728,23 @@ export default function DashboardPage() {
                                     {isGeneratingInvite ? 'Loading...' : (showCodeFallback ? 'Hide invite code' : 'Or share code manually')}
                                   </button>
                                   {showCodeFallback && inviteCode && (
-                                    <div className="rounded-lg bg-zinc-100 p-3 dark:bg-zinc-800">
-                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+                                    <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-800">
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
                                         Your co-parent can enter this code at the &quot;Join a Family&quot; page.
                                       </p>
                                       <div className="flex items-center gap-2">
-                                        <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-lg tracking-widest text-center border dark:bg-zinc-900 dark:text-zinc-100">
+                                        <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-lg tracking-widest text-center border dark:bg-slate-900 dark:text-slate-100">
                                           {inviteCode}
                                         </code>
                                         <button
                                           onClick={(e) => { e.stopPropagation(); handleCopyInvite(); }}
-                                          className="rounded bg-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200"
+                                          className="rounded bg-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200"
                                         >
                                           {copySuccess ? 'Copied!' : 'Copy'}
                                         </button>
                                       </div>
                                       {inviteExpiresAt && (
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+                                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-mono">
                                           Expires {new Date(inviteExpiresAt).toLocaleDateString()}
                                         </p>
                                       )}
@@ -737,23 +764,23 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Step 4: Set Split Ratio */}
-                    <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
                       <button
                         onClick={() => toggleSection('split')}
                         className="flex w-full items-center justify-between"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
-                            <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                            <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
-                          <h3 className="font-medium text-green-800 dark:text-green-300">
+                          <h3 className="font-medium text-emerald-800 dark:text-emerald-300">
                             Split ratio set ({Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%)
                           </h3>
                         </div>
                         <svg
-                          className={`h-5 w-5 text-zinc-400 transition-transform ${isSectionExpanded('split') ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 text-slate-400 transition-transform ${isSectionExpanded('split') ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -774,13 +801,13 @@ export default function DashboardPage() {
                                   value={splitRatioA}
                                   onChange={(e) => setSplitRatioA(Number(e.target.value))}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full h-2 rounded-lg cursor-pointer accent-green-600"
+                                  className="w-full h-2 rounded-lg cursor-pointer accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-green-700 dark:text-green-400">
+                                  <span className="text-emerald-700 dark:text-emerald-400">
                                     You: {splitRatioA}%
                                   </span>
-                                  <span className="text-green-700 dark:text-green-400">
+                                  <span className="text-emerald-700 dark:text-emerald-400">
                                     Co-parent: {100 - splitRatioA}%
                                   </span>
                                 </div>
@@ -788,7 +815,7 @@ export default function DashboardPage() {
                               {/* Number inputs */}
                               <div className="flex items-center gap-2">
                                 <div className="flex-1">
-                                  <label className="block text-xs text-green-600 dark:text-green-500 mb-1">You</label>
+                                  <label className="block text-xs text-emerald-600 dark:text-emerald-500 mb-1">You</label>
                                   <input
                                     type="number"
                                     min="0"
@@ -800,12 +827,12 @@ export default function DashboardPage() {
                                     }}
                                     onClick={(e) => e.stopPropagation()}
                                     onFocus={(e) => e.target.select()}
-                                    className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
+                                    className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-emerald-600 dark:bg-slate-800 dark:text-slate-100"
                                   />
                                 </div>
-                                <span className="text-green-600 dark:text-green-400 mt-5">/</span>
+                                <span className="text-emerald-600 dark:text-emerald-400 mt-5">/</span>
                                 <div className="flex-1">
-                                  <label className="block text-xs text-green-600 dark:text-green-500 mb-1">Co-parent</label>
+                                  <label className="block text-xs text-emerald-600 dark:text-emerald-500 mb-1">Co-parent</label>
                                   <input
                                     type="number"
                                     min="0"
@@ -817,7 +844,7 @@ export default function DashboardPage() {
                                     }}
                                     onClick={(e) => e.stopPropagation()}
                                     onFocus={(e) => e.target.select()}
-                                    className="w-full rounded-lg border border-green-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-500 focus:outline-none dark:border-green-600 dark:bg-zinc-800 dark:text-zinc-100"
+                                    className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-emerald-600 dark:bg-slate-800 dark:text-slate-100"
                                   />
                                 </div>
                               </div>
@@ -826,14 +853,14 @@ export default function DashboardPage() {
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleSaveSplitRatio(); }}
                                   disabled={isSavingSplitRatio}
-                                  className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                                 >
                                   {isSavingSplitRatio ? 'Saving...' : 'Save'}
                                 </button>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleCancelSplitRatio(); }}
                                   disabled={isSavingSplitRatio}
-                                  className="rounded-lg border border-green-300 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-900/30"
+                                  className="rounded-lg border border-emerald-300 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 dark:border-emerald-600 dark:text-emerald-300 dark:hover:bg-emerald-900/30"
                                 >
                                   Cancel
                                 </button>
@@ -842,9 +869,9 @@ export default function DashboardPage() {
                           ) : (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleEditSplitRatio(); }}
-                              className="inline-flex items-center gap-1.5 text-sm text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors group"
+                              className="inline-flex items-center gap-1.5 text-sm text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-200 transition-colors group"
                             >
-                              <span className="font-medium">
+                              <span className="font-medium font-mono">
                                 {Math.round((meData?.family?.parent_a_ratio || 0.5) * 100)}% / {Math.round((1 - (meData?.family?.parent_a_ratio || 0.5)) * 100)}%
                               </span>
                               <svg className="h-4 w-4 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -864,9 +891,9 @@ export default function DashboardPage() {
             <div className="mt-8">
               <Link
                 href="/expenses/add"
-                className="flex items-center gap-4 rounded-lg border-2 border-zinc-900 bg-zinc-900 p-5 text-white transition-colors hover:bg-zinc-800 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="flex items-center gap-4 rounded-lg border-2 border-slate-900 bg-slate-900 p-5 text-white transition-colors hover:bg-slate-800 dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 dark:bg-zinc-900/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 dark:bg-slate-900/20">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
@@ -884,39 +911,39 @@ export default function DashboardPage() {
         {syncStatus === "synced" && hasFamily && isSetupComplete && (
           <>
             {/* Balance Card */}
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <h3 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+              <h3 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
                 Balance
               </h3>
               {isLoadingBalance ? (
-                <p className="text-sm text-zinc-500">Calculating balance...</p>
+                <p className="text-sm text-slate-500">Calculating balance...</p>
               ) : balance ? (
                 <div>
                   {balance.balance_cents === 0 ? (
                     <div className="text-center py-4">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-2">
-                        <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-2">
+                        <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">Settled Up!</p>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">Settled Up!</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                         No balance between you and your co-parent
                       </p>
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                      <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 font-mono">
                         {formatCurrency(balance.balance_cents)}
                       </p>
                       <p className="text-lg mt-2">
                         {balance.payer_id === user?.id ? (
                           <span className="text-red-600 dark:text-red-400">
-                            You owe your co-parent
+                            You owe
                           </span>
                         ) : (
-                          <span className="text-green-600 dark:text-green-400">
-                            Your co-parent owes you
+                          <span className="text-indigo-600 dark:text-indigo-400">
+                            You are owed
                           </span>
                         )}
                       </p>
@@ -924,23 +951,23 @@ export default function DashboardPage() {
                   )}
 
                   {/* Summary Stats */}
-                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                  <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Total Expenses</p>
-                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                      <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-900">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Expenses</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100 font-mono">
                           {formatCurrency(balance.breakdown.total_expenses_cents)}
                         </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           {balance.breakdown.included_expenses_count} expense{balance.breakdown.included_expenses_count !== 1 ? 's' : ''}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-900">
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Your Share</p>
-                        <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                      <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-900">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Your Share</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100 font-mono">
                           {formatCurrency(isParentA ? balance.breakdown.a_share_cents : balance.breakdown.b_share_cents)}
                         </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                           {Math.round((isParentA ? (meData?.family?.parent_a_ratio || 0.5) : (1 - (meData?.family?.parent_a_ratio || 0.5))) * 100)}% of total
                         </p>
                       </div>
@@ -952,114 +979,73 @@ export default function DashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                            {balance.breakdown.questioned_count} questioned ({formatCurrency(balance.breakdown.questioned_total_cents)})
+                            {balance.breakdown.questioned_count} questioned (<span className="font-mono">{formatCurrency(balance.breakdown.questioned_total_cents)}</span>)
                           </span>
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {/* Payment Actions */}
-                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
-                    {balance.balance_cents !== 0 && balance.payer_id === user?.id && (
-                      <Link
-                        href="/payments/add"
-                        className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Record Payment
-                      </Link>
-                    )}
-                    <Link
-                      href="/payments"
-                      className="flex items-center justify-between rounded-lg border border-zinc-200 p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                          <svg className="h-4 w-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </div>
-                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">View Payment History</span>
-                      </div>
-                      <svg className="h-4 w-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  </div>
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500">No balance data available</p>
+                <p className="text-sm text-slate-500">No balance data available</p>
               )}
             </div>
 
-            {/* Primary Actions */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {/* Action Bar */}
+            <div className="mt-6 grid grid-cols-2 gap-3">
               <Link
                 href="/expenses/add"
-                className="flex items-center gap-4 rounded-lg border-2 border-zinc-900 bg-zinc-900 p-5 text-white transition-colors hover:bg-zinc-800 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 dark:bg-zinc-900/20">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold">Add Expense</h4>
-                  <p className="text-sm opacity-80">Record a new shared expense</p>
-                </div>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Expense
               </Link>
               <Link
                 href="/payments/add"
-                className="flex items-center gap-4 rounded-lg border-2 border-green-600 bg-green-600 p-5 text-white transition-colors hover:bg-green-700 dark:border-green-500 dark:bg-green-600 dark:hover:bg-green-700"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold">Record Payment</h4>
-                  <p className="text-sm opacity-80">Log a payment to your co-parent</p>
-                </div>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Record Payment
               </Link>
             </div>
 
             {/* Quick Navigation */}
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
                 href="/expenses"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
               >
-                <svg className="h-4 w-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 All Expenses
               </Link>
               <Link
                 href="/payments"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
               >
-                <svg className="h-4 w-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Payment History
               </Link>
               <Link
                 href="/activity"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
               >
-                <svg className="h-4 w-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Activity Feed
               </Link>
-              <span className="mx-1 text-zinc-300 dark:text-zinc-700">|</span>
+              <span className="mx-1 text-slate-300 dark:text-slate-700">|</span>
               <Link
                 href="/settings/children"
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -1068,7 +1054,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/settings/fixed-expenses"
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1077,62 +1063,111 @@ export default function DashboardPage() {
               </Link>
             </div>
 
+            {/* Needs Attention Section */}
+            {attentionExpenses.length > 0 && (
+              <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+                <div className="border-l-4 border-amber-400 p-4 dark:border-amber-500">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <svg className="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        Needs Attention ({attentionExpenses.length})
+                      </h3>
+                    </div>
+                    <Link
+                      href="/expenses?status=questioned"
+                      className="text-xs font-medium text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200"
+                    >
+                      View all
+                    </Link>
+                  </div>
+                  <div className="divide-y divide-amber-200 dark:divide-amber-800">
+                    {attentionExpenses.slice(0, 3).map((expense) => (
+                      <Link
+                        key={expense.id}
+                        href={`/expenses/${expense.id}`}
+                        className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-medium text-amber-900 dark:text-amber-100">
+                              {expense.description}
+                            </p>
+                            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(expense.status)}`}>
+                              {expense.status.replace(/_/g, " ")}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400 font-mono">
+                            {new Date(expense.expense_date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <p className="ml-4 shrink-0 text-sm font-semibold text-amber-900 dark:text-amber-100 font-mono">
+                          {formatCurrency(expense.amount_cents)}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Expenses Section */}
-            <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+            <div className="mt-8 rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+              <div className="flex items-center justify-between px-6 py-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Recent Expenses
                 </h3>
                 <Link
                   href="/expenses"
-                  className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                 >
                   View All
                 </Link>
               </div>
 
               {isLoadingExpenses && (
-                <p className="text-sm text-zinc-500">Loading expenses...</p>
+                <div className="px-6 pb-6">
+                  <p className="text-sm text-slate-500">Loading expenses...</p>
+                </div>
               )}
 
               {!isLoadingExpenses && expenses.length === 0 && (
-                <div className="py-8 text-center">
-                  <p className="text-zinc-600 dark:text-zinc-400">No expenses yet</p>
-                  <p className="mt-1 text-sm text-zinc-500">Add your first expense to get started</p>
+                <div className="px-6 pb-6 py-8 text-center">
+                  <p className="text-slate-600 dark:text-slate-400">No expenses yet</p>
+                  <p className="mt-1 text-sm text-slate-500">Add your first expense to get started</p>
                 </div>
               )}
 
               {!isLoadingExpenses && expenses.length > 0 && (
-                <div className="space-y-3">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {expenses.map((expense) => (
-                    <div
+                    <Link
                       key={expense.id}
-                      className="flex items-center justify-between rounded-lg border border-zinc-100 p-4 dark:border-zinc-800"
+                      href={`/expenses/${expense.id}`}
+                      className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
                     >
-                      <div className="flex-1">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                             {expense.description}
                           </p>
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(expense.status)}`}>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(expense.status)}`}>
                             {expense.status.replace(/_/g, " ")}
                           </span>
                         </div>
-                        <div className="mt-1 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+                        <div className="mt-0.5 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                           <span>{formatCategory(expense.category)}</span>
-                          <span>{new Date(expense.expense_date).toLocaleDateString()}</span>
+                          <span className="font-mono">{new Date(expense.expense_date).toLocaleDateString()}</span>
+                          <span>{expense.paid_by === user?.id ? "You paid" : "Partner paid"}</span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-semibold ${expense.amount_cents < 0 ? "text-green-600 dark:text-green-400" : "text-zinc-900 dark:text-zinc-100"}`}>
-                          {expense.amount_cents < 0 ? "-" : ""}
-                          {formatCurrency(Math.abs(expense.amount_cents))}
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {expense.paid_by === user?.id ? "You paid" : "Partner paid"}
-                        </p>
-                      </div>
-                    </div>
+                      <p className={`ml-4 shrink-0 font-semibold font-mono ${expense.amount_cents < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-slate-100"}`}>
+                        {expense.amount_cents < 0 ? "-" : ""}
+                        {formatCurrency(Math.abs(expense.amount_cents))}
+                      </p>
+                    </Link>
                   ))}
                 </div>
               )}
