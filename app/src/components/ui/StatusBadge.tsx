@@ -19,7 +19,7 @@ const statusLabelMap: Record<ExpenseStatus, string> = {
   questioned: "Questioned",
   pending_satisfaction: "Pending",
   resolved: "Resolved",
-  resolved_creator_decided: "Auto-Resolved",
+  resolved_creator_decided: "Resolved (timeout)",
   resolved_personal: "Personal",
   resolved_deleted: "Deleted",
   closed_unresolved: "Unresolved",
