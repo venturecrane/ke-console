@@ -20,6 +20,11 @@ import {
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { canQuestion, canRespond, canSatisfy } from "@/lib/expenseActions";
 import {
+  renderTimelineEvent,
+  formatReasonLabel,
+  formatResolutionLabel,
+} from "@/lib/timelineUtils";
+import {
   Button,
   Card,
   CardBody,
@@ -47,114 +52,6 @@ const RESOLUTION_ACTIONS: {
   { value: "personal", label: "Mark as Personal", description: "Won't count in split" },
   { value: "delete", label: "Delete Expense", description: "Remove this expense" },
 ];
-
-function formatReasonLabel(reason: string): string {
-  return QUESTION_REASONS.find((r) => r.value === reason)?.label || reason;
-}
-
-function formatResolutionLabel(action: string): string {
-  switch (action) {
-    case "keep":
-    case "kept":
-      return "Keep as-is";
-    case "edit":
-    case "edited":
-      return "Edit amount";
-    case "personal":
-      return "Mark as personal";
-    case "delete":
-    case "deleted":
-      return "Delete expense";
-    default:
-      return action;
-  }
-}
-
-// ---------- Timeline rendering ----------
-
-function renderTimelineEvent(
-  event: ActivityEvent,
-  currentUserId: string
-): { label: string; detail?: string; note?: string } | null {
-  const actor =
-    event.user_id === currentUserId
-      ? "You"
-      : event.user_name || event.user_email;
-  const after = event.after_snapshot as Record<string, unknown> | null;
-  const meta = event.metadata as Record<string, unknown> | null;
-
-  switch (event.event_type) {
-    case "expense.created": {
-      const amount =
-        typeof after?.amount_cents === "number"
-          ? formatCurrency(after.amount_cents)
-          : "";
-      const category =
-        typeof after?.category === "string"
-          ? formatCategory(after.category)
-          : "";
-      return {
-        label: `${actor} added this expense`,
-        detail: [amount, category].filter(Boolean).join(" · "),
-      };
-    }
-    case "expense.edited": {
-      const newAmount =
-        typeof after?.amount_cents === "number"
-          ? formatCurrency(after.amount_cents)
-          : null;
-      return {
-        label: `${actor} edited this expense`,
-        detail: newAmount ? `Amount changed to ${newAmount}` : undefined,
-      };
-    }
-    case "expense.questioned": {
-      const reason =
-        typeof meta?.reason === "string"
-          ? formatReasonLabel(meta.reason)
-          : typeof after?.question_reason === "string"
-            ? formatReasonLabel(after.question_reason)
-            : null;
-      const note =
-        typeof meta?.note === "string"
-          ? meta.note
-          : typeof after?.question_note === "string"
-            ? (after.question_note as string)
-            : null;
-      return {
-        label: `${actor} questioned this expense`,
-        detail: reason ? `Reason: ${reason}` : undefined,
-        note: note || undefined,
-      };
-    }
-    case "expense.resolved": {
-      const action =
-        typeof meta?.action === "string"
-          ? formatResolutionLabel(meta.action)
-          : typeof after?.resolution_action === "string"
-            ? formatResolutionLabel(after.resolution_action as string)
-            : null;
-      const note =
-        typeof meta?.note === "string" ? meta.note : undefined;
-      return {
-        label: `${actor} responded: ${action || "resolved"}`,
-        note: note as string | undefined,
-      };
-    }
-    case "expense.satisfied":
-      return {
-        label: `${actor} confirmed — expense resolved`,
-      };
-    default:
-      // Fallback for unknown event types (e.g. expense.generated, timeout)
-      if (event.event_type === "expense.generated") {
-        return {
-          label: "Auto-resolved after 7 days — no response from questioner",
-        };
-      }
-      return null;
-  }
-}
 
 // ---------- Page component ----------
 

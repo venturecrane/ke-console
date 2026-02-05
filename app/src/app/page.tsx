@@ -55,6 +55,11 @@ export default async function Home() {
               Sign In
             </Button>
           </Link>
+          <Link href="/demo">
+            <Button variant="ghost" size="lg" className="px-8">
+              See How It Works
+            </Button>
+          </Link>
         </div>
       </main>
     </div>
