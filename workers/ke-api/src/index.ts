@@ -2558,12 +2558,14 @@ app.get('/families/:id/activity', async (c) => {
       return c.json({ error: 'Not authorized to view this family\'s activity' }, 403);
     }
 
-    const limit = parseInt(c.req.query('limit') || '20');
+    const rawLimit = parseInt(c.req.query('limit') || '20');
+    const limit = Math.min(Math.max(rawLimit, 1), 100);
     const offset = parseInt(c.req.query('offset') || '0');
     const typeFilter = c.req.query('type'); // expenses, payments, fixed_expenses, disputes, children
     const search = c.req.query('search');
     const startDate = c.req.query('startDate');
     const endDate = c.req.query('endDate');
+    const expenseId = c.req.query('expense_id');
 
     // Build query with filters
     let query = `SELECT ae.*, u.email as user_email, u.name as user_name
@@ -2571,6 +2573,12 @@ app.get('/families/:id/activity', async (c) => {
        LEFT JOIN users u ON ae.user_id = u.id
        WHERE ae.family_id = ?`;
     const params: (string | number)[] = [familyId];
+
+    // Expense ID filter - scope activity to a single expense
+    if (expenseId) {
+      query += ` AND ae.target_id = ?`;
+      params.push(expenseId);
+    }
 
     // Type filter - map category to event types
     if (typeFilter) {
@@ -2627,6 +2635,11 @@ app.get('/families/:id/activity', async (c) => {
        LEFT JOIN users u ON ae.user_id = u.id
        WHERE ae.family_id = ?`;
     const countParams: (string | number)[] = [familyId];
+
+    if (expenseId) {
+      countQuery += ` AND ae.target_id = ?`;
+      countParams.push(expenseId);
+    }
 
     if (typeFilter) {
       let eventTypes: string[] = [];

@@ -324,7 +324,7 @@ function getEventDescription(
 function getEventLink(event: ActivityEvent): string | null {
   switch (event.target_type) {
     case "expense":
-      return `/expenses`;
+      return `/expenses/${event.target_id}`;
     case "payment":
       return `/payments`;
     case "child":
