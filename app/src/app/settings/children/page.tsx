@@ -115,20 +115,20 @@ export default function ChildrenSettingsPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
 
   if (!meData?.family) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-        <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 <svg
                   className="h-5 w-5"
@@ -144,7 +144,7 @@ export default function ChildrenSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                 Manage Kids
               </h1>
             </div>
@@ -152,13 +152,13 @@ export default function ChildrenSettingsPage() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-zinc-600 dark:text-zinc-400">
+          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-slate-600 dark:text-slate-400">
               You need to create or join a family first.
             </p>
             <Link
               href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
             >
               Go to Dashboard
             </Link>
@@ -169,13 +169,13 @@ export default function ChildrenSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               <svg
                 className="h-5 w-5"
@@ -191,7 +191,7 @@ export default function ChildrenSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Manage Kids
             </h1>
           </div>
@@ -208,8 +208,8 @@ export default function ChildrenSettingsPage() {
         )}
 
         {/* Add Child Form */}
-        <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-100">
             Add a Kid
           </h2>
           <form onSubmit={handleAddChild} className="flex gap-3">
@@ -223,7 +223,7 @@ export default function ChildrenSettingsPage() {
                 }}
                 placeholder="Kid's name"
                 maxLength={100}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
               />
               {addError && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -234,7 +234,7 @@ export default function ChildrenSettingsPage() {
             <button
               type="submit"
               disabled={isAdding || !newChildName.trim()}
-              className="rounded-lg bg-zinc-900 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isAdding ? "Adding..." : "Add Kid"}
             </button>
@@ -242,25 +242,25 @@ export default function ChildrenSettingsPage() {
         </div>
 
         {/* Children List */}
-        <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-            <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">
               Kids ({children.length})
             </h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Add kids to tag expenses to specific family members.
             </p>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-zinc-500">Loading kids...</p>
+              <p className="text-slate-500">Loading kids...</p>
             </div>
           ) : children.length === 0 ? (
             <div className="py-12 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
                 <svg
-                  className="h-6 w-6 text-zinc-400"
+                  className="h-6 w-6 text-slate-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -273,29 +273,29 @@ export default function ChildrenSettingsPage() {
                   />
                 </svg>
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400">No kids added yet</p>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-slate-600 dark:text-slate-400">No kids added yet</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Add your kids above to tag expenses to them.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
               {children.map((child) => (
                 <li
                   key={child.id}
                   className="flex items-center justify-between px-6 py-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                      <span className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                      <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
                         {child.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                      <p className="font-medium text-slate-900 dark:text-slate-100">
                         {child.name}
                       </p>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
                         Added {new Date(child.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -303,7 +303,7 @@ export default function ChildrenSettingsPage() {
 
                   {showDeleteConfirm === child.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
                         Delete?
                       </span>
                       <button
@@ -316,7 +316,7 @@ export default function ChildrenSettingsPage() {
                       <button
                         onClick={() => setShowDeleteConfirm(null)}
                         disabled={deletingChildId === child.id}
-                        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
                         No
                       </button>
@@ -324,7 +324,7 @@ export default function ChildrenSettingsPage() {
                   ) : (
                     <button
                       onClick={() => setShowDeleteConfirm(child.id)}
-                      className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-800 dark:hover:text-red-400"
                       title="Delete kid"
                     >
                       <svg

@@ -11,53 +11,48 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-900">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
       <main className="flex max-w-2xl flex-col items-center text-center">
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-5xl">
-          Kid Expenses
+        <h1 className="mb-4 text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
+          The shared ledger for co-parents.
         </h1>
-        <p className="mb-2 text-xl text-zinc-600 dark:text-zinc-400">
-          Simple expense tracking for co-parents
-        </p>
-        <p className="mb-8 text-lg text-zinc-500 dark:text-zinc-500">
-          Stay organized together, effortlessly.
+        <p className="mb-12 text-lg text-slate-600 dark:text-slate-400">
+          A neutral space to track shared costs. No guesswork, no arguments — just clear numbers.
         </p>
 
-        <div className="mb-12 max-w-lg text-zinc-600 dark:text-zinc-400">
-          <p className="mb-4">
-            A shared space to track kid-related expenses. Log costs, set up
-            recurring expenses, and always know where things stand.
-          </p>
-          <ul className="inline-flex flex-col items-start space-y-2">
-            <li className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Quick and easy expense logging
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Set up recurring expenses once
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Flexible split ratios that work for you
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400">&#10003;</span>
-              Clear running balance at a glance
-            </li>
-          </ul>
+        <div className="mb-12 w-full max-w-lg space-y-3">
+          <div className="border-l-2 border-indigo-500/60 pl-4 py-2">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Log expenses with category, date, and receipt link
+            </p>
+          </div>
+          <div className="border-l-2 border-indigo-500/60 pl-4 py-2">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Recurring expenses post automatically each month
+            </p>
+          </div>
+          <div className="border-l-2 border-indigo-500/60 pl-4 py-2">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Configurable split ratios with full audit trail
+            </p>
+          </div>
+          <div className="border-l-2 border-indigo-500/60 pl-4 py-2">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Running balance calculated to the cent
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
           <Link
             href="/sign-up"
-            className="flex h-12 items-center justify-center rounded-lg bg-zinc-900 px-8 font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="flex h-12 items-center justify-center rounded-lg bg-indigo-600 px-8 font-medium text-white transition-colors hover:bg-indigo-700"
           >
             Get Started
           </Link>
           <Link
             href="/sign-in"
-            className="flex h-12 items-center justify-center rounded-lg border border-zinc-300 px-8 font-medium text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="flex h-12 items-center justify-center rounded-lg border border-slate-300 px-8 font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             Sign In
           </Link>

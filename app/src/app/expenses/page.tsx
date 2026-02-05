@@ -81,7 +81,7 @@ function formatCategory(category: string): string {
 function getStatusColor(status: string): string {
   switch (status) {
     case "posted":
-      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-emerald-400";
     case "questioned":
       return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
     case "pending_satisfaction":
@@ -92,9 +92,9 @@ function getStatusColor(status: string): string {
     case "resolved_personal":
     case "resolved_deleted":
     case "closed_unresolved":
-      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
     default:
-      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
   }
 }
 
@@ -380,19 +380,19 @@ export default function ExpenseListPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-slate-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               <svg
                 className="h-5 w-5"
@@ -408,14 +408,14 @@ export default function ExpenseListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               Expenses
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <Link
               href="/expenses/add"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
             >
               Add Expense
             </Link>
@@ -426,13 +426,13 @@ export default function ExpenseListPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Filters */}
-        <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-wrap gap-4">
             {/* Category Filter */}
             <div className="flex-1 min-w-[150px]">
               <label
                 htmlFor="category"
-                className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400"
+                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
               >
                 Category
               </label>
@@ -440,7 +440,7 @@ export default function ExpenseListPage() {
                 id="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value as ExpenseCategory | "")}
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -454,7 +454,7 @@ export default function ExpenseListPage() {
             <div className="flex-1 min-w-[150px]">
               <label
                 htmlFor="status"
-                className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400"
+                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
               >
                 Status
               </label>
@@ -462,7 +462,7 @@ export default function ExpenseListPage() {
                 id="status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | "")}
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               >
                 {STATUS_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -476,7 +476,7 @@ export default function ExpenseListPage() {
             <div className="flex-1 min-w-[150px]">
               <label
                 htmlFor="dateRange"
-                className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400"
+                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
               >
                 Date Range
               </label>
@@ -484,7 +484,7 @@ export default function ExpenseListPage() {
                 id="dateRange"
                 value={dateRangePreset}
                 onChange={(e) => setDateRangePreset(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               >
                 {DATE_RANGE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -501,7 +501,7 @@ export default function ExpenseListPage() {
               <div className="flex-1 min-w-[150px]">
                 <label
                   htmlFor="startDate"
-                  className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400"
+                  className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
                 >
                   Start Date
                 </label>
@@ -510,13 +510,13 @@ export default function ExpenseListPage() {
                   id="startDate"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
               <div className="flex-1 min-w-[150px]">
                 <label
                   htmlFor="endDate"
-                  className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400"
+                  className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
                 >
                   End Date
                 </label>
@@ -525,7 +525,7 @@ export default function ExpenseListPage() {
                   id="endDate"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -533,7 +533,7 @@ export default function ExpenseListPage() {
         </div>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
           {isLoading ? (
             "Loading..."
           ) : (
@@ -546,14 +546,14 @@ export default function ExpenseListPage() {
         {/* Expense List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-zinc-500">Loading expenses...</p>
+            <p className="text-slate-500">Loading expenses...</p>
           </div>
         ) : expenses.length === 0 ? (
-          <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
               No expenses found
             </p>
-            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+            <p className="mt-2 text-slate-500 dark:text-slate-400">
               {categoryFilter || statusFilter
                 ? "Try adjusting your filters"
                 : "No expenses for this time period"}
@@ -561,7 +561,7 @@ export default function ExpenseListPage() {
             {!categoryFilter && !statusFilter && (
               <Link
                 href="/expenses/add"
-                className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="mt-4 inline-block rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
               >
                 Add First Expense
               </Link>
@@ -572,12 +572,12 @@ export default function ExpenseListPage() {
             {expenses.map((expense) => (
               <div
                 key={expense.id}
-                className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                      <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
                         {expense.description}
                       </p>
                       <span
@@ -586,7 +586,7 @@ export default function ExpenseListPage() {
                         {formatStatus(expense.status)}
                       </span>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
                       <span className="inline-flex items-center gap-1">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -597,7 +597,7 @@ export default function ExpenseListPage() {
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {new Date(expense.expense_date).toLocaleDateString()}
+                        <span className="font-mono">{new Date(expense.expense_date).toLocaleDateString()}</span>
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -607,17 +607,17 @@ export default function ExpenseListPage() {
                       </span>
                     </div>
                     {expense.memo && (
-                      <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
                         {expense.memo}
                       </p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
                     <p
-                      className={`text-lg font-semibold ${
+                      className={`text-lg font-semibold font-mono ${
                         expense.amount_cents < 0
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-zinc-900 dark:text-zinc-100"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-slate-900 dark:text-slate-100"
                       }`}
                     >
                       {expense.amount_cents < 0 && "("}
@@ -680,7 +680,7 @@ export default function ExpenseListPage() {
                     <button
                       onClick={() => handleSatisfyExpense(expense.id)}
                       disabled={satisfyingExpenseId === expense.id}
-                      className="rounded-lg border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40"
+                      className="rounded-lg border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 dark:border-green-700 dark:bg-green-900/20 dark:text-emerald-400 dark:hover:bg-green-900/40"
                     >
                       {satisfyingExpenseId === expense.id ? "..." : "Satisfied"}
                     </button>
@@ -697,7 +697,7 @@ export default function ExpenseListPage() {
             <button
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="rounded-lg border border-zinc-300 px-6 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {isLoadingMore ? "Loading..." : "Load More"}
             </button>
@@ -708,12 +708,12 @@ export default function ExpenseListPage() {
       {/* Question Modal */}
       {questionModalExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
-            <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
+            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
               Question Expense
             </h3>
-            <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              Questioning: <strong>{questionModalExpense.description}</strong> ({formatCurrency(questionModalExpense.amount_cents)})
+            <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+              Questioning: <strong>{questionModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(questionModalExpense.amount_cents)}</span>)
             </p>
 
             {questionError && (
@@ -723,13 +723,13 @@ export default function ExpenseListPage() {
             )}
 
             <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Reason *
               </label>
               <select
                 value={questionReason}
                 onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 {QUESTION_REASONS.map((reason) => (
                   <option key={reason.value} value={reason.value}>
@@ -740,7 +740,7 @@ export default function ExpenseListPage() {
             </div>
 
             <div className="mb-6">
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Note (optional)
               </label>
               <textarea
@@ -748,7 +748,7 @@ export default function ExpenseListPage() {
                 onChange={(e) => setQuestionNote(e.target.value)}
                 placeholder="Add additional details..."
                 rows={3}
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               />
             </div>
 
@@ -761,7 +761,7 @@ export default function ExpenseListPage() {
                   setQuestionError(null);
                 }}
                 disabled={isQuestioning}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>
@@ -780,12 +780,12 @@ export default function ExpenseListPage() {
       {/* Resolve Modal */}
       {resolveModalExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900">
-            <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
+            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
               Respond to Question
             </h3>
-            <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
-              Expense: <strong>{resolveModalExpense.description}</strong> ({formatCurrency(resolveModalExpense.amount_cents)})
+            <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">
+              Expense: <strong>{resolveModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(resolveModalExpense.amount_cents)}</span>)
             </p>
             {resolveModalExpense.question_reason && (
               <p className="mb-4 text-sm text-yellow-600 dark:text-yellow-400">
@@ -807,7 +807,7 @@ export default function ExpenseListPage() {
                   className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                     resolveAction === action.value
                       ? "border-blue-500 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20"
-                      : "border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                      : "border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
                   }`}
                 >
                   <input
@@ -819,10 +819,10 @@ export default function ExpenseListPage() {
                     className="h-4 w-4 text-blue-600"
                   />
                   <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                       {action.label}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {action.description}
                     </p>
                   </div>
@@ -832,7 +832,7 @@ export default function ExpenseListPage() {
 
             {resolveAction === "edit" && (
               <div className="mb-6">
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   New Amount ($)
                 </label>
                 <input
@@ -841,7 +841,7 @@ export default function ExpenseListPage() {
                   min="0.01"
                   value={resolveNewAmount}
                   onChange={(e) => setResolveNewAmount(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
             )}
@@ -855,7 +855,7 @@ export default function ExpenseListPage() {
                   setResolveError(null);
                 }}
                 disabled={isResolving}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>

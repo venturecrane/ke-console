@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -46,6 +47,20 @@ export default function RootLayout({
       localization={{
         userButton: {
           action__manageAccount: "Settings",
+        },
+      }}
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: "#4f46e5",
+          colorBackground: "#0f172a",
+          colorInputBackground: "#1e293b",
+          colorInputText: "#e2e8f0",
+          fontFamily: "var(--font-geist-sans), Arial, Helvetica, sans-serif",
+        },
+        elements: {
+          card: "shadow-none border border-slate-800",
+          formButtonPrimary: "bg-indigo-600 hover:bg-indigo-700",
         },
       }}
     >
