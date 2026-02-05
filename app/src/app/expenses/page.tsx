@@ -17,6 +17,15 @@ import {
   type QuestionReason,
   type ResolutionAction,
 } from "@/lib/api";
+import { formatCurrency, formatCategory } from "@/lib/statusColors";
+import {
+  Button,
+  Card,
+  CardBody,
+  StatusBadge,
+  EmptyState,
+  Alert,
+} from "@/components/ui";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -62,49 +71,6 @@ const RESOLUTION_ACTIONS: { value: ResolutionAction; label: string; description:
   { value: "personal", label: "Mark as Personal", description: "Won't count in split" },
   { value: "delete", label: "Delete Expense", description: "Remove this expense" },
 ];
-
-// Format cents to dollars display
-function formatCurrency(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(dollars);
-}
-
-// Format category for display
-function formatCategory(category: string): string {
-  return category.charAt(0).toUpperCase() + category.slice(1);
-}
-
-// Get status badge color
-function getStatusColor(status: string): string {
-  switch (status) {
-    case "posted":
-      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-emerald-400";
-    case "questioned":
-      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
-    case "pending_satisfaction":
-      return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
-    case "resolved":
-    case "resolved_creator_decided":
-      return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-    case "resolved_personal":
-    case "resolved_deleted":
-    case "closed_unresolved":
-      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
-    default:
-      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
-  }
-}
-
-// Format status for display
-function formatStatus(status: string): string {
-  return status
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 // Get date range based on preset
 function getDateRange(preset: string): { startDate?: string; endDate?: string } {
@@ -380,19 +346,19 @@ export default function ExpenseListPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-ke-bg">
+      <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-ke-muted hover:text-ke-secondary"
             >
               <svg
                 className="h-5 w-5"
@@ -408,16 +374,17 @@ export default function ExpenseListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-semibold text-ke-primary">
               Expenses
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <Link
               href="/expenses/add"
-              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
             >
-              Add Expense
+              <Button size="sm">
+                Add Expense
+              </Button>
             </Link>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -426,114 +393,116 @@ export default function ExpenseListPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Filters */}
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex flex-wrap gap-4">
-            {/* Category Filter */}
-            <div className="flex-1 min-w-[150px]">
-              <label
-                htmlFor="category"
-                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
-              >
-                Category
-              </label>
-              <select
-                id="category"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as ExpenseCategory | "")}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex-1 min-w-[150px]">
-              <label
-                htmlFor="status"
-                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
-              >
-                Status
-              </label>
-              <select
-                id="status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | "")}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Date Range Filter */}
-            <div className="flex-1 min-w-[150px]">
-              <label
-                htmlFor="dateRange"
-                className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
-              >
-                Date Range
-              </label>
-              <select
-                id="dateRange"
-                value={dateRangePreset}
-                onChange={(e) => setDateRangePreset(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              >
-                {DATE_RANGE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Custom Date Range */}
-          {dateRangePreset === "custom" && (
-            <div className="mt-4 flex flex-wrap gap-4">
+        <Card className="mb-6">
+          <CardBody>
+            <div className="flex flex-wrap gap-4">
+              {/* Category Filter */}
               <div className="flex-1 min-w-[150px]">
                 <label
-                  htmlFor="startDate"
-                  className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
+                  htmlFor="category"
+                  className="mb-1 block text-xs font-medium text-ke-muted"
                 >
-                  Start Date
+                  Category
                 </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                />
+                <select
+                  id="category"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value as ExpenseCategory | "")}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {/* Status Filter */}
               <div className="flex-1 min-w-[150px]">
                 <label
-                  htmlFor="endDate"
-                  className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400"
+                  htmlFor="status"
+                  className="mb-1 block text-xs font-medium text-ke-muted"
                 >
-                  End Date
+                  Status
                 </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                />
+                <select
+                  id="status"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | "")}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                >
+                  {STATUS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="flex-1 min-w-[150px]">
+                <label
+                  htmlFor="dateRange"
+                  className="mb-1 block text-xs font-medium text-ke-muted"
+                >
+                  Date Range
+                </label>
+                <select
+                  id="dateRange"
+                  value={dateRangePreset}
+                  onChange={(e) => setDateRangePreset(e.target.value)}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                >
+                  {DATE_RANGE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Custom Date Range */}
+            {dateRangePreset === "custom" && (
+              <div className="mt-4 flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[150px]">
+                  <label
+                    htmlFor="startDate"
+                    className="mb-1 block text-xs font-medium text-ke-muted"
+                  >
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
+                <div className="flex-1 min-w-[150px]">
+                  <label
+                    htmlFor="endDate"
+                    className="mb-1 block text-xs font-medium text-ke-muted"
+                  >
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
+              </div>
+            )}
+          </CardBody>
+        </Card>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+        <div className="mb-4 text-sm text-ke-muted">
           {isLoading ? (
             "Loading..."
           ) : (
@@ -546,147 +515,141 @@ export default function ExpenseListPage() {
         {/* Expense List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-slate-500">Loading expenses...</p>
+            <p className="text-ke-muted">Loading expenses...</p>
           </div>
         ) : expenses.length === 0 ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
-              No expenses found
-            </p>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
-              {categoryFilter || statusFilter
+          <EmptyState
+            title="No expenses found"
+            description={
+              categoryFilter || statusFilter
                 ? "Try adjusting your filters"
-                : "No expenses for this time period"}
-            </p>
-            {!categoryFilter && !statusFilter && (
-              <Link
-                href="/expenses/add"
-                className="mt-4 inline-block rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-              >
-                Add First Expense
-              </Link>
-            )}
-          </div>
+                : "No expenses for this time period"
+            }
+            action={
+              !categoryFilter && !statusFilter ? (
+                <Link href="/expenses/add">
+                  <Button size="sm">
+                    Add First Expense
+                  </Button>
+                </Link>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="space-y-3">
             {expenses.map((expense) => (
-              <div
-                key={expense.id}
-                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
-                        {expense.description}
-                      </p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${getStatusColor(expense.status)}`}
+              <Card key={expense.id}>
+                <CardBody>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-ke-primary truncate">
+                          {expense.description}
+                        </p>
+                        <StatusBadge status={expense.status} />
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
+                        <span className="inline-flex items-center gap-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
+                          {formatCategory(expense.category)}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="font-mono">{new Date(expense.expense_date).toLocaleDateString()}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          {expense.paid_by === user?.id ? "You paid" : "Partner paid"}
+                        </span>
+                      </div>
+                      {expense.memo && (
+                        <p className="mt-2 text-sm text-ke-muted line-clamp-2">
+                          {expense.memo}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p
+                        className={`text-lg font-semibold font-mono ${
+                          expense.amount_cents < 0
+                            ? "text-ke-positive"
+                            : "text-ke-primary"
+                        }`}
                       >
-                        {formatStatus(expense.status)}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
-                        {formatCategory(expense.category)}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="font-mono">{new Date(expense.expense_date).toLocaleDateString()}</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        {expense.paid_by === user?.id ? "You paid" : "Partner paid"}
-                      </span>
-                    </div>
-                    {expense.memo && (
-                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
-                        {expense.memo}
+                        {expense.amount_cents < 0 && "("}
+                        {formatCurrency(Math.abs(expense.amount_cents))}
+                        {expense.amount_cents < 0 && ")"}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Dispute Info for questioned expenses */}
+                  {expense.status === "questioned" && expense.question_reason && (
+                    <div className="mt-3 rounded-lg bg-ke-status-questioned-bg p-3">
+                      <p className="text-sm font-medium text-ke-status-questioned-text">
+                        Questioned: {QUESTION_REASONS.find(r => r.value === expense.question_reason)?.label || expense.question_reason}
+                      </p>
+                      {expense.question_note && (
+                        <p className="mt-1 text-sm text-ke-status-questioned-text opacity-80">
+                          {expense.question_note}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pending satisfaction info */}
+                  {expense.status === "pending_satisfaction" && (
+                    <div className="mt-3 rounded-lg bg-ke-attention-bg p-3">
+                      <p className="text-sm font-medium text-ke-primary">
+                        Creator responded: {expense.resolution_action === "kept" ? "Kept as-is" : expense.resolution_action === "edited" ? "Amount edited" : expense.resolution_action}
+                      </p>
+                      <p className="mt-1 text-sm text-ke-secondary">
+                        Waiting for questioner confirmation
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {canQuestion(expense) && (
+                      <button
+                        onClick={() => setQuestionModalExpense(expense)}
+                        className="rounded-lg border border-ke-status-questioned-bg bg-ke-status-questioned-bg px-3 py-1.5 text-sm font-medium text-ke-status-questioned-text transition-colors hover:opacity-80"
+                      >
+                        Question
+                      </button>
+                    )}
+
+                    {canResolve(expense) && (
+                      <button
+                        onClick={() => {
+                          setResolveModalExpense(expense);
+                          setResolveNewAmount((expense.amount_cents / 100).toString());
+                        }}
+                        className="rounded-lg border border-ke-accent/30 bg-ke-accent/10 px-3 py-1.5 text-sm font-medium text-ke-accent transition-colors hover:opacity-80"
+                      >
+                        Respond
+                      </button>
+                    )}
+
+                    {canSatisfy(expense) && (
+                      <button
+                        onClick={() => handleSatisfyExpense(expense.id)}
+                        disabled={satisfyingExpenseId === expense.id}
+                        className="rounded-lg border border-ke-status-posted-bg bg-ke-status-posted-bg px-3 py-1.5 text-sm font-medium text-ke-status-posted-text transition-colors hover:opacity-80 disabled:opacity-50"
+                      >
+                        {satisfyingExpenseId === expense.id ? "..." : "Satisfied"}
+                      </button>
                     )}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p
-                      className={`text-lg font-semibold font-mono ${
-                        expense.amount_cents < 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-slate-900 dark:text-slate-100"
-                      }`}
-                    >
-                      {expense.amount_cents < 0 && "("}
-                      {formatCurrency(Math.abs(expense.amount_cents))}
-                      {expense.amount_cents < 0 && ")"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Dispute Info for questioned expenses */}
-                {expense.status === "questioned" && expense.question_reason && (
-                  <div className="mt-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                      Questioned: {QUESTION_REASONS.find(r => r.value === expense.question_reason)?.label || expense.question_reason}
-                    </p>
-                    {expense.question_note && (
-                      <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
-                        {expense.question_note}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Pending satisfaction info */}
-                {expense.status === "pending_satisfaction" && (
-                  <div className="mt-3 rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
-                    <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
-                      Creator responded: {expense.resolution_action === "kept" ? "Kept as-is" : expense.resolution_action === "edited" ? "Amount edited" : expense.resolution_action}
-                    </p>
-                    <p className="mt-1 text-sm text-orange-700 dark:text-orange-400">
-                      Waiting for questioner confirmation
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {canQuestion(expense) && (
-                    <button
-                      onClick={() => setQuestionModalExpense(expense)}
-                      className="rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-1.5 text-sm font-medium text-yellow-700 transition-colors hover:bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/40"
-                    >
-                      Question
-                    </button>
-                  )}
-
-                  {canResolve(expense) && (
-                    <button
-                      onClick={() => {
-                        setResolveModalExpense(expense);
-                        setResolveNewAmount((expense.amount_cents / 100).toString());
-                      }}
-                      className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
-                    >
-                      Respond
-                    </button>
-                  )}
-
-                  {canSatisfy(expense) && (
-                    <button
-                      onClick={() => handleSatisfyExpense(expense.id)}
-                      disabled={satisfyingExpenseId === expense.id}
-                      className="rounded-lg border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 dark:border-green-700 dark:bg-green-900/20 dark:text-emerald-400 dark:hover:bg-green-900/40"
-                    >
-                      {satisfyingExpenseId === expense.id ? "..." : "Satisfied"}
-                    </button>
-                  )}
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             ))}
           </div>
         )}
@@ -694,184 +657,198 @@ export default function ExpenseListPage() {
         {/* Load More Button */}
         {hasMore && !isLoading && (
           <div className="mt-6 text-center">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {isLoadingMore ? "Loading..." : "Load More"}
-            </button>
+            </Button>
           </div>
         )}
       </main>
 
       {/* Question Modal */}
       {questionModalExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
-            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Question Expense
-            </h3>
-            <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
-              Questioning: <strong>{questionModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(questionModalExpense.amount_cents)}</span>)
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md">
+            <CardBody className="p-6">
+              <h3 className="mb-4 text-lg font-semibold text-ke-primary">
+                Question Expense
+              </h3>
+              <p className="mb-4 text-sm text-ke-secondary">
+                Questioning: <strong>{questionModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(questionModalExpense.amount_cents)}</span>)
+              </p>
 
-            {questionError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">{questionError}</p>
+              {questionError && (
+                <Alert variant="error" className="mb-4">
+                  {questionError}
+                </Alert>
+              )}
+
+              <div className="mb-4">
+                <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  Reason *
+                </label>
+                <select
+                  value={questionReason}
+                  onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                >
+                  {QUESTION_REASONS.map((reason) => (
+                    <option key={reason.value} value={reason.value}>
+                      {reason.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
 
-            <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Reason *
-              </label>
-              <select
-                value={questionReason}
-                onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-              >
-                {QUESTION_REASONS.map((reason) => (
-                  <option key={reason.value} value={reason.value}>
-                    {reason.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="mb-6">
+                <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  Note (optional)
+                </label>
+                <textarea
+                  value={questionNote}
+                  onChange={(e) => setQuestionNote(e.target.value)}
+                  placeholder="Add additional details..."
+                  rows={3}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                />
+              </div>
 
-            <div className="mb-6">
-              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Note (optional)
-              </label>
-              <textarea
-                value={questionNote}
-                onChange={(e) => setQuestionNote(e.target.value)}
-                placeholder="Add additional details..."
-                rows={3}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setQuestionModalExpense(null);
-                  setQuestionReason("wrong_amount");
-                  setQuestionNote("");
-                  setQuestionError(null);
-                }}
-                disabled={isQuestioning}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleQuestionExpense}
-                disabled={isQuestioning}
-                className="rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
-              >
-                {isQuestioning ? "Submitting..." : "Question Expense"}
-              </button>
-            </div>
-          </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setQuestionModalExpense(null);
+                    setQuestionReason("wrong_amount");
+                    setQuestionNote("");
+                    setQuestionError(null);
+                  }}
+                  disabled={isQuestioning}
+                >
+                  Cancel
+                </Button>
+                <button
+                  onClick={handleQuestionExpense}
+                  disabled={isQuestioning}
+                  className="rounded-lg bg-ke-status-questioned-text px-4 py-2 text-sm font-medium text-ke-inverse transition-colors hover:opacity-90 disabled:opacity-50"
+                >
+                  {isQuestioning ? "Submitting..." : "Question Expense"}
+                </button>
+              </div>
+            </CardBody>
+          </Card>
         </div>
       )}
 
       {/* Resolve Modal */}
       {resolveModalExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-slate-900">
-            <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Respond to Question
-            </h3>
-            <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">
-              Expense: <strong>{resolveModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(resolveModalExpense.amount_cents)}</span>)
-            </p>
-            {resolveModalExpense.question_reason && (
-              <p className="mb-4 text-sm text-yellow-600 dark:text-yellow-400">
-                Questioned for: {QUESTION_REASONS.find(r => r.value === resolveModalExpense.question_reason)?.label}
-                {resolveModalExpense.question_note && ` - "${resolveModalExpense.question_note}"`}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md">
+            <CardBody className="p-6">
+              <h3 className="mb-4 text-lg font-semibold text-ke-primary">
+                Respond to Question
+              </h3>
+              <p className="mb-2 text-sm text-ke-secondary">
+                Expense: <strong>{resolveModalExpense.description}</strong> (<span className="font-mono">{formatCurrency(resolveModalExpense.amount_cents)}</span>)
               </p>
-            )}
+              {resolveModalExpense.question_reason && (
+                <p className="mb-4 text-sm text-ke-status-questioned-text">
+                  Questioned for: {QUESTION_REASONS.find(r => r.value === resolveModalExpense.question_reason)?.label}
+                  {resolveModalExpense.question_note && ` - "${resolveModalExpense.question_note}"`}
+                </p>
+              )}
 
-            {resolveError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">{resolveError}</p>
+              {resolveError && (
+                <Alert variant="error" className="mb-4">
+                  {resolveError}
+                </Alert>
+              )}
+
+              <div className="mb-4 space-y-2">
+                {RESOLUTION_ACTIONS.map((action) => (
+                  <label
+                    key={action.value}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                      resolveAction === action.value
+                        ? "border-ke-accent bg-ke-accent/10"
+                        : "border-ke-border hover:bg-ke-elevated"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="resolveAction"
+                      value={action.value}
+                      checked={resolveAction === action.value}
+                      onChange={(e) => setResolveAction(e.target.value as ResolutionAction)}
+                      className="h-4 w-4 text-ke-accent"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-ke-primary">
+                        {action.label}
+                      </p>
+                      <p className="text-xs text-ke-muted">
+                        {action.description}
+                      </p>
+                    </div>
+                  </label>
+                ))}
               </div>
-            )}
 
-            <div className="mb-4 space-y-2">
-              {RESOLUTION_ACTIONS.map((action) => (
-                <label
-                  key={action.value}
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
-                    resolveAction === action.value
-                      ? "border-blue-500 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20"
-                      : "border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-                  }`}
-                >
+              {resolveAction === "edit" && (
+                <div className="mb-6">
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    New Amount ($)
+                  </label>
                   <input
-                    type="radio"
-                    name="resolveAction"
-                    value={action.value}
-                    checked={resolveAction === action.value}
-                    onChange={(e) => setResolveAction(e.target.value as ResolutionAction)}
-                    className="h-4 w-4 text-blue-600"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={resolveNewAmount}
+                    onChange={(e) => setResolveNewAmount(e.target.value)}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {action.label}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {action.description}
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </div>
+                </div>
+              )}
 
-            {resolveAction === "edit" && (
-              <div className="mb-6">
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  New Amount ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={resolveNewAmount}
-                  onChange={(e) => setResolveNewAmount(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setResolveModalExpense(null);
+                    setResolveAction("keep");
+                    setResolveNewAmount("");
+                    setResolveError(null);
+                  }}
+                  disabled={isResolving}
+                >
+                  Cancel
+                </Button>
+                {resolveAction === "delete" ? (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleResolveExpense}
+                    disabled={isResolving}
+                  >
+                    {isResolving ? "Submitting..." : "Delete Expense"}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleResolveExpense}
+                    disabled={isResolving}
+                  >
+                    {isResolving ? "Submitting..." : "Submit Response"}
+                  </Button>
+                )}
               </div>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setResolveModalExpense(null);
-                  setResolveAction("keep");
-                  setResolveNewAmount("");
-                  setResolveError(null);
-                }}
-                disabled={isResolving}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleResolveExpense}
-                disabled={isResolving}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
-                  resolveAction === "delete"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-              >
-                {isResolving ? "Submitting..." : resolveAction === "delete" ? "Delete Expense" : "Submit Response"}
-              </button>
-            </div>
-          </div>
+            </CardBody>
+          </Card>
         </div>
       )}
     </div>
