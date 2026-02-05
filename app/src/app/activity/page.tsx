@@ -11,6 +11,14 @@ import {
   type ActivityTypeFilter,
   type ActivityFilters,
 } from "@/lib/api";
+import { formatCurrency } from "@/lib/statusColors";
+import {
+  Button,
+  Card,
+  CardBody,
+  EmptyState,
+  Alert,
+} from "@/components/ui";
 
 const ITEMS_PER_PAGE = 25;
 
@@ -49,15 +57,6 @@ function formatRelativeTime(dateString: string): string {
   }
 }
 
-// Format currency
-function formatCurrency(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(dollars);
-}
-
 // Get event icon and color based on event type
 function getEventStyle(eventType: string): {
   icon: React.ReactNode;
@@ -72,8 +71,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         ),
-        bgColor: "bg-green-100 dark:bg-green-900/30",
-        textColor: "text-green-600 dark:text-green-400",
+        bgColor: "bg-ke-status-posted-bg",
+        textColor: "text-ke-status-posted-text",
       };
     case "expense.edited":
       return {
@@ -82,8 +81,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         ),
-        bgColor: "bg-blue-100 dark:bg-blue-900/30",
-        textColor: "text-blue-600 dark:text-blue-400",
+        bgColor: "bg-ke-status-resolved-bg",
+        textColor: "text-ke-status-resolved-text",
       };
     case "expense.questioned":
       return {
@@ -92,8 +91,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
-        textColor: "text-yellow-600 dark:text-yellow-400",
+        bgColor: "bg-ke-status-questioned-bg",
+        textColor: "text-ke-status-questioned-text",
       };
     case "expense.resolved":
       return {
@@ -102,8 +101,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         ),
-        bgColor: "bg-purple-100 dark:bg-purple-900/30",
-        textColor: "text-purple-600 dark:text-purple-400",
+        bgColor: "bg-ke-status-resolved-bg",
+        textColor: "text-ke-status-resolved-text",
       };
     case "expense.satisfied":
       return {
@@ -112,8 +111,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
           </svg>
         ),
-        bgColor: "bg-teal-100 dark:bg-teal-900/30",
-        textColor: "text-teal-600 dark:text-teal-400",
+        bgColor: "bg-ke-status-posted-bg",
+        textColor: "text-ke-status-posted-text",
       };
     case "expense.generated":
       return {
@@ -122,8 +121,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         ),
-        bgColor: "bg-cyan-100 dark:bg-cyan-900/30",
-        textColor: "text-cyan-600 dark:text-cyan-400",
+        bgColor: "bg-ke-accent/10",
+        textColor: "text-ke-accent",
       };
     case "payment.created":
       return {
@@ -132,8 +131,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
-        textColor: "text-emerald-600 dark:text-emerald-400",
+        bgColor: "bg-ke-status-posted-bg",
+        textColor: "text-ke-positive",
       };
     case "child.created":
       return {
@@ -142,8 +141,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
         ),
-        bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
-        textColor: "text-indigo-600 dark:text-indigo-400",
+        bgColor: "bg-ke-accent/10",
+        textColor: "text-ke-accent",
       };
     case "child.deleted":
       return {
@@ -152,8 +151,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
           </svg>
         ),
-        bgColor: "bg-red-100 dark:bg-red-900/30",
-        textColor: "text-red-600 dark:text-red-400",
+        bgColor: "bg-ke-status-closed-bg",
+        textColor: "text-ke-status-closed-text",
       };
     case "fixed_expense.created":
       return {
@@ -162,8 +161,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         ),
-        bgColor: "bg-violet-100 dark:bg-violet-900/30",
-        textColor: "text-violet-600 dark:text-violet-400",
+        bgColor: "bg-ke-accent/10",
+        textColor: "text-ke-accent",
       };
     case "fixed_expense.updated":
       return {
@@ -172,8 +171,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         ),
-        bgColor: "bg-violet-100 dark:bg-violet-900/30",
-        textColor: "text-violet-600 dark:text-violet-400",
+        bgColor: "bg-ke-accent/10",
+        textColor: "text-ke-accent",
       };
     case "fixed_expense.ended":
       return {
@@ -182,8 +181,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ),
-        bgColor: "bg-violet-100 dark:bg-violet-900/30",
-        textColor: "text-violet-600 dark:text-violet-400",
+        bgColor: "bg-ke-status-settled-bg",
+        textColor: "text-ke-status-settled-text",
       };
     default:
       return {
@@ -192,8 +191,8 @@ function getEventStyle(eventType: string): {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        bgColor: "bg-slate-100 dark:bg-slate-800",
-        textColor: "text-slate-600 dark:text-slate-400",
+        bgColor: "bg-ke-elevated",
+        textColor: "text-ke-muted",
       };
   }
 }
@@ -458,20 +457,20 @@ export default function ActivityFeedPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
 
   if (!meData?.family) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="min-h-screen bg-ke-bg">
+        <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                className="text-ke-muted hover:text-ke-primary"
               >
                 <svg
                   className="h-5 w-5"
@@ -487,7 +486,7 @@ export default function ActivityFeedPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-xl font-semibold text-ke-primary">
                 Activity Feed
               </h1>
             </div>
@@ -495,30 +494,27 @@ export default function ActivityFeedPage() {
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-slate-600 dark:text-slate-400">
+          <Card className="p-6 text-center">
+            <p className="text-ke-secondary">
               You need to create or join a family first.
             </p>
-            <Link
-              href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-            >
-              Go to Dashboard
+            <Link href="/dashboard" className="mt-4 inline-block">
+              <Button>Go to Dashboard</Button>
             </Link>
-          </div>
+          </Card>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-ke-bg">
+      <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-ke-muted hover:text-ke-primary"
             >
               <svg
                 className="h-5 w-5"
@@ -534,7 +530,7 @@ export default function ActivityFeedPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-semibold text-ke-primary">
               Activity Feed
             </h1>
           </div>
@@ -545,110 +541,112 @@ export default function ActivityFeedPage() {
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Error Display */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
+          <Alert variant="error" className="mb-6">
+            {error}
+          </Alert>
         )}
 
         {/* Filters Section */}
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          {/* Search Input */}
-          <div className="mb-4">
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        <Card className="mb-6">
+          <CardBody>
+            {/* Search Input */}
+            <div className="mb-4">
+              <div className="relative">
+                <svg
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ke-muted"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search activity..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface py-2 pl-10 pr-4 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search activity..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-              />
-            </div>
-          </div>
-
-          {/* Filter Row */}
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Type Filter Dropdown */}
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="type-filter"
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Type:
-              </label>
-              <select
-                id="type-filter"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as ActivityTypeFilter)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              >
-                {TYPE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              </div>
             </div>
 
-            {/* Date Range */}
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="start-date"
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                From:
-              </label>
-              <input
-                type="date"
-                id="start-date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
+            {/* Filter Row */}
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Type Filter Dropdown */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="type-filter"
+                  className="text-sm font-medium text-ke-secondary"
+                >
+                  Type:
+                </label>
+                <select
+                  id="type-filter"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as ActivityTypeFilter)}
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                >
+                  {TYPE_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="end-date"
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                To:
-              </label>
-              <input
-                type="date"
-                id="end-date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
+              {/* Date Range */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="start-date"
+                  className="text-sm font-medium text-ke-secondary"
+                >
+                  From:
+                </label>
+                <input
+                  type="date"
+                  id="start-date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                />
+              </div>
 
-            {/* Clear Filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-        </div>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="end-date"
+                  className="text-sm font-medium text-ke-secondary"
+                >
+                  To:
+                </label>
+                <input
+                  type="date"
+                  id="end-date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                />
+              </div>
+
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <button
+                  onClick={handleClearFilters}
+                  className="text-sm text-ke-muted hover:text-ke-primary"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </CardBody>
+        </Card>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+        <div className="mb-4 text-sm text-ke-muted">
           {isLoading ? (
             "Loading..."
           ) : (
@@ -662,45 +660,27 @@ export default function ActivityFeedPage() {
         {/* Activity List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-slate-500">Loading activity...</p>
+            <p className="text-ke-muted">Loading activity...</p>
           </div>
         ) : events.length === 0 ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-              <svg
-                className="h-6 w-6 text-slate-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
-              {hasActiveFilters ? "No matching activity" : "No activity yet"}
-            </p>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
-              {hasActiveFilters
+          <EmptyState
+            title={hasActiveFilters ? "No matching activity" : "No activity yet"}
+            description={
+              hasActiveFilters
                 ? "Try adjusting your filters to see more results."
-                : "Activity will appear here when you or your co-parent add expenses, payments, or kids."}
-            </p>
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
+                : "Activity will appear here when you or your co-parent add expenses, payments, or kids."
+            }
+            action={
+              hasActiveFilters ? (
+                <Button variant="secondary" onClick={handleClearFilters}>
+                  Clear filters
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
-          <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+          <Card>
+            <ul className="divide-y divide-ke-divider">
               {events.map((event) => {
                 const style = getEventStyle(event.event_type);
                 const { action, details } = getEventDescription(event, user?.id);
@@ -714,21 +694,21 @@ export default function ActivityFeedPage() {
                       <span className={style.textColor}>{style.icon}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                      <p className="text-sm font-medium text-ke-primary">
                         {action}
                       </p>
                       {details && (
-                        <p className="mt-0.5 text-sm font-mono text-slate-600 dark:text-slate-400 truncate">
+                        <p className="mt-0.5 text-sm font-mono text-ke-secondary truncate">
                           {details}
                         </p>
                       )}
-                      <p className="mt-1 text-xs font-mono text-slate-500 dark:text-slate-500">
+                      <p className="mt-1 text-xs font-mono text-ke-muted">
                         {formatRelativeTime(event.created_at)}
                       </p>
                     </div>
                     {link && (
                       <svg
-                        className="h-5 w-5 flex-shrink-0 text-slate-400"
+                        className="h-5 w-5 flex-shrink-0 text-ke-muted"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -749,7 +729,7 @@ export default function ActivityFeedPage() {
                     {link ? (
                       <Link
                         href={link}
-                        className="block transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
+                        className="block transition-colors hover:bg-ke-elevated"
                       >
                         {content}
                       </Link>
@@ -760,27 +740,27 @@ export default function ActivityFeedPage() {
                 );
               })}
             </ul>
-          </div>
+          </Card>
         )}
 
         {/* Load More Button */}
         {hasMore && !isLoading && (
           <div className="mt-6 text-center">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {isLoadingMore ? "Loading..." : "Load More"}
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Info Box */}
-        <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+        <Alert variant="info" className="mt-6">
           <div className="flex gap-3">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-slate-500 dark:text-slate-400"
+              className="h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -793,15 +773,15 @@ export default function ActivityFeedPage() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <p className="text-sm font-medium">
                 About Activity Feed
               </p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-1 text-sm opacity-80">
                 This feed shows all actions taken by you and your co-parent, including expenses added, edited, questioned, resolved, payments made, and kids added or removed. By default, it shows activity from the last 30 days.
               </p>
             </div>
           </div>
-        </div>
+        </Alert>
       </main>
     </div>
   );
