@@ -4,17 +4,10 @@ import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { getMe, getPayments, type MeResponse, type Payment } from "@/lib/api";
+import { formatCurrency } from "@/lib/statusColors";
+import { Button, Card, EmptyState, Alert } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 20;
-
-// Format cents to dollars display
-function formatCurrency(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(dollars);
-}
 
 export default function PaymentListPage() {
   const { user, isLoaded } = useUser();
@@ -93,19 +86,19 @@ export default function PaymentListPage() {
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-ke-muted">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-ke-bg">
+      <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-ke-muted hover:text-ke-secondary"
             >
               <svg
                 className="h-5 w-5"
@@ -121,16 +114,13 @@ export default function PaymentListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-semibold text-ke-primary">
               Payments
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              href="/payments/add"
-              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-            >
-              Record Payment
+            <Link href="/payments/add">
+              <Button size="sm">Record Payment</Button>
             </Link>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -139,15 +129,13 @@ export default function PaymentListPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Info Card */}
-        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20">
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            Payments are records of money you paid to your co-parent (via Venmo, Zelle, cash, etc.).
-            Recording a payment reduces your balance owed.
-          </p>
-        </div>
+        <Alert variant="info" className="mb-6">
+          Payments are records of money you paid to your co-parent (via Venmo, Zelle, cash, etc.).
+          Recording a payment reduces your balance owed.
+        </Alert>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+        <div className="mb-4 text-sm text-ke-muted">
           {isLoading ? (
             "Loading..."
           ) : (
@@ -160,36 +148,28 @@ export default function PaymentListPage() {
         {/* Payment List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-slate-500">Loading payments...</p>
+            <p className="text-ke-muted">Loading payments...</p>
           </div>
         ) : payments.length === 0 ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
-              No payments recorded
-            </p>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
-              Record your first payment when you settle up with your co-parent
-            </p>
-            <Link
-              href="/payments/add"
-              className="mt-4 inline-block rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-            >
-              Record First Payment
-            </Link>
-          </div>
+          <EmptyState
+            title="No payments recorded"
+            description="Record your first payment when you settle up with your co-parent"
+            action={
+              <Link href="/payments/add">
+                <Button>Record First Payment</Button>
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {payments.map((payment) => (
-              <div
-                key={payment.id}
-                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-              >
+              <Card key={payment.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ke-status-posted-bg">
                         <svg
-                          className="w-4 h-4 text-green-600 dark:text-green-400"
+                          className="w-4 h-4 text-ke-positive"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -203,27 +183,27 @@ export default function PaymentListPage() {
                         </svg>
                       </span>
                       <div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
+                        <p className="font-medium text-ke-primary">
                           {payment.paid_by === user?.id ? "You paid" : "Partner paid"}
                         </p>
-                        <p className="text-sm font-mono text-slate-500 dark:text-slate-400">
+                        <p className="text-sm font-mono text-ke-muted">
                           {new Date(payment.payment_date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     {payment.notes && (
-                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 pl-10">
+                      <p className="mt-2 text-sm text-ke-muted pl-10">
                         {payment.notes}
                       </p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-semibold font-mono text-green-600 dark:text-green-400">
+                    <p className="text-lg font-semibold font-mono text-ke-positive">
                       {formatCurrency(payment.amount_cents)}
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -231,13 +211,13 @@ export default function PaymentListPage() {
         {/* Load More Button */}
         {hasMore && !isLoading && (
           <div className="mt-6 text-center">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {isLoadingMore ? "Loading..." : "Load More"}
-            </button>
+            </Button>
           </div>
         )}
       </main>
