@@ -4,18 +4,13 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  getMe,
-  getExpense,
-  getActivity,
-  questionExpense,
-  resolveExpense,
-  satisfyExpense,
-  type MeResponse,
-  type Expense,
-  type ActivityEvent,
-  type QuestionReason,
-  type ResolutionAction,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  Expense,
+  ActivityEvent,
+  QuestionReason,
+  ResolutionAction,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { canQuestion, canRespond, canSatisfy } from "@/lib/expenseActions";
@@ -59,6 +54,7 @@ export default function ExpenseDetailPage() {
   const { user, isLoaded } = useUser();
   const params = useParams();
   const router = useRouter();
+  const api = useApi();
   const actionsRef = useRef<HTMLDivElement>(null);
   const expenseId = params.id as string;
 
@@ -92,14 +88,14 @@ export default function ExpenseDetailPage() {
 
     try {
       const [me, expenseData] = await Promise.all([
-        getMe(user.id),
-        getExpense(user.id, expenseId),
+        api.getMe(),
+        api.getExpense(expenseId),
       ]);
       setMeData(me);
       setExpense(expenseData.expense);
 
       if (me.family) {
-        const activityData = await getActivity(user.id, me.family.id, {
+        const activityData = await api.getActivity(me.family.id, {
           expenseId,
           limit: 50,
         });
@@ -112,7 +108,7 @@ export default function ExpenseDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, expenseId]);
+  }, [user, expenseId, api]);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -138,7 +134,7 @@ export default function ExpenseDetailPage() {
     setQuestionError(null);
 
     try {
-      const result = await questionExpense(user.id, expense.id, {
+      const result = await api.questionExpense(expense.id, {
         reason: questionReason,
         note: questionNote || undefined,
       });
@@ -174,7 +170,7 @@ export default function ExpenseDetailPage() {
         request.newAmount = amount;
       }
 
-      const result = await resolveExpense(user.id, expense.id, request);
+      const result = await api.resolveExpense(expense.id, request);
       setExpense(result.expense);
       setShowRespondForm(false);
       setResolveAction("keep");
@@ -197,7 +193,7 @@ export default function ExpenseDetailPage() {
     setIsSatisfying(true);
 
     try {
-      const result = await satisfyExpense(user.id, expense.id);
+      const result = await api.satisfyExpense(expense.id);
       setExpense(result.expense);
       await refreshTimeline();
     } catch (err) {
@@ -214,7 +210,7 @@ export default function ExpenseDetailPage() {
     setQuestionError(null);
 
     try {
-      const result = await questionExpense(user.id, expense.id, {
+      const result = await api.questionExpense(expense.id, {
         reason: "other",
         note: "Still not satisfied with the response",
       });
@@ -230,7 +226,7 @@ export default function ExpenseDetailPage() {
   async function refreshTimeline() {
     if (!user || !meData?.family) return;
     try {
-      const activityData = await getActivity(user.id, meData.family.id, {
+      const activityData = await api.getActivity(meData.family.id, {
         expenseId,
         limit: 50,
       });

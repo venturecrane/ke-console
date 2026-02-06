@@ -3,17 +3,13 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import {
-  getMe,
-  getFixedExpenses,
-  createFixedExpense,
-  updateFixedExpense,
-  endFixedExpense,
-  type MeResponse,
-  type FixedExpense,
-  type ExpenseCategory,
-  type FixedExpenseTier,
-  type RecurringFrequency,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  FixedExpense,
+  ExpenseCategory,
+  FixedExpenseTier,
+  RecurringFrequency,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { Button, Card, CardHeader, CardBody, Alert, EmptyState } from "@/components/ui";
@@ -53,6 +49,7 @@ function getTodayDate(): string {
 
 export default function FixedExpensesSettingsPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
   const [tier, setTier] = useState<FixedExpenseTier | null>(null);
@@ -96,7 +93,7 @@ export default function FixedExpensesSettingsPage() {
     setError(null);
 
     try {
-      const data = await getFixedExpenses(user.id, meData.family.id, includeEnded);
+      const data = await api.getFixedExpenses(meData.family.id, includeEnded);
       setFixedExpenses(data.fixedExpenses);
       setTier(data.tier);
     } catch (err) {
@@ -105,14 +102,14 @@ export default function FixedExpensesSettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, meData?.family, includeEnded]);
+  }, [user, meData?.family, includeEnded, api]);
 
   // Fetch user data on load
   useEffect(() => {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
       } catch (err) {
         console.error("Failed to load user data:", err);
@@ -123,7 +120,7 @@ export default function FixedExpensesSettingsPage() {
     if (isLoaded && user) {
       loadUserData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, api]);
 
   // Fetch fixed expenses when user data is loaded
   useEffect(() => {
@@ -147,7 +144,7 @@ export default function FixedExpensesSettingsPage() {
         return;
       }
 
-      const result = await createFixedExpense(user.id, meData.family.id, {
+      const result = await api.createFixedExpense(meData.family.id, {
         description: addDescription.trim(),
         amount,
         category: addCategory,
@@ -208,7 +205,7 @@ export default function FixedExpensesSettingsPage() {
         return;
       }
 
-      const result = await updateFixedExpense(user.id, meData.family.id, editingExpense.id, {
+      const result = await api.updateFixedExpense(meData.family.id, editingExpense.id, {
         description: editDescription.trim(),
         amount,
         category: editCategory,
@@ -237,7 +234,7 @@ export default function FixedExpensesSettingsPage() {
     setEndingId(id);
 
     try {
-      const result = await endFixedExpense(user.id, meData.family.id, id);
+      const result = await api.endFixedExpense(meData.family.id, id);
 
       if (includeEnded) {
         // Update the expense in place

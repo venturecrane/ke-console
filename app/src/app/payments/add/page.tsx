@@ -4,12 +4,14 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createPayment, getMe, type MeResponse } from "@/lib/api";
+import { useApi } from "@/hooks/use-api";
+import type { MeResponse } from "@/lib/api";
 import { Button, Card, CardBody, Alert, Input, Textarea } from "@/components/ui";
 
 export default function AddPaymentPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +28,7 @@ export default function AddPaymentPage() {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
         if (!data.family) {
           router.push("/dashboard");
@@ -44,7 +46,7 @@ export default function AddPaymentPage() {
     } else if (isLoaded && !user) {
       router.push("/sign-in");
     }
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user, router, api]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,7 +63,7 @@ export default function AddPaymentPage() {
     }
 
     try {
-      await createPayment(user.id, meData.family.id, {
+      await api.createPayment(meData.family.id, {
         amount: amountNum,
         paymentDate,
         notes: notes.trim() || undefined,

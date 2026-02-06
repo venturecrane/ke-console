@@ -3,7 +3,8 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { getMe, getPayments, type MeResponse, type Payment } from "@/lib/api";
+import { useApi } from "@/hooks/use-api";
+import type { MeResponse, Payment } from "@/lib/api";
 import { formatCurrency } from "@/lib/statusColors";
 import { Button, Card, EmptyState, Alert } from "@/components/ui";
 
@@ -11,6 +12,7 @@ const ITEMS_PER_PAGE = 20;
 
 export default function PaymentListPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +31,7 @@ export default function PaymentListPage() {
       }
 
       try {
-        const data = await getPayments(
-          user.id,
+        const data = await api.getPayments(
           meData.family.id,
           ITEMS_PER_PAGE,
           offset
@@ -50,7 +51,7 @@ export default function PaymentListPage() {
         setIsLoadingMore(false);
       }
     },
-    [user, meData?.family]
+    [user, meData?.family, api]
   );
 
   // Fetch user data on load
@@ -58,7 +59,7 @@ export default function PaymentListPage() {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
       } catch (error) {
         console.error("Failed to load user data:", error);
@@ -68,7 +69,7 @@ export default function PaymentListPage() {
     if (isLoaded && user) {
       loadUserData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, api]);
 
   // Fetch payments when user data is available
   useEffect(() => {

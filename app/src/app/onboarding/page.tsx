@@ -3,14 +3,10 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import {
-  getMe,
-  getChildren,
-  createChild,
-  updateFamily,
-  generateInviteCode,
-  type MeResponse,
-  type Child,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  Child,
 } from "@/lib/api";
 import { Button, Card, Alert } from "@/components/ui";
 
@@ -19,6 +15,7 @@ type WizardStep = "syncing" | "welcome" | "children" | "split" | "invite";
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const api = useApi();
   const [step, setStep] = useState<WizardStep>("syncing");
   const [syncError, setSyncError] = useState(false);
   const [meData, setMeData] = useState<MeResponse | null>(null);
@@ -54,7 +51,7 @@ export default function OnboardingPage() {
         return;
       }
 
-      const data = await getMe(user.id);
+      const data = await api.getMe();
       setMeData(data);
 
       // Check if onboarding already completed
@@ -70,7 +67,7 @@ export default function OnboardingPage() {
       }
 
       // Check if user already has children (returning user)
-      const childrenData = await getChildren(user.id, data.family.id);
+      const childrenData = await api.getChildren(data.family.id);
       if (childrenData.children.length > 0) {
         // Already set up, mark complete and go to dashboard
         localStorage.setItem("ke-onboarding-complete", "true");
@@ -82,7 +79,7 @@ export default function OnboardingPage() {
     } catch {
       setSyncError(true);
     }
-  }, [user, router]);
+  }, [user, router, api]);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -97,7 +94,7 @@ export default function OnboardingPage() {
     setChildError(null);
 
     try {
-      const newChild = await createChild(user.id, meData.family.id, childName.trim());
+      const newChild = await api.createChild(meData.family.id, childName.trim());
       setChildren((prev) => [...prev, newChild]);
       setChildName("");
     } catch (err) {
@@ -113,7 +110,7 @@ export default function OnboardingPage() {
     setIsSavingSplit(true);
     try {
       const ratio = splitMode === "even" ? 0.5 : splitRatioA / 100;
-      await updateFamily(user.id, meData.family.id, { parentARatio: ratio });
+      await api.updateFamily(meData.family.id, { parentARatio: ratio });
       setStep("invite");
     } catch {
       // Silently continue - default ratio is fine
@@ -130,7 +127,7 @@ export default function OnboardingPage() {
     try {
       let code = inviteCode;
       if (!code) {
-        const result = await generateInviteCode(user.id, meData.family.id);
+        const result = await api.generateInviteCode(meData.family.id);
         code = result.inviteCode;
         setInviteCode(code);
       }
@@ -154,7 +151,7 @@ export default function OnboardingPage() {
         // Generate code for manual copy fallback
         if (!inviteCode) {
           try {
-            const result = await generateInviteCode(user.id, meData.family.id);
+            const result = await api.generateInviteCode(meData.family.id);
             setInviteCode(result.inviteCode);
           } catch {
             // ignore

@@ -3,19 +3,15 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import {
-  getMe,
-  getExpenses,
-  questionExpense,
-  resolveExpense,
-  satisfyExpense,
-  type MeResponse,
-  type Expense,
-  type ExpenseCategory,
-  type ExpenseStatus,
-  type ExpenseFilters,
-  type QuestionReason,
-  type ResolutionAction,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  Expense,
+  ExpenseCategory,
+  ExpenseStatus,
+  ExpenseFilters,
+  QuestionReason,
+  ResolutionAction,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
@@ -103,6 +99,7 @@ function getDateRange(preset: string): { startDate?: string; endDate?: string } 
 
 export default function ExpenseListPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -188,7 +185,7 @@ export default function ExpenseListPage() {
         if (statusFilter === "needs_attention") {
           const results = await Promise.all(
             NEEDS_ATTENTION_STATUSES.map((status) =>
-              getExpenses(user.id, meData.family!.id, { ...baseFilters, status, limit: 100, offset: 0 })
+              api.getExpenses(meData.family!.id, { ...baseFilters, status, limit: 100, offset: 0 })
             )
           );
           const merged = results
@@ -208,7 +205,7 @@ export default function ExpenseListPage() {
             baseFilters.status = statusFilter;
           }
 
-          const data = await getExpenses(user.id, meData.family.id, baseFilters);
+          const data = await api.getExpenses(meData.family.id, baseFilters);
 
           if (append) {
             setExpenses((prev) => [...prev, ...data.expenses]);
@@ -225,7 +222,7 @@ export default function ExpenseListPage() {
         setIsLoadingMore(false);
       }
     },
-    [user, meData?.family, categoryFilter, statusFilter, dateRangePreset, customStartDate, customEndDate]
+    [user, meData?.family, categoryFilter, statusFilter, dateRangePreset, customStartDate, customEndDate, api]
   );
 
   // Fetch user data on load
@@ -233,7 +230,7 @@ export default function ExpenseListPage() {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
       } catch (error) {
         console.error("Failed to load user data:", error);
@@ -243,7 +240,7 @@ export default function ExpenseListPage() {
     if (isLoaded && user) {
       loadUserData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, api]);
 
   // Fetch expenses when user data or filters change
   useEffect(() => {
@@ -266,7 +263,7 @@ export default function ExpenseListPage() {
     setQuestionError(null);
 
     try {
-      const result = await questionExpense(user.id, questionModalExpense.id, {
+      const result = await api.questionExpense(questionModalExpense.id, {
         reason: questionReason,
         note: questionNote || undefined,
       });
@@ -307,7 +304,7 @@ export default function ExpenseListPage() {
         request.newAmount = amount;
       }
 
-      const result = await resolveExpense(user.id, resolveModalExpense.id, request);
+      const result = await api.resolveExpense(resolveModalExpense.id, request);
 
       // Update the expense in the list (or remove if deleted)
       if (resolveAction === "delete") {
@@ -338,7 +335,7 @@ export default function ExpenseListPage() {
     setSatisfyingExpenseId(expenseId);
 
     try {
-      const result = await satisfyExpense(user.id, expenseId);
+      const result = await api.satisfyExpense(expenseId);
 
       // Update the expense in the list
       setExpenses((prev) =>

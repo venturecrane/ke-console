@@ -4,12 +4,13 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { createFamily } from "@/lib/api";
+import { useApi } from "@/hooks/use-api";
 import { Button, Card, CardBody, Alert } from "@/components/ui";
 
 export default function CreateFamilyPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const api = useApi();
   const [familyName, setFamilyName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export default function CreateFamilyPage() {
     setError(null);
 
     try {
-      await createFamily(user.id, familyName || undefined);
+      await api.createFamily(familyName || undefined);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create family");

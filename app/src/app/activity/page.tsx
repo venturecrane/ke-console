@@ -3,13 +3,12 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import {
-  getMe,
-  getActivity,
-  type MeResponse,
-  type ActivityEvent,
-  type ActivityTypeFilter,
-  type ActivityFilters,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  ActivityEvent,
+  ActivityTypeFilter,
+  ActivityFilters,
 } from "@/lib/api";
 import { formatCurrency } from "@/lib/statusColors";
 import {
@@ -348,6 +347,7 @@ const TYPE_FILTER_OPTIONS: { value: ActivityTypeFilter; label: string }[] = [
 
 export default function ActivityFeedPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -392,7 +392,7 @@ export default function ActivityFeedPage() {
       }
 
       try {
-        const data = await getActivity(user.id, meData.family.id, {
+        const data = await api.getActivity(meData.family.id, {
           ...filters,
           offset,
         });
@@ -412,7 +412,7 @@ export default function ActivityFeedPage() {
         setIsLoadingMore(false);
       }
     },
-    [user, meData?.family, filters]
+    [user, meData?.family, filters, api]
   );
 
   // Fetch user data on load
@@ -420,7 +420,7 @@ export default function ActivityFeedPage() {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
       } catch (err) {
         console.error("Failed to load user data:", err);
@@ -431,7 +431,7 @@ export default function ActivityFeedPage() {
     if (isLoaded && user) {
       loadUserData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, api]);
 
   // Fetch activity when user data is loaded or filters change
   useEffect(() => {

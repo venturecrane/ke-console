@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "app/**/*.{ts,tsx}": "app/node_modules/.bin/eslint --no-warn-ignored --config app/eslint.config.mjs"
+  },
+  "devDependencies": {
+    "husky": "^9",
+    "lint-staged": "^15"
+  }
+}
