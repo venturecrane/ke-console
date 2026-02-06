@@ -3,13 +3,11 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import {
-  getMe,
-  getExpenses,
-  getBalance,
-  type MeResponse,
-  type Expense,
-  type BalanceResponse,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  Expense,
+  BalanceResponse,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
@@ -25,6 +23,7 @@ import {
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [syncStatus, setSyncStatus] = useState<"pending" | "synced" | "error">(
     "pending"
   );
@@ -38,7 +37,7 @@ export default function DashboardPage() {
   const fetchUserData = useCallback(async () => {
     if (!user) return;
     try {
-      const data = await getMe(user.id);
+      const data = await api.getMe();
       setMeData(data);
       const family = data.family;
       if (family) {
@@ -46,11 +45,11 @@ export default function DashboardPage() {
         setIsLoadingBalance(true);
         try {
           const [expenseData, balanceData, ...attentionResults] = await Promise.all([
-            getExpenses(user.id, family.id, { limit: 5 }),
-            getBalance(user.id, family.id),
+            api.getExpenses(family.id, { limit: 5 }),
+            api.getBalance(family.id),
             ...(family.parent_b_id !== null
               ? NEEDS_ATTENTION_STATUSES.map((status) =>
-                  getExpenses(user.id, family.id, { status, limit: 10 })
+                  api.getExpenses(family.id, { status, limit: 10 })
                 )
               : []),
           ]);
@@ -75,7 +74,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
-  }, [user]);
+  }, [user, api]);
 
   useEffect(() => {
     async function syncUser() {

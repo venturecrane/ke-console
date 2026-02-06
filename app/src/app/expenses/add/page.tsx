@@ -4,13 +4,11 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  createExpense,
-  getMe,
-  getChildren,
-  type MeResponse,
-  type ExpenseCategory,
-  type Child,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  ExpenseCategory,
+  Child,
 } from "@/lib/api";
 import {
   Button,
@@ -33,6 +31,7 @@ const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
 export default function AddExpensePage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,14 +54,14 @@ export default function AddExpensePage() {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
         if (!data.family) {
           router.push("/dashboard");
           return;
         }
         // Fetch children for the family
-        const childrenData = await getChildren(user.id, data.family.id);
+        const childrenData = await api.getChildren(data.family.id);
         setChildren(childrenData.children);
       } catch (err) {
         console.error("Failed to load user data:", err);
@@ -77,7 +76,7 @@ export default function AddExpensePage() {
     } else if (isLoaded && !user) {
       router.push("/sign-in");
     }
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user, router, api]);
 
   // Handle "All Children" toggle
   function handleAllChildrenChange(checked: boolean) {
@@ -120,7 +119,7 @@ export default function AddExpensePage() {
     }
 
     try {
-      await createExpense(user.id, meData.family.id, {
+      await api.createExpense(meData.family.id, {
         description: description.trim(),
         amount: amountNum,
         category,

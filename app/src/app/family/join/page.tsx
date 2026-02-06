@@ -4,13 +4,14 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { joinFamily } from "@/lib/api";
+import { useApi } from "@/hooks/use-api";
 import { Button, Card, CardBody, Alert } from "@/components/ui";
 
 function JoinFamilyForm() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const api = useApi();
   const [inviteCode, setInviteCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ function JoinFamilyForm() {
     setError(null);
 
     try {
-      await joinFamily(user.id, inviteCode.trim().toUpperCase());
+      await api.joinFamily(inviteCode.trim().toUpperCase());
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join family");

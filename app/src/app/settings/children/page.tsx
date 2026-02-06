@@ -3,18 +3,16 @@
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import {
-  getMe,
-  getChildren,
-  createChild,
-  deleteChild,
-  type MeResponse,
-  type Child,
+import { useApi } from "@/hooks/use-api";
+import type {
+  MeResponse,
+  Child,
 } from "@/lib/api";
 import { Button, Card, CardHeader, CardBody, Alert, EmptyState } from "@/components/ui";
 
 export default function ChildrenSettingsPage() {
   const { user, isLoaded } = useUser();
+  const api = useApi();
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +34,7 @@ export default function ChildrenSettingsPage() {
     setError(null);
 
     try {
-      const data = await getChildren(user.id, meData.family.id);
+      const data = await api.getChildren(meData.family.id);
       setChildren(data.children);
     } catch (err) {
       console.error("Failed to fetch children:", err);
@@ -44,14 +42,14 @@ export default function ChildrenSettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, meData?.family]);
+  }, [user, meData?.family, api]);
 
   // Fetch user data on load
   useEffect(() => {
     async function loadUserData() {
       if (!user) return;
       try {
-        const data = await getMe(user.id);
+        const data = await api.getMe();
         setMeData(data);
       } catch (err) {
         console.error("Failed to load user data:", err);
@@ -62,7 +60,7 @@ export default function ChildrenSettingsPage() {
     if (isLoaded && user) {
       loadUserData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, api]);
 
   // Fetch children when user data is loaded
   useEffect(() => {
@@ -85,7 +83,7 @@ export default function ChildrenSettingsPage() {
     setAddError(null);
 
     try {
-      const newChild = await createChild(user.id, meData.family.id, trimmedName);
+      const newChild = await api.createChild(meData.family.id, trimmedName);
       setChildren((prev) => [...prev, newChild]);
       setNewChildName("");
     } catch (err) {
@@ -102,7 +100,7 @@ export default function ChildrenSettingsPage() {
     setDeletingChildId(childId);
 
     try {
-      await deleteChild(user.id, meData.family.id, childId);
+      await api.deleteChild(meData.family.id, childId);
       setChildren((prev) => prev.filter((c) => c.id !== childId));
       setShowDeleteConfirm(null);
     } catch (err) {
