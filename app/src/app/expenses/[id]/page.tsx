@@ -12,6 +12,7 @@ import type {
   QuestionReason,
   ResolutionAction,
   ExpenseCategory,
+  Child,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { canQuestion, canRespond, canSatisfy } from "@/lib/expenseActions";
@@ -83,6 +84,7 @@ export default function ExpenseDetailPage() {
   const [meData, setMeData] = useState<MeResponse | null>(null);
   const [expense, setExpense] = useState<Expense | null>(null);
   const [timeline, setTimeline] = useState<ActivityEvent[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,12 +135,16 @@ export default function ExpenseDetailPage() {
       setExpense(expenseData.expense);
 
       if (me.family) {
-        const activityData = await api.getActivity(me.family.id, {
-          expenseId,
-          limit: 50,
-        });
+        const [activityData, childrenData] = await Promise.all([
+          api.getActivity(me.family.id, {
+            expenseId,
+            limit: 50,
+          }),
+          api.getChildren(me.family.id),
+        ]);
         // API returns descending; reverse for chronological timeline
         setTimeline([...activityData.events].reverse());
+        setChildren(childrenData.children);
       }
     } catch (err) {
       console.error("Failed to load expense:", err);
@@ -626,9 +632,29 @@ export default function ExpenseDetailPage() {
                     rel="noopener noreferrer"
                     className="text-ke-accent hover:underline"
                   >
-                    View link
+                    View receipt
                   </a>
                 </p>
+              )}
+
+              {/* Children */}
+              {expense.child_ids && children.length > 0 && (
+                <div className="mt-3 border-t border-ke-divider pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted mb-1">Kids</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {expense.child_ids.split(",").map((childId) => {
+                      const child = children.find((c) => c.id === childId.trim());
+                      return child ? (
+                        <span
+                          key={child.id}
+                          className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary"
+                        >
+                          {child.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
               )}
             </CardBody>
           </Card>

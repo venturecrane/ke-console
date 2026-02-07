@@ -49,6 +49,8 @@ export default function AddExpensePage() {
   const [memo, setMemo] = useState("");
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
   const [allChildrenSelected, setAllChildrenSelected] = useState(false);
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
+  const [linkUrlError, setLinkUrlError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadUserData() {
@@ -109,6 +111,14 @@ export default function AddExpensePage() {
 
     setIsSubmitting(true);
     setError(null);
+
+    // Validate URL if provided
+    const trimmedLink = linkUrl.trim();
+    if (trimmedLink && !trimmedLink.startsWith("http://") && !trimmedLink.startsWith("https://")) {
+      setError("Receipt link must start with http:// or https://");
+      setIsSubmitting(false);
+      return;
+    }
 
     // Parse amount (allow negative for refunds)
     const amountNum = parseFloat(amount);
@@ -218,53 +228,6 @@ export default function AddExpensePage() {
                 </Select>
               </div>
 
-              {/* Children */}
-              {children.length > 0 && (
-                <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-ke-primary">
-                    Kids <span className="text-ke-muted">(optional)</span>
-                  </label>
-                  <div className="rounded-lg border border-ke-border p-3">
-                    {/* All Children option */}
-                    <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-ke-divider pb-2">
-                      <input
-                        type="checkbox"
-                        checked={allChildrenSelected}
-                        onChange={(e) => handleAllChildrenChange(e.target.checked)}
-                        className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
-                      />
-                      <span className="font-medium text-ke-primary">
-                        All Kids
-                      </span>
-                    </label>
-                    {/* Individual children */}
-                    <div className="mt-2 space-y-2">
-                      {children.map((child) => (
-                        <label
-                          key={child.id}
-                          className="flex cursor-pointer items-center gap-2"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedChildIds.includes(child.id)}
-                            onChange={(e) =>
-                              handleChildToggle(child.id, e.target.checked)
-                            }
-                            className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
-                          />
-                          <span className="text-ke-secondary">
-                            {child.name}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-1 text-xs text-ke-muted">
-                    Select which kids this expense applies to
-                  </p>
-                </div>
-              )}
-
               {/* Date */}
               <div className="mb-4">
                 <Input
@@ -277,30 +240,109 @@ export default function AddExpensePage() {
                 />
               </div>
 
-              {/* Link URL (optional) */}
-              <div className="mb-4">
-                <Input
-                  label={<>Link URL <span className="text-ke-muted">(optional)</span></>}
-                  id="linkUrl"
-                  type="url"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-
-              {/* Memo (optional) */}
+              {/* Collapsible Additional Details */}
               <div className="mb-6">
-                <Textarea
-                  label={<>Memo <span className="text-ke-muted">(optional)</span></>}
-                  id="memo"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  placeholder="Additional notes..."
-                  maxLength={500}
-                  rows={3}
-                  hint={`${memo.length}/500 characters`}
-                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
+                  className="flex w-full items-center justify-between rounded-lg border border-ke-border px-4 py-3 text-sm font-medium text-ke-secondary transition-colors hover:bg-ke-elevated"
+                >
+                  <span>Additional Details</span>
+                  <svg
+                    className={`h-4 w-4 transition-transform ${showAdditionalDetails ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showAdditionalDetails && (
+                  <div className="mt-3 space-y-4 rounded-lg border border-ke-border p-4">
+                    {/* Memo (optional) */}
+                    <div>
+                      <Textarea
+                        label={<>Memo <span className="text-ke-muted">(optional)</span></>}
+                        id="memo"
+                        value={memo}
+                        onChange={(e) => setMemo(e.target.value)}
+                        placeholder="Additional notes..."
+                        maxLength={500}
+                        rows={3}
+                        hint={`${memo.length}/500 characters`}
+                      />
+                    </div>
+
+                    {/* Receipt Link (optional) */}
+                    <div>
+                      <Input
+                        label={<>Receipt Link <span className="text-ke-muted">(optional)</span></>}
+                        id="linkUrl"
+                        type="url"
+                        value={linkUrl}
+                        onChange={(e) => {
+                          setLinkUrl(e.target.value);
+                          const val = e.target.value.trim();
+                          if (val && !val.startsWith("http://") && !val.startsWith("https://")) {
+                            setLinkUrlError("Must start with http:// or https://");
+                          } else {
+                            setLinkUrlError(null);
+                          }
+                        }}
+                        placeholder="https://..."
+                        hint={linkUrlError || undefined}
+                      />
+                    </div>
+
+                    {/* Children */}
+                    {children.length > 0 && (
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-ke-primary">
+                          Kids <span className="text-ke-muted">(optional)</span>
+                        </label>
+                        <div className="rounded-lg border border-ke-border p-3">
+                          {/* All Children option */}
+                          <label className="mb-2 flex cursor-pointer items-center gap-2 border-b border-ke-divider pb-2">
+                            <input
+                              type="checkbox"
+                              checked={allChildrenSelected}
+                              onChange={(e) => handleAllChildrenChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
+                            />
+                            <span className="font-medium text-ke-primary">
+                              All Kids
+                            </span>
+                          </label>
+                          {/* Individual children */}
+                          <div className="mt-2 space-y-2">
+                            {children.map((child) => (
+                              <label
+                                key={child.id}
+                                className="flex cursor-pointer items-center gap-2"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedChildIds.includes(child.id)}
+                                  onChange={(e) =>
+                                    handleChildToggle(child.id, e.target.checked)
+                                  }
+                                  className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
+                                />
+                                <span className="text-ke-secondary">
+                                  {child.name}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="mt-1 text-xs text-ke-muted">
+                          Select which kids this expense applies to
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {error && (

@@ -854,3 +854,130 @@ export async function cancelSubscription(
     userId
   );
 }
+
+// ============================================
+// NOTIFICATION PREFERENCES API (#100)
+// ============================================
+
+export interface NotificationPreferences {
+  expense_created: boolean;
+  expense_questioned: boolean;
+  question_resolved: boolean;
+  payment_recorded: boolean;
+  recurring_generated: boolean;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  expense_created?: boolean;
+  expense_questioned?: boolean;
+  question_resolved?: boolean;
+  payment_recorded?: boolean;
+  recurring_generated?: boolean;
+}
+
+export async function getNotificationPreferences(
+  userId: string,
+  familyId: string
+): Promise<NotificationPreferences> {
+  return apiRequest<NotificationPreferences>(
+    `/families/${familyId}/notification-preferences`,
+    { method: "GET" },
+    userId
+  );
+}
+
+export async function updateNotificationPreferences(
+  userId: string,
+  familyId: string,
+  updates: UpdateNotificationPreferencesRequest
+): Promise<NotificationPreferences> {
+  return apiRequest<NotificationPreferences>(
+    `/families/${familyId}/notification-preferences`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    },
+    userId
+  );
+}
+
+// ============================================
+// CSV EXPORT API (#101)
+// ============================================
+
+async function apiBlobRequest(
+  path: string,
+  token?: string
+): Promise<Blob> {
+  const headers: HeadersInit = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    let errorMsg = "Export failed";
+    try {
+      const data = await response.json();
+      errorMsg = (data as ApiError).error || errorMsg;
+    } catch {
+      // response may not be JSON
+    }
+    throw new Error(errorMsg);
+  }
+
+  return response.blob();
+}
+
+export async function exportExpensesCsv(
+  userId: string,
+  familyId: string
+): Promise<Blob> {
+  return apiBlobRequest(`/families/${familyId}/expenses/export`, userId);
+}
+
+export async function exportPaymentsCsv(
+  userId: string,
+  familyId: string
+): Promise<Blob> {
+  return apiBlobRequest(`/families/${familyId}/payments/export`, userId);
+}
+
+// ============================================
+// ACTIVITY EVENT DETAIL API (#103)
+// ============================================
+
+export async function getActivityEvent(
+  userId: string,
+  eventId: string
+): Promise<ActivityEvent> {
+  return apiRequest<ActivityEvent>(
+    `/activity/${eventId}`,
+    { method: "GET" },
+    userId
+  );
+}
+
+// ============================================
+// UPDATE CHILD API (#105)
+// ============================================
+
+export async function updateChild(
+  userId: string,
+  familyId: string,
+  childId: string,
+  name: string
+): Promise<Child> {
+  return apiRequest<Child>(
+    `/families/${familyId}/children/${childId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    },
+    userId
+  );
+}

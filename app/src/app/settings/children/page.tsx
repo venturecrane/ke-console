@@ -27,6 +27,12 @@ export default function ChildrenSettingsPage() {
   const [deletingChildId, setDeletingChildId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
+  // Edit state (#105)
+  const [editingChildId, setEditingChildId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
   const fetchChildren = useCallback(async () => {
     if (!user || !meData?.family) return;
 
@@ -108,6 +114,51 @@ export default function ChildrenSettingsPage() {
       setError(err instanceof Error ? err.message : "Failed to delete child");
     } finally {
       setDeletingChildId(null);
+    }
+  }
+
+  function startEdit(child: Child) {
+    setEditingChildId(child.id);
+    setEditName(child.name);
+    setEditError(null);
+    // Close any open delete confirm
+    setShowDeleteConfirm(null);
+  }
+
+  function cancelEdit() {
+    setEditingChildId(null);
+    setEditName("");
+    setEditError(null);
+  }
+
+  async function handleEditChild(childId: string) {
+    if (!user || !meData?.family) return;
+
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      setEditError("Name is required");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      setEditError("Name must be 100 characters or less");
+      return;
+    }
+
+    setIsEditing(true);
+    setEditError(null);
+
+    try {
+      const updated = await api.updateChild(meData.family.id, childId, trimmedName);
+      setChildren((prev) =>
+        prev.map((c) => (c.id === childId ? updated : c))
+      );
+      setEditingChildId(null);
+      setEditName("");
+    } catch (err) {
+      console.error("Failed to update child:", err);
+      setEditError(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setIsEditing(false);
     }
   }
 
@@ -266,66 +317,142 @@ export default function ChildrenSettingsPage() {
               {children.map((child) => (
                 <li
                   key={child.id}
-                  className="flex items-center justify-between px-6 py-4"
+                  className="px-6 py-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ke-elevated">
-                      <span className="text-lg font-medium text-ke-secondary">
-                        {child.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-ke-primary">
-                        {child.name}
-                      </p>
-                      <p className="text-sm font-mono text-ke-muted">
-                        Added {new Date(child.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {showDeleteConfirm === child.id ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-ke-muted">
-                        Delete?
-                      </span>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteChild(child.id)}
-                        disabled={deletingChildId === child.id}
-                      >
-                        {deletingChildId === child.id ? "..." : "Yes"}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(null)}
-                        disabled={deletingChildId === child.id}
-                      >
-                        No
-                      </Button>
+                  {editingChildId === child.id ? (
+                    /* Inline Edit Mode */
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ke-elevated">
+                          <span className="text-lg font-medium text-ke-secondary">
+                            {editName.charAt(0)?.toUpperCase() || child.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => {
+                            setEditName(e.target.value);
+                            setEditError(null);
+                          }}
+                          maxLength={100}
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleEditChild(child.id);
+                            } else if (e.key === "Escape") {
+                              cancelEdit();
+                            }
+                          }}
+                          className="flex-1 rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                        />
+                      </div>
+                      {editError && (
+                        <p className="ml-[52px] text-sm text-ke-negative">{editError}</p>
+                      )}
+                      <div className="ml-[52px] flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleEditChild(child.id)}
+                          disabled={isEditing || !editName.trim()}
+                        >
+                          {isEditing ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={cancelEdit}
+                          disabled={isEditing}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setShowDeleteConfirm(child.id)}
-                      className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-negative"
-                      title="Delete kid"
-                    >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                    /* Display Mode */
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ke-elevated">
+                          <span className="text-lg font-medium text-ke-secondary">
+                            {child.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-ke-primary">
+                            {child.name}
+                          </p>
+                          <p className="text-sm font-mono text-ke-muted">
+                            Added {new Date(child.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {showDeleteConfirm === child.id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-ke-muted">
+                            Delete?
+                          </span>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDeleteChild(child.id)}
+                            disabled={deletingChildId === child.id}
+                          >
+                            {deletingChildId === child.id ? "..." : "Yes"}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setShowDeleteConfirm(null)}
+                            disabled={deletingChildId === child.id}
+                          >
+                            No
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => startEdit(child)}
+                            className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-secondary"
+                            title="Edit kid name"
+                          >
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteConfirm(child.id)}
+                            className="rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-negative"
+                            title="Delete kid"
+                          >
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </li>
               ))}

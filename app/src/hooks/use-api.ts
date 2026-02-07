@@ -30,6 +30,7 @@ import type {
   ChildrenListResponse,
   ActivityListResponse,
   ActivityFilters,
+  ActivityEvent,
   QuestionExpenseRequest,
   ResolveExpenseRequest,
   FixedExpenseListResponse,
@@ -38,6 +39,8 @@ import type {
   FixedExpense,
   EditExpenseRequest,
   SubscriptionResponse,
+  NotificationPreferences,
+  UpdateNotificationPreferencesRequest,
   ApiError,
 } from "@/lib/api";
 
@@ -70,6 +73,32 @@ export function useApi() {
     }
 
     return data as T;
+  }
+
+  async function apiBlobRequest(path: string): Promise<Blob> {
+    const token = await getToken();
+    const headers: HeadersInit = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    const response = await fetch(`${API_URL}${path}`, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      let errorMsg = "Export failed";
+      try {
+        const data = await response.json();
+        errorMsg = (data as ApiError).error || errorMsg;
+      } catch {
+        // response may not be JSON
+      }
+      throw new Error(errorMsg);
+    }
+
+    return response.blob();
   }
 
   return {
@@ -246,6 +275,16 @@ export function useApi() {
         { method: "DELETE" }
       ),
 
+    updateChild: (
+      familyId: string,
+      childId: string,
+      name: string
+    ): Promise<Child> =>
+      apiRequest<Child>(`/families/${familyId}/children/${childId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name }),
+      }),
+
     // Activity
     getActivity: (
       familyId: string,
@@ -266,6 +305,9 @@ export function useApi() {
         { method: "GET" }
       );
     },
+
+    getActivityEvent: (eventId: string): Promise<ActivityEvent> =>
+      apiRequest<ActivityEvent>(`/activity/${eventId}`, { method: "GET" }),
 
     // Fixed Expenses
     getFixedExpenses: (
@@ -342,5 +384,33 @@ export function useApi() {
       familyId: string
     ): Promise<{ success: boolean; message: string }> =>
       apiRequest(`/families/${familyId}/subscription`, { method: "DELETE" }),
+
+    // Notification Preferences (#100)
+    getNotificationPreferences: (
+      familyId: string
+    ): Promise<NotificationPreferences> =>
+      apiRequest<NotificationPreferences>(
+        `/families/${familyId}/notification-preferences`,
+        { method: "GET" }
+      ),
+
+    updateNotificationPreferences: (
+      familyId: string,
+      updates: UpdateNotificationPreferencesRequest
+    ): Promise<NotificationPreferences> =>
+      apiRequest<NotificationPreferences>(
+        `/families/${familyId}/notification-preferences`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(updates),
+        }
+      ),
+
+    // CSV Export (#101)
+    exportExpensesCsv: (familyId: string): Promise<Blob> =>
+      apiBlobRequest(`/families/${familyId}/expenses/export`),
+
+    exportPaymentsCsv: (familyId: string): Promise<Blob> =>
+      apiBlobRequest(`/families/${familyId}/payments/export`),
   };
 }

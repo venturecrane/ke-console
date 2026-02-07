@@ -726,16 +726,12 @@ export default function ActivityFeedPage() {
 
                 return (
                   <li key={event.id}>
-                    {link ? (
-                      <Link
-                        href={link}
-                        className="block transition-colors hover:bg-ke-elevated"
-                      >
-                        {content}
-                      </Link>
-                    ) : (
-                      content
-                    )}
+                    <Link
+                      href={`/activity/${event.id}`}
+                      className="block transition-colors hover:bg-ke-elevated"
+                    >
+                      {content}
+                    </Link>
                   </li>
                 );
               })}

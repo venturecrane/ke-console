@@ -12,6 +12,7 @@ import type {
   ExpenseFilters,
   QuestionReason,
   ResolutionAction,
+  SubscriptionResponse,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
@@ -22,6 +23,7 @@ import {
   StatusBadge,
   EmptyState,
   Alert,
+  UpgradeModal,
 } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 20;
@@ -131,6 +133,11 @@ export default function ExpenseListPage() {
   // Satisfy state
   const [satisfyingExpenseId, setSatisfyingExpenseId] = useState<string | null>(null);
 
+  // CSV Export state
+  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   // Read status filter from URL on mount (e.g., /expenses?status=needs_attention)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -232,6 +239,14 @@ export default function ExpenseListPage() {
       try {
         const data = await api.getMe();
         setMeData(data);
+        if (data.family) {
+          try {
+            const sub = await api.getSubscription(data.family.id);
+            setSubscription(sub);
+          } catch {
+            // Non-critical; export may just work or fail gracefully
+          }
+        }
       } catch (error) {
         console.error("Failed to load user data:", error);
       }
@@ -373,6 +388,31 @@ export default function ExpenseListPage() {
     );
   }
 
+  async function handleExportCsv() {
+    if (!meData?.family) return;
+
+    // Check subscription
+    if (subscription && subscription.plan !== "pro") {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const blob = await api.exportExpensesCsv(meData.family.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `expenses-${new Date().toISOString().split("T")[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export CSV:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -409,6 +449,14 @@ export default function ExpenseListPage() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleExportCsv}
+              disabled={isExporting}
+            >
+              {isExporting ? "Exporting..." : "Export CSV"}
+            </Button>
             <Link
               href="/expenses/add"
             >
@@ -774,6 +822,14 @@ export default function ExpenseListPage() {
           </Card>
         </div>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        title="Export Requires Pro"
+        description="CSV export is a Pro feature. Upgrade to download your expense data."
+      />
 
       {/* Resolve Modal */}
       {resolveModalExpense && (
