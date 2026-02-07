@@ -15,7 +15,7 @@ import type {
 } from '../types';
 import { authMiddleware } from '../middleware/auth';
 import { generateId, getTodayDate } from '../utils';
-import { createActivityEvent } from '../services/activity';
+import { createActivityEvent, applyTimeoutChecks, getFamilyTier, getHistoryCutoffDate } from '../services/activity';
 
 const app = new Hono<AppType>();
 
@@ -137,10 +137,18 @@ app.get('/:id/expenses', async (c) => {
     // Get query parameters for filtering
     const status = c.req.query('status');
     const category = c.req.query('category');
-    const startDate = c.req.query('startDate');
+    let startDate = c.req.query('startDate');
     const endDate = c.req.query('endDate');
     const limit = parseInt(c.req.query('limit') || '50');
     const offset = parseInt(c.req.query('offset') || '0');
+
+    // Apply tier-based history limit for Free tier
+    const tier = await getFamilyTier(c.env.DB, familyId);
+    let tierLimited = false;
+    if (tier.plan === 'free' && tier.historyMonths > 0 && !startDate) {
+      startDate = getHistoryCutoffDate(tier.historyMonths);
+      tierLimited = true;
+    }
 
     // Build query
     let query = 'SELECT * FROM expenses WHERE family_id = ? AND deleted_at IS NULL';
@@ -168,6 +176,12 @@ app.get('/:id/expenses', async (c) => {
 
     const result = await c.env.DB.prepare(query).bind(...params).all<Expense>();
 
+    // Apply on-read timeout checks to each expense
+    const expenses = [];
+    for (const expense of result.results || []) {
+      expenses.push(await applyTimeoutChecks(c.env.DB, expense));
+    }
+
     // Get total count for pagination
     let countQuery = 'SELECT COUNT(*) as count FROM expenses WHERE family_id = ? AND deleted_at IS NULL';
     const countParams: (string | number)[] = [familyId];
@@ -192,11 +206,16 @@ app.get('/:id/expenses', async (c) => {
     const countResult = await c.env.DB.prepare(countQuery).bind(...countParams).first<{ count: number }>();
 
     return c.json({
-      expenses: result.results || [],
+      expenses,
       pagination: {
         total: countResult?.count || 0,
         limit,
         offset,
+      },
+      tier: {
+        plan: tier.plan,
+        historyLimited: tierLimited,
+        historyMonths: tier.historyMonths,
       },
     });
   } catch (error) {

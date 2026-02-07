@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { AppType, Family, ActivityEventWithUser } from '../types';
 import { authMiddleware } from '../middleware/auth';
+import { getFamilyTier, getHistoryCutoffDate } from '../services/activity';
 
 const app = new Hono<AppType>();
 
@@ -30,9 +31,17 @@ app.get('/:id/activity', async (c) => {
     const offset = parseInt(c.req.query('offset') || '0');
     const typeFilter = c.req.query('type'); // expenses, payments, fixed_expenses, disputes, children
     const search = c.req.query('search');
-    const startDate = c.req.query('startDate');
+    let startDate = c.req.query('startDate');
     const endDate = c.req.query('endDate');
     const expenseId = c.req.query('expense_id');
+
+    // Apply tier-based history limit for Free tier
+    const tier = await getFamilyTier(c.env.DB, familyId);
+    let tierLimited = false;
+    if (tier.plan === 'free' && tier.historyMonths > 0 && !startDate) {
+      startDate = getHistoryCutoffDate(tier.historyMonths);
+      tierLimited = true;
+    }
 
     // Build query with filters
     let query = `SELECT ae.*, u.email as user_email, u.name as user_name
@@ -165,6 +174,11 @@ app.get('/:id/activity', async (c) => {
         total: countResult?.count || 0,
         limit,
         offset,
+      },
+      tier: {
+        plan: tier.plan,
+        historyLimited: tierLimited,
+        historyMonths: tier.historyMonths,
       },
     });
   } catch (error) {

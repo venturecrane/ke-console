@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import type { AppType } from './types';
+import type { AppType, Env } from './types';
+import { generateAllFamilyExpenses } from './services/activity';
 
 // Route modules
 import usersRoutes from './routes/users';
@@ -12,6 +13,8 @@ import paymentsRoutes from './routes/payments';
 import childrenRoutes from './routes/children';
 import fixedExpensesRoutes from './routes/fixed-expenses';
 import activityRoutes from './routes/activity';
+import billingRoutes from './routes/billing';
+import webhookRoutes from './routes/webhooks';
 
 const app = new Hono<AppType>();
 
@@ -50,6 +53,8 @@ app.route('/families', childrenRoutes);
 app.route('/families', fixedExpensesRoutes);
 app.route('/families', activityRoutes);
 app.route('/expenses', expenseActionsRoutes);
+app.route('/families', billingRoutes);
+app.route('/webhooks', webhookRoutes);
 
 // API info
 app.get('/', (c) => {
@@ -75,7 +80,13 @@ app.get('/', (c) => {
       '/families/:id/fixed-expenses',
       '/families/:id/fixed-expenses/:fixedExpenseId',
       '/families/:id/activity',
+      '/families/:id/subscription',
+      '/families/:id/subscription/checkout',
+      '/families/:id/subscription/cancel',
+      '/webhooks/stripe',
       '/expenses/:id',
+      '/expenses/:id (PATCH)',
+      '/expenses/:id (DELETE)',
       '/expenses/:id/question',
       '/expenses/:id/resolve',
       '/expenses/:id/satisfy',
@@ -94,4 +105,24 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal server error' }, 500);
 });
 
-export default app;
+// Export the Hono app for testing
+export { app };
+
+export default {
+  fetch: app.fetch,
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(
+      (async () => {
+        try {
+          const result = await generateAllFamilyExpenses(env.DB);
+          console.log(
+            `Cron: Generated ${result.totalGenerated} expenses for ${result.familiesProcessed} families.` +
+            (result.errors.length > 0 ? ` Errors: ${result.errors.join('; ')}` : '')
+          );
+        } catch (error) {
+          console.error('Cron error:', error);
+        }
+      })()
+    );
+  },
+};

@@ -1,5 +1,5 @@
 import { generateId } from '../utils';
-import type { Expense, FixedExpense } from '../types';
+import type { Expense, Family, FixedExpense } from '../types';
 
 // Create activity event
 export async function createActivityEvent(
@@ -43,10 +43,97 @@ export async function checkAndApplyTimeout(db: D1Database, expense: Expense): Pr
       `UPDATE expenses SET status = 'resolved_creator_decided', updated_at = datetime('now') WHERE id = ?`
     ).bind(expense.id).run();
 
-    return { ...expense, status: 'resolved_creator_decided' };
+    const updatedExpense = { ...expense, status: 'resolved_creator_decided' };
+
+    // Log system timeout activity event
+    await createActivityEvent(
+      db,
+      expense.family_id,
+      'system',
+      'expense.timeout',
+      'expense',
+      expense.id,
+      expense,
+      updatedExpense,
+      { timeout_days: 7, resolved_at: expense.resolved_at }
+    );
+
+    return updatedExpense;
   }
 
   return expense;
+}
+
+// Check 30-day closure for questioned expenses
+export async function checkAndApply30DayClosure(db: D1Database, expense: Expense): Promise<Expense> {
+  if (expense.status !== 'questioned') return expense;
+
+  const questionedAt = new Date(expense.questioned_at!);
+  const now = new Date();
+  const daysDiff = (now.getTime() - questionedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (daysDiff >= 30) {
+    const closedAt = now.toISOString();
+    await db.prepare(
+      `UPDATE expenses SET
+        status = 'closed_unresolved',
+        closed_unresolved_at = ?,
+        closed_unresolved_by = 'system',
+        updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(closedAt, expense.id).run();
+
+    const updatedExpense = {
+      ...expense,
+      status: 'closed_unresolved',
+      closed_unresolved_at: closedAt,
+      closed_unresolved_by: 'system',
+    };
+
+    // Log system closure activity event
+    await createActivityEvent(
+      db,
+      expense.family_id,
+      'system',
+      'expense.closure',
+      'expense',
+      expense.id,
+      expense,
+      updatedExpense,
+      { timeout_days: 30, questioned_at: expense.questioned_at }
+    );
+
+    return updatedExpense;
+  }
+
+  return expense;
+}
+
+// Apply all on-read timeout checks to an expense
+export async function applyTimeoutChecks(db: D1Database, expense: Expense): Promise<Expense> {
+  let result = await checkAndApplyTimeout(db, expense);
+  result = await checkAndApply30DayClosure(db, result);
+  return result;
+}
+
+// Get family tier (free or pro)
+export async function getFamilyTier(db: D1Database, familyId: string): Promise<{ plan: 'free' | 'pro'; historyMonths: number }> {
+  const subscription = await db.prepare(
+    `SELECT plan, status FROM subscriptions WHERE family_id = ? AND status = 'active' AND plan = 'pro'`
+  ).bind(familyId).first<{ plan: string; status: string }>();
+
+  const isPro = subscription !== null;
+  return {
+    plan: isPro ? 'pro' : 'free',
+    historyMonths: isPro ? -1 : 3, // -1 means unlimited
+  };
+}
+
+// Get the date N months ago in YYYY-MM-DD format
+export function getHistoryCutoffDate(months: number): string {
+  const now = new Date();
+  now.setMonth(now.getMonth() - months);
+  return now.toISOString().split('T')[0];
 }
 
 // Check tier limit for fixed expenses
@@ -151,4 +238,33 @@ export async function generateMonthlyExpenses(db: D1Database, familyId: string):
   }
 
   return generated;
+}
+
+// Generate monthly expenses for ALL families (called by cron)
+export async function generateAllFamilyExpenses(db: D1Database): Promise<{ totalGenerated: number; familiesProcessed: number; errors: string[] }> {
+  const errors: string[] = [];
+  let totalGenerated = 0;
+  let familiesProcessed = 0;
+
+  // Get all families that have at least one active fixed expense template
+  const families = await db.prepare(
+    `SELECT DISTINCT f.id FROM families f
+     INNER JOIN fixed_expenses fe ON fe.family_id = f.id
+     WHERE fe.deleted_at IS NULL
+     AND fe.effective_from <= date('now')
+     AND (fe.effective_until IS NULL OR fe.effective_until >= date('now'))`
+  ).all<{ id: string }>();
+
+  for (const family of families.results || []) {
+    try {
+      const generated = await generateMonthlyExpenses(db, family.id);
+      totalGenerated += generated;
+      familiesProcessed++;
+    } catch (error) {
+      // Isolated failure: one family failing doesn't block others
+      errors.push(`Family ${family.id}: ${String(error)}`);
+    }
+  }
+
+  return { totalGenerated, familiesProcessed, errors };
 }

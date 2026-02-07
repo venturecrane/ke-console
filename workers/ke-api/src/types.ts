@@ -5,6 +5,8 @@ export interface Env {
   RESEND_API_KEY?: string;
   APP_URL?: string;
   CLERK_DOMAIN?: string;
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
 }
 
 export type AppType = {
@@ -150,6 +152,17 @@ export interface ResolveExpenseRequest {
   newAmount?: number; // in dollars, only for 'edit' action
 }
 
+export interface EditExpenseRequest {
+  description?: string;
+  amount?: number; // in dollars
+  category?: 'school' | 'medical' | 'activities' | 'childcare' | 'other';
+  expenseDate?: string; // ISO date string
+  paidBy?: string;
+  memo?: string | null;
+  linkUrl?: string | null;
+  childIds?: string[] | null;
+}
+
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
 
 export interface FixedExpense {
@@ -207,4 +220,27 @@ export interface ActivityEvent {
 export interface ActivityEventWithUser extends ActivityEvent {
   user_email: string;
   user_name: string | null;
+}
+
+// Billing / Subscription types
+export type SubscriptionPlan = 'free' | 'pro';
+export type SubscriptionStatus = 'active' | 'cancelled' | 'expired';
+
+export interface Subscription {
+  id: string;
+  family_id: string;
+  status: SubscriptionStatus;
+  plan: SubscriptionPlan;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  started_at: string;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCheckoutRequest {
+  returnUrl: string; // URL to redirect after checkout
 }

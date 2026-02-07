@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import app from '../index';
+import { app } from '../index';
 
 // These tests verify route wiring and middleware behavior using Hono's app.request().
 // They don't need a real D1 database — they test routing, auth middleware, and 404 handling.

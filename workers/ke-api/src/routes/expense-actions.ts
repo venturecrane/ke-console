@@ -7,9 +7,10 @@ import type {
   QuestionReason,
   QuestionExpenseRequest,
   ResolveExpenseRequest,
+  EditExpenseRequest,
 } from '../types';
 import { authMiddleware } from '../middleware/auth';
-import { createActivityEvent, checkAndApplyTimeout } from '../services/activity';
+import { createActivityEvent, applyTimeoutChecks } from '../services/activity';
 
 const app = new Hono<AppType>();
 
@@ -43,8 +44,8 @@ app.get('/:id', async (c) => {
       return c.json({ error: 'Not authorized to access this expense' }, 403);
     }
 
-    // Check for 7-day timeout
-    expense = await checkAndApplyTimeout(c.env.DB, expense);
+    // Apply on-read timeout checks (7-day + 30-day)
+    expense = await applyTimeoutChecks(c.env.DB, expense);
 
     return c.json({ expense });
   } catch (error) {
@@ -273,8 +274,8 @@ app.post('/:id/satisfy', async (c) => {
       return c.json({ error: 'Expense not found' }, 404);
     }
 
-    // Check for 7-day timeout
-    expense = await checkAndApplyTimeout(c.env.DB, expense);
+    // Apply on-read timeout checks (7-day + 30-day)
+    expense = await applyTimeoutChecks(c.env.DB, expense);
 
     // Get the family
     const family = await c.env.DB.prepare(
@@ -330,6 +331,221 @@ app.post('/:id/satisfy', async (c) => {
   } catch (error) {
     console.error('Satisfy expense error:', error);
     return c.json({ error: 'Failed to satisfy expense', details: String(error) }, 500);
+  }
+});
+
+// Edit own posted expense (creator only, posted status only)
+app.patch('/:id', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.get('userId');
+
+  try {
+    // Get the expense
+    const expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Only creator can edit
+    if (expense.created_by !== userId) {
+      return c.json({ error: 'Only the expense creator can edit' }, 403);
+    }
+
+    // Can only edit posted expenses
+    if (expense.status !== 'posted') {
+      return c.json({ error: `Cannot edit expense with status '${expense.status}'` }, 400);
+    }
+
+    const body = await c.req.json<EditExpenseRequest>();
+    const { description, amount, category, expenseDate, paidBy, memo, linkUrl, childIds } = body;
+
+    // Build update query dynamically
+    const updates: string[] = [];
+    const params: (string | number | null)[] = [];
+
+    if (description !== undefined) {
+      if (!description || description.length === 0) {
+        return c.json({ error: 'Description cannot be empty' }, 400);
+      }
+      if (description.length > 200) {
+        return c.json({ error: 'Description must be 200 characters or less' }, 400);
+      }
+      updates.push('description = ?');
+      params.push(description);
+    }
+
+    if (amount !== undefined) {
+      if (typeof amount !== 'number' || amount <= 0) {
+        return c.json({ error: 'Amount must be a positive number' }, 400);
+      }
+      updates.push('amount_cents = ?');
+      params.push(dollarsToCents(amount));
+    }
+
+    if (category !== undefined) {
+      if (!['school', 'medical', 'activities', 'childcare', 'other'].includes(category)) {
+        return c.json({ error: 'Category must be: school, medical, activities, childcare, or other' }, 400);
+      }
+      updates.push('category = ?');
+      params.push(category);
+    }
+
+    if (expenseDate !== undefined) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) {
+        return c.json({ error: 'expenseDate must be in YYYY-MM-DD format' }, 400);
+      }
+      updates.push('expense_date = ?');
+      params.push(expenseDate);
+    }
+
+    if (paidBy !== undefined) {
+      if (paidBy !== family.parent_a_id && paidBy !== family.parent_b_id) {
+        return c.json({ error: 'paidBy must be a member of the family' }, 400);
+      }
+      updates.push('paid_by = ?');
+      params.push(paidBy);
+    }
+
+    if (memo !== undefined) {
+      if (memo && memo.length > 500) {
+        return c.json({ error: 'Memo must be 500 characters or less' }, 400);
+      }
+      updates.push('memo = ?');
+      params.push(memo);
+    }
+
+    if (linkUrl !== undefined) {
+      updates.push('link_url = ?');
+      params.push(linkUrl);
+    }
+
+    if (childIds !== undefined) {
+      updates.push('child_ids = ?');
+      params.push(childIds && childIds.length > 0 ? JSON.stringify(childIds) : null);
+    }
+
+    if (updates.length === 0) {
+      return c.json({ error: 'No fields to update' }, 400);
+    }
+
+    // Re-check status before update to handle race condition
+    // (co-parent may have questioned between our read and write)
+    const freshExpense = await c.env.DB.prepare(
+      'SELECT status FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<{ status: string }>();
+
+    if (!freshExpense || freshExpense.status !== 'posted') {
+      return c.json({ error: 'Expense status changed — it may have been questioned' }, 409);
+    }
+
+    updates.push("updated_at = datetime('now')");
+    params.push(expenseId);
+
+    await c.env.DB.prepare(
+      `UPDATE expenses SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...params).run();
+
+    // Fetch updated expense
+    const updatedExpense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ?'
+    ).bind(expenseId).first<Expense>();
+
+    // Create activity event with before/after snapshots
+    await createActivityEvent(
+      c.env.DB,
+      expense.family_id,
+      userId,
+      'expense.edited',
+      'expense',
+      expenseId,
+      expense,
+      updatedExpense
+    );
+
+    return c.json({ success: true, expense: updatedExpense });
+  } catch (error) {
+    console.error('Edit expense error:', error);
+    return c.json({ error: 'Failed to edit expense', details: String(error) }, 500);
+  }
+});
+
+// Delete own posted expense (creator only, posted status only)
+app.delete('/:id', async (c) => {
+  const expenseId = c.req.param('id');
+  const userId = c.get('userId');
+
+  try {
+    // Get the expense
+    const expense = await c.env.DB.prepare(
+      'SELECT * FROM expenses WHERE id = ? AND deleted_at IS NULL'
+    ).bind(expenseId).first<Expense>();
+
+    if (!expense) {
+      return c.json({ error: 'Expense not found' }, 404);
+    }
+
+    // Get the family
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(expense.family_id).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check user belongs to family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this expense' }, 403);
+    }
+
+    // Only creator can delete
+    if (expense.created_by !== userId) {
+      return c.json({ error: 'Only the expense creator can delete' }, 403);
+    }
+
+    // Can only delete posted expenses
+    if (expense.status !== 'posted') {
+      return c.json({ error: `Cannot delete expense with status '${expense.status}'` }, 400);
+    }
+
+    // Soft delete
+    await c.env.DB.prepare(
+      `UPDATE expenses SET deleted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`
+    ).bind(expenseId).run();
+
+    // Create activity event with full snapshot before deletion
+    await createActivityEvent(
+      c.env.DB,
+      expense.family_id,
+      userId,
+      'expense.deleted',
+      'expense',
+      expenseId,
+      expense,
+      null
+    );
+
+    return c.json({ success: true, id: expenseId });
+  } catch (error) {
+    console.error('Delete expense error:', error);
+    return c.json({ error: 'Failed to delete expense', details: String(error) }, 500);
   }
 });
 

@@ -3,7 +3,7 @@ import { dollarsToCents } from '../calculations';
 import type { AppType, CreatePaymentRequest, Family, Payment } from '../types';
 import { authMiddleware } from '../middleware/auth';
 import { generateId, getTodayDate } from '../utils';
-import { createActivityEvent } from '../services/activity';
+import { createActivityEvent, getFamilyTier, getHistoryCutoffDate } from '../services/activity';
 
 const app = new Hono<AppType>();
 
@@ -98,16 +98,29 @@ app.get('/:id/payments', async (c) => {
     const limit = parseInt(c.req.query('limit') || '50');
     const offset = parseInt(c.req.query('offset') || '0');
 
+    // Apply tier-based history limit for Free tier
+    const tier = await getFamilyTier(c.env.DB, familyId);
+    let tierLimited = false;
+    let dateFilter = '';
+    const queryParams: (string | number)[] = [familyId];
+
+    if (tier.plan === 'free' && tier.historyMonths > 0) {
+      const cutoff = getHistoryCutoffDate(tier.historyMonths);
+      dateFilter = ' AND payment_date >= ?';
+      queryParams.push(cutoff);
+      tierLimited = true;
+    }
+
     const result = await c.env.DB.prepare(
       `SELECT * FROM payments
-       WHERE family_id = ? AND deleted_at IS NULL
+       WHERE family_id = ? AND deleted_at IS NULL${dateFilter}
        ORDER BY payment_date DESC, created_at DESC
        LIMIT ? OFFSET ?`
-    ).bind(familyId, limit, offset).all<Payment>();
+    ).bind(...queryParams, limit, offset).all<Payment>();
 
     const countResult = await c.env.DB.prepare(
-      'SELECT COUNT(*) as count FROM payments WHERE family_id = ? AND deleted_at IS NULL'
-    ).bind(familyId).first<{ count: number }>();
+      `SELECT COUNT(*) as count FROM payments WHERE family_id = ? AND deleted_at IS NULL${dateFilter}`
+    ).bind(...queryParams).first<{ count: number }>();
 
     return c.json({
       payments: result.results || [],
@@ -115,6 +128,11 @@ app.get('/:id/payments', async (c) => {
         total: countResult?.count || 0,
         limit,
         offset,
+      },
+      tier: {
+        plan: tier.plan,
+        historyLimited: tierLimited,
+        historyMonths: tier.historyMonths,
       },
     });
   } catch (error) {
