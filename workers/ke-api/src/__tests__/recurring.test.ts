@@ -120,7 +120,7 @@ describe('generateMonthlyExpenses', () => {
     const { db, prepareFn } = createRecurringMockDb(tracker);
     const generated = await generateMonthlyExpenses(db, 'fam-001');
 
-    expect(generated).toBe(1);
+    expect(generated.count).toBe(1);
     // First call: SELECT fixed_expenses
     expect(prepareFn.mock.calls[0][0]).toContain('fixed_expenses');
     // Second call: idempotency check
@@ -168,7 +168,7 @@ describe('generateMonthlyExpenses', () => {
     const { db, prepareFn } = createRecurringMockDb(tracker);
     const generated = await generateMonthlyExpenses(db, 'fam-001');
 
-    expect(generated).toBe(0);
+    expect(generated.count).toBe(0);
     // Only 2 prepare calls: SELECT fixed_expenses + idempotency check
     // No INSERT calls
     expect(prepareFn).toHaveBeenCalledTimes(2);
@@ -210,7 +210,7 @@ describe('generateMonthlyExpenses', () => {
 
     const { db: db1 } = createRecurringMockDb(tracker1);
     const firstRun = await generateMonthlyExpenses(db1, 'fam-001');
-    expect(firstRun).toBe(1);
+    expect(firstRun.count).toBe(1);
 
     // Second run: existing expense found (simulating the one just created)
     const tracker2: MockCallTracker = {
@@ -223,7 +223,7 @@ describe('generateMonthlyExpenses', () => {
 
     const { db: db2 } = createRecurringMockDb(tracker2);
     const secondRun = await generateMonthlyExpenses(db2, 'fam-001');
-    expect(secondRun).toBe(0);
+    expect(secondRun.count).toBe(0);
   });
 
   it('handles multiple templates, skipping ones with existing expenses', async () => {
@@ -286,7 +286,7 @@ describe('generateMonthlyExpenses', () => {
     const { db } = createRecurringMockDb(tracker);
     const generated = await generateMonthlyExpenses(db, 'fam-001');
 
-    expect(generated).toBe(1);
+    expect(generated.count).toBe(1);
   });
 
   it('returns 0 when family has no active fixed expense templates', async () => {
@@ -300,7 +300,7 @@ describe('generateMonthlyExpenses', () => {
     const { db } = createRecurringMockDb(tracker);
     const generated = await generateMonthlyExpenses(db, 'fam-001');
 
-    expect(generated).toBe(0);
+    expect(generated.count).toBe(0);
   });
 });
 

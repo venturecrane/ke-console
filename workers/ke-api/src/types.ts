@@ -244,3 +244,23 @@ export interface Subscription {
 export interface CreateCheckoutRequest {
   returnUrl: string; // URL to redirect after checkout
 }
+
+// Notification preferences
+export interface NotificationPreferences {
+  id: string;
+  user_id: string;
+  family_id: string;
+  expense_created: boolean;
+  expense_questioned: boolean;
+  question_resolved: boolean;
+  payment_recorded: boolean;
+  recurring_generated: boolean;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  expense_created?: boolean;
+  expense_questioned?: boolean;
+  question_resolved?: boolean;
+  payment_recorded?: boolean;
+  recurring_generated?: boolean;
+}

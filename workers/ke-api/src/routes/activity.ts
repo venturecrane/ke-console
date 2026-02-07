@@ -73,7 +73,7 @@ app.get('/:id/activity', async (c) => {
           eventTypes = ['expense.questioned', 'expense.resolved', 'expense.satisfied'];
           break;
         case 'children':
-          eventTypes = ['child.created', 'child.deleted'];
+          eventTypes = ['child.created', 'child.updated', 'child.deleted'];
           break;
       }
       if (eventTypes.length > 0) {
@@ -133,7 +133,7 @@ app.get('/:id/activity', async (c) => {
           eventTypes = ['expense.questioned', 'expense.resolved', 'expense.satisfied'];
           break;
         case 'children':
-          eventTypes = ['child.created', 'child.deleted'];
+          eventTypes = ['child.created', 'child.updated', 'child.deleted'];
           break;
       }
       if (eventTypes.length > 0) {

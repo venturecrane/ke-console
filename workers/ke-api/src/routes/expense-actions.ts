@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { authMiddleware } from '../middleware/auth';
 import { createActivityEvent, applyTimeoutChecks } from '../services/activity';
+import { sendNotification } from '../services/notifications';
 
 const app = new Hono<AppType>();
 
@@ -133,6 +134,19 @@ app.post('/:id/question', async (c) => {
       { reason, note }
     );
 
+    // Notify expense creator (BR-055: notify the OTHER parent)
+    if (expense.created_by !== userId) {
+      const actor = await c.env.DB.prepare(
+        'SELECT name, email FROM users WHERE id = ?'
+      ).bind(userId).first<{ name: string | null; email: string }>();
+
+      sendNotification(c.env.DB, c.env, expense.created_by, expense.family_id, 'expense_questioned', {
+        description: expense.description,
+        reason,
+        actor_name: actor?.name || actor?.email || 'Your co-parent',
+      }).catch(() => {});
+    }
+
     return c.json({ success: true, expense: updatedExpense });
   } catch (error) {
     console.error('Question expense error:', error);
@@ -251,6 +265,19 @@ app.post('/:id/resolve', async (c) => {
       updatedExpense,
       { action, newAmount: action === 'edit' ? newAmount : undefined }
     );
+
+    // Notify the questioner (BR-055: notify the OTHER parent)
+    if (expense.questioned_by && expense.questioned_by !== userId) {
+      const actor = await c.env.DB.prepare(
+        'SELECT name, email FROM users WHERE id = ?'
+      ).bind(userId).first<{ name: string | null; email: string }>();
+
+      sendNotification(c.env.DB, c.env, expense.questioned_by, expense.family_id, 'question_resolved', {
+        description: expense.description,
+        action,
+        actor_name: actor?.name || actor?.email || 'The expense creator',
+      }).catch(() => {});
+    }
 
     return c.json({ success: true, expense: updatedExpense });
   } catch (error) {

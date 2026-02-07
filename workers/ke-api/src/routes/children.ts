@@ -112,6 +112,81 @@ app.get('/:id/children', async (c) => {
   }
 });
 
+// Update a child's name
+app.patch('/:id/children/:childId', async (c) => {
+  const familyId = c.req.param('id');
+  const childId = c.req.param('childId');
+  const userId = c.get('userId');
+
+  try {
+    // Check if family exists
+    const family = await c.env.DB.prepare(
+      'SELECT * FROM families WHERE id = ?'
+    ).bind(familyId).first<Family>();
+
+    if (!family) {
+      return c.json({ error: 'Family not found' }, 404);
+    }
+
+    // Check if user belongs to this family
+    if (family.parent_a_id !== userId && family.parent_b_id !== userId) {
+      return c.json({ error: 'Not authorized to access this family' }, 403);
+    }
+
+    // Check if child exists and belongs to this family
+    const child = await c.env.DB.prepare(
+      'SELECT * FROM children WHERE id = ? AND family_id = ? AND deleted_at IS NULL'
+    ).bind(childId, familyId).first<Child>();
+
+    if (!child) {
+      return c.json({ error: 'Child not found' }, 404);
+    }
+
+    const body = await c.req.json<{ name?: string }>();
+    const { name } = body;
+
+    // Validate name
+    if (name === undefined) {
+      return c.json({ error: 'No fields to update' }, 400);
+    }
+
+    if (!name || typeof name !== 'string') {
+      return c.json({ error: 'Name is required' }, 400);
+    }
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 1 || trimmedName.length > 100) {
+      return c.json({ error: 'Name must be between 1 and 100 characters' }, 400);
+    }
+
+    // Update the child
+    await c.env.DB.prepare(
+      'UPDATE children SET name = ? WHERE id = ?'
+    ).bind(trimmedName, childId).run();
+
+    // Log activity event
+    await createActivityEvent(
+      c.env.DB,
+      familyId,
+      userId,
+      'child.updated',
+      'child',
+      childId,
+      { name: child.name },
+      { name: trimmedName }
+    );
+
+    const updatedChild = await c.env.DB.prepare(
+      'SELECT * FROM children WHERE id = ?'
+    ).bind(childId).first<Child>();
+
+    return c.json(updatedChild);
+  } catch (error) {
+    console.error('Update child error:', error);
+    return c.json({ error: 'Failed to update child', details: String(error) }, 500);
+  }
+});
+
 // Soft-delete a child
 app.delete('/:id/children/:childId', async (c) => {
   const familyId = c.req.param('id');

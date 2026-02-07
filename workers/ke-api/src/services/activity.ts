@@ -1,6 +1,13 @@
 import { generateId } from '../utils';
 import type { Expense, Family, FixedExpense } from '../types';
 
+// Generated expense detail (for email notifications)
+export interface GeneratedExpenseDetail {
+  family_id: string;
+  description: string;
+  amount_cents: number;
+}
+
 // Create activity event
 export async function createActivityEvent(
   db: D1Database,
@@ -163,7 +170,8 @@ export async function checkFixedExpenseLimit(db: D1Database, familyId: string): 
 }
 
 // Generate monthly expenses from fixed expense templates
-export async function generateMonthlyExpenses(db: D1Database, familyId: string): Promise<number> {
+// Returns count of generated expenses AND their details (for notification emails)
+export async function generateMonthlyExpenses(db: D1Database, familyId: string): Promise<{ count: number; details: GeneratedExpenseDetail[] }> {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // 1-indexed
@@ -179,6 +187,7 @@ export async function generateMonthlyExpenses(db: D1Database, familyId: string):
   ).bind(familyId).all<FixedExpense>();
 
   let generated = 0;
+  const details: GeneratedExpenseDetail[] = [];
 
   for (const fixed of fixedExpenses.results || []) {
     // Check if expense already exists for this month
@@ -235,16 +244,27 @@ export async function generateMonthlyExpenses(db: D1Database, familyId: string):
     );
 
     generated++;
+    details.push({
+      family_id: fixed.family_id,
+      description: fixed.description,
+      amount_cents: fixed.amount_cents,
+    });
   }
 
-  return generated;
+  return { count: generated, details };
 }
 
 // Generate monthly expenses for ALL families (called by cron)
-export async function generateAllFamilyExpenses(db: D1Database): Promise<{ totalGenerated: number; familiesProcessed: number; errors: string[] }> {
+export async function generateAllFamilyExpenses(db: D1Database): Promise<{
+  totalGenerated: number;
+  familiesProcessed: number;
+  errors: string[];
+  generatedDetails: GeneratedExpenseDetail[];
+}> {
   const errors: string[] = [];
   let totalGenerated = 0;
   let familiesProcessed = 0;
+  const generatedDetails: GeneratedExpenseDetail[] = [];
 
   // Get all families that have at least one active fixed expense template
   const families = await db.prepare(
@@ -257,8 +277,9 @@ export async function generateAllFamilyExpenses(db: D1Database): Promise<{ total
 
   for (const family of families.results || []) {
     try {
-      const generated = await generateMonthlyExpenses(db, family.id);
-      totalGenerated += generated;
+      const result = await generateMonthlyExpenses(db, family.id);
+      totalGenerated += result.count;
+      generatedDetails.push(...result.details);
       familiesProcessed++;
     } catch (error) {
       // Isolated failure: one family failing doesn't block others
@@ -266,5 +287,5 @@ export async function generateAllFamilyExpenses(db: D1Database): Promise<{ total
     }
   }
 
-  return { totalGenerated, familiesProcessed, errors };
+  return { totalGenerated, familiesProcessed, errors, generatedDetails };
 }

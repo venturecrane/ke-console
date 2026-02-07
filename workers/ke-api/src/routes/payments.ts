@@ -4,6 +4,7 @@ import type { AppType, CreatePaymentRequest, Family, Payment } from '../types';
 import { authMiddleware } from '../middleware/auth';
 import { generateId, getTodayDate } from '../utils';
 import { createActivityEvent, getFamilyTier, getHistoryCutoffDate } from '../services/activity';
+import { sendNotification } from '../services/notifications';
 
 const app = new Hono<AppType>();
 
@@ -68,6 +69,20 @@ app.post('/:id/payments', async (c) => {
       null,
       payment
     );
+
+    // Notify the other parent (BR-055: never notify self)
+    const otherParentId = family.parent_a_id === userId ? family.parent_b_id : family.parent_a_id;
+    if (otherParentId) {
+      const actor = await c.env.DB.prepare(
+        'SELECT name, email FROM users WHERE id = ?'
+      ).bind(userId).first<{ name: string | null; email: string }>();
+
+      // Fire-and-forget (BR-056)
+      sendNotification(c.env.DB, c.env, otherParentId, familyId, 'payment_recorded', {
+        amount_cents: amountCents,
+        actor_name: actor?.name || actor?.email || 'Your co-parent',
+      }).catch(() => {});
+    }
 
     return c.json({ success: true, payment }, 201);
   } catch (error) {

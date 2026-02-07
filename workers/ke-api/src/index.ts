@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { AppType, Env } from './types';
 import { generateAllFamilyExpenses } from './services/activity';
+import { sendGenerationSummary } from './services/notifications';
 
 // Route modules
 import usersRoutes from './routes/users';
@@ -15,6 +16,8 @@ import fixedExpensesRoutes from './routes/fixed-expenses';
 import activityRoutes from './routes/activity';
 import billingRoutes from './routes/billing';
 import webhookRoutes from './routes/webhooks';
+import notificationPrefsRoutes from './routes/notification-prefs';
+import exportRoutes from './routes/export';
 
 const app = new Hono<AppType>();
 
@@ -46,12 +49,14 @@ app.get('/health', async (c) => {
 // Mount routes
 app.route('/users', usersRoutes);
 app.route('/me', meRoutes);
+app.route('/me', notificationPrefsRoutes);
 app.route('/families', familiesRoutes);
 app.route('/families', expensesRoutes);
 app.route('/families', paymentsRoutes);
 app.route('/families', childrenRoutes);
 app.route('/families', fixedExpensesRoutes);
 app.route('/families', activityRoutes);
+app.route('/families', exportRoutes);
 app.route('/expenses', expenseActionsRoutes);
 app.route('/families', billingRoutes);
 app.route('/webhooks', webhookRoutes);
@@ -65,6 +70,7 @@ app.get('/', (c) => {
       '/health',
       '/users/sync',
       '/me',
+      '/me/notification-preferences',
       '/families',
       '/families/:id',
       '/families/:id/invite',
@@ -73,8 +79,10 @@ app.get('/', (c) => {
       '/families/:id/invites/:inviteId',
       '/families/join',
       '/families/:id/expenses',
+      '/families/:id/expenses/export/csv',
       '/families/:id/balance',
       '/families/:id/payments',
+      '/families/:id/payments/export/csv',
       '/families/:id/children',
       '/families/:id/children/:childId',
       '/families/:id/fixed-expenses',
@@ -119,6 +127,15 @@ export default {
             `Cron: Generated ${result.totalGenerated} expenses for ${result.familiesProcessed} families.` +
             (result.errors.length > 0 ? ` Errors: ${result.errors.join('; ')}` : '')
           );
+
+          // Send generation summary emails (fire-and-forget)
+          if (result.totalGenerated > 0 && result.generatedDetails.length > 0) {
+            try {
+              await sendGenerationSummary(env.DB, env, result.generatedDetails);
+            } catch (emailError) {
+              console.error('Failed to send generation summary emails:', emailError);
+            }
+          }
         } catch (error) {
           console.error('Cron error:', error);
         }
