@@ -36,6 +36,8 @@ import type {
   CreateFixedExpenseRequest,
   UpdateFixedExpenseRequest,
   FixedExpense,
+  EditExpenseRequest,
+  SubscriptionResponse,
   ApiError,
 } from "@/lib/api";
 
@@ -305,5 +307,40 @@ export function useApi() {
       apiRequest(`/families/${familyId}/fixed-expenses/${fixedExpenseId}`, {
         method: "DELETE",
       }),
+
+    // Edit / Delete Expense (#90)
+    editExpense: (
+      expenseId: string,
+      updates: EditExpenseRequest
+    ): Promise<{ success: boolean; expense: Expense }> =>
+      apiRequest(`/expenses/${expenseId}`, {
+        method: "PATCH",
+        body: JSON.stringify(updates),
+      }),
+
+    deleteExpense: (
+      expenseId: string
+    ): Promise<{ success: boolean; id: string }> =>
+      apiRequest(`/expenses/${expenseId}`, { method: "DELETE" }),
+
+    // Subscription / Billing (#92)
+    getSubscription: (familyId: string): Promise<SubscriptionResponse> =>
+      apiRequest<SubscriptionResponse>(`/families/${familyId}/subscription`, {
+        method: "GET",
+      }),
+
+    createCheckoutSession: (
+      familyId: string,
+      returnUrl: string
+    ): Promise<{ checkoutUrl: string; sessionId: string }> =>
+      apiRequest(`/families/${familyId}/subscription/checkout`, {
+        method: "POST",
+        body: JSON.stringify({ returnUrl }),
+      }),
+
+    cancelSubscription: (
+      familyId: string
+    ): Promise<{ success: boolean; message: string }> =>
+      apiRequest(`/families/${familyId}/subscription`, { method: "DELETE" }),
   };
 }

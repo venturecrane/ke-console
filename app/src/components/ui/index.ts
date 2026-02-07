@@ -13,3 +13,4 @@ export { Textarea, type TextareaProps } from "./Textarea";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { SectionHeader, type SectionHeaderProps } from "./SectionHeader";
 export { Alert, type AlertProps, type AlertVariant } from "./Alert";
+export { UpgradeModal, type UpgradeModalProps } from "./UpgradeModal";

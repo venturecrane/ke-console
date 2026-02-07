@@ -12,7 +12,7 @@ import type {
   RecurringFrequency,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
-import { Button, Card, CardHeader, CardBody, Alert, EmptyState } from "@/components/ui";
+import { Button, Card, CardHeader, CardBody, Alert, EmptyState, UpgradeModal } from "@/components/ui";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "school", label: "School" },
@@ -85,6 +85,9 @@ export default function FixedExpensesSettingsPage() {
   // End (delete) state
   const [endingId, setEndingId] = useState<string | null>(null);
   const [showEndConfirm, setShowEndConfirm] = useState<string | null>(null);
+
+  // Upgrade modal state (#93)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const fetchFixedExpenses = useCallback(async () => {
     if (!user || !meData?.family) return;
@@ -372,13 +375,29 @@ export default function FixedExpensesSettingsPage() {
                 {tier && (
                   tier.limit === -1
                     ? `${tier.current} active recurring expenses (Pro: Unlimited)`
-                    : `${tier.current} of ${tier.limit} recurring expenses used (Free tier)`
+                    : `${tier.current}/${tier.limit} templates used`
                 )}
               </p>
+              {/* Progress bar for free tier */}
+              {tier && tier.limit !== -1 && (
+                <div className="mt-2 h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-ke-elevated">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      tier.current >= tier.limit ? "bg-ke-negative" : "bg-ke-accent"
+                    }`}
+                    style={{ width: `${Math.min(100, (tier.current / tier.limit) * 100)}%` }}
+                  />
+                </div>
+              )}
             </div>
             <Button
-              onClick={() => setShowAddForm(true)}
-              disabled={tier !== null && !tier.canAdd}
+              onClick={() => {
+                if (tier && !tier.canAdd && tier.limit !== -1) {
+                  setShowUpgradeModal(true);
+                } else {
+                  setShowAddForm(true);
+                }
+              }}
             >
               Add Recurring Expense
             </Button>
@@ -407,7 +426,11 @@ export default function FixedExpensesSettingsPage() {
                   Recurring expense limit reached
                 </p>
                 <p className="mt-1 text-sm">
-                  Free tier allows up to {tier.limit} recurring expenses. Upgrade to Pro for unlimited.
+                  Free tier allows up to {tier.limit} recurring expenses.{" "}
+                  <Link href="/settings/billing" className="text-ke-accent underline hover:no-underline">
+                    Upgrade to Pro
+                  </Link>{" "}
+                  for unlimited.
                 </p>
               </div>
             </div>
@@ -742,6 +765,14 @@ export default function FixedExpensesSettingsPage() {
           </div>
         </Alert>
       </main>
+
+      {/* Upgrade Modal (#93) */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        title="Template Limit Reached"
+        description={`Free accounts can create up to ${tier?.limit ?? 2} recurring templates. Upgrade to Pro for unlimited.`}
+      />
 
       {/* Edit Modal */}
       {editingExpense && (

@@ -11,6 +11,7 @@ import type {
   ActivityEvent,
   QuestionReason,
   ResolutionAction,
+  ExpenseCategory,
 } from "@/lib/api";
 import { formatCurrency, formatCategory } from "@/lib/statusColors";
 import { canQuestion, canRespond, canSatisfy } from "@/lib/expenseActions";
@@ -48,6 +49,27 @@ const RESOLUTION_ACTIONS: {
   { value: "delete", label: "Delete Expense", description: "Remove this expense" },
 ];
 
+const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
+  { value: "school", label: "School" },
+  { value: "medical", label: "Medical" },
+  { value: "activities", label: "Activities" },
+  { value: "childcare", label: "Childcare" },
+  { value: "other", label: "Other" },
+];
+
+const AUTO_RESOLVE_DAYS = 7;
+
+// ---------- Helpers ----------
+
+function getAutoResolveDaysLeft(resolvedAt: string | null): number | null {
+  if (!resolvedAt) return null;
+  const resolvedDate = new Date(resolvedAt);
+  const deadlineMs = resolvedDate.getTime() + AUTO_RESOLVE_DAYS * 24 * 60 * 60 * 1000;
+  const nowMs = Date.now();
+  const daysLeft = Math.ceil((deadlineMs - nowMs) / (24 * 60 * 60 * 1000));
+  return Math.max(0, daysLeft);
+}
+
 // ---------- Page component ----------
 
 export default function ExpenseDetailPage() {
@@ -80,6 +102,22 @@ export default function ExpenseDetailPage() {
 
   // Satisfy state
   const [isSatisfying, setIsSatisfying] = useState(false);
+
+  // Edit form state (#90)
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editDescription, setEditDescription] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editCategory, setEditCategory] = useState<ExpenseCategory>("other");
+  const [editDate, setEditDate] = useState("");
+  const [editMemo, setEditMemo] = useState("");
+  const [editLinkUrl, setEditLinkUrl] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  // Delete state (#90)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -119,8 +157,8 @@ export default function ExpenseDetailPage() {
   // Scroll to actions if ?focus=actions
   useEffect(() => {
     if (!isLoading && expense && actionsRef.current) {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("focus") === "actions") {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("focus") === "actions") {
         actionsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
@@ -223,6 +261,66 @@ export default function ExpenseDetailPage() {
     }
   }
 
+  // Edit expense handler (#90)
+  function openEditForm() {
+    if (!expense) return;
+    setEditDescription(expense.description);
+    setEditAmount((expense.amount_cents / 100).toFixed(2));
+    setEditCategory(expense.category);
+    setEditDate(expense.expense_date);
+    setEditMemo(expense.memo || "");
+    setEditLinkUrl(expense.link_url || "");
+    setEditError(null);
+    setShowEditForm(true);
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user || !expense) return;
+    setIsEditing(true);
+    setEditError(null);
+
+    try {
+      const amount = parseFloat(editAmount);
+      if (isNaN(amount) || amount <= 0) {
+        setEditError("Please enter a valid positive amount");
+        setIsEditing(false);
+        return;
+      }
+
+      const result = await api.editExpense(expense.id, {
+        description: editDescription.trim(),
+        amount,
+        category: editCategory,
+        expenseDate: editDate,
+        memo: editMemo.trim() || null,
+        linkUrl: editLinkUrl.trim() || null,
+      });
+      setExpense(result.expense);
+      setShowEditForm(false);
+      await refreshTimeline();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Failed to edit expense");
+    } finally {
+      setIsEditing(false);
+    }
+  }
+
+  // Delete expense handler (#90)
+  async function handleDelete() {
+    if (!user || !expense) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await api.deleteExpense(expense.id);
+      router.push("/expenses");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete expense");
+      setIsDeleting(false);
+    }
+  }
+
   async function refreshTimeline() {
     if (!user || !meData?.family) return;
     try {
@@ -268,6 +366,10 @@ export default function ExpenseDetailPage() {
 
   const userId = user?.id || "";
   const isCreator = expense.created_by === userId;
+  const canEdit = isCreator && expense.status === "posted";
+  const daysLeft = expense.status === "pending_satisfaction"
+    ? getAutoResolveDaysLeft(expense.resolved_at)
+    : null;
 
   return (
     <div className="min-h-screen bg-ke-bg">
@@ -279,51 +381,258 @@ export default function ExpenseDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="text-xl font-semibold text-ke-primary">Expense Detail</h1>
+          <h1 className="flex-1 text-xl font-semibold text-ke-primary">Expense Detail</h1>
+          {/* Edit / Delete buttons in header for creator of posted expenses */}
+          {canEdit && !showEditForm && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={openEditForm}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-secondary"
+                title="Edit expense"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg p-2 text-ke-muted transition-colors hover:bg-ke-elevated hover:text-ke-negative"
+                title="Delete expense"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 space-y-6">
-        {/* ---------- Expense Summary ---------- */}
-        <Card>
-          <CardBody>
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-medium text-ke-primary">
-                  {expense.description}
-                </h2>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
-                  <span className="font-mono text-sm">
-                    {new Date(expense.expense_date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    Posted by {isCreator ? "You" : (meData?.family ? "Partner" : "Unknown")}
-                  </span>
-                </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary">
-                    {formatCategory(expense.category)}
-                  </span>
-                  <StatusBadge status={expense.status} />
-                </div>
+        {/* ---------- Delete Confirmation ---------- */}
+        {showDeleteConfirm && (
+          <Alert variant="error">
+            <div>
+              <p className="font-medium">Delete this expense?</p>
+              <p className="mt-1 text-sm">This action cannot be undone. The expense will be permanently removed.</p>
+              {deleteError && (
+                <p className="mt-2 text-sm font-medium">{deleteError}</p>
+              )}
+              <div className="mt-3 flex gap-3">
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="min-h-[44px]"
+                >
+                  {isDeleting ? "Deleting..." : "Yes, Delete"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteError(null);
+                  }}
+                  disabled={isDeleting}
+                  className="min-h-[44px]"
+                >
+                  Cancel
+                </Button>
               </div>
-              <p className="shrink-0 text-2xl font-semibold font-mono text-ke-primary">
-                {formatCurrency(expense.amount_cents)}
-              </p>
             </div>
+          </Alert>
+        )}
 
-            {/* Memo */}
-            {expense.memo && (
-              <p className="mt-3 text-sm text-ke-secondary border-t border-ke-divider pt-3">
-                {expense.memo}
-              </p>
-            )}
-          </CardBody>
-        </Card>
+        {/* ---------- Edit Form ---------- */}
+        {showEditForm && (
+          <Card>
+            <CardBody>
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+                Edit Expense
+              </h3>
+
+              {editError && (
+                <Alert variant="error" className="mb-4">
+                  {editError}
+                </Alert>
+              )}
+
+              <form onSubmit={handleEdit} className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Description *
+                  </label>
+                  <input
+                    type="text"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    maxLength={200}
+                    required
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Amount ($) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={editAmount}
+                      onChange={(e) => setEditAmount(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm font-mono text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      Category *
+                    </label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value as ExpenseCategory)}
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Link URL (optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={editLinkUrl}
+                    onChange={(e) => setEditLinkUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    Memo (optional)
+                  </label>
+                  <textarea
+                    value={editMemo}
+                    onChange={(e) => setEditMemo(e.target.value)}
+                    placeholder="Additional notes..."
+                    rows={2}
+                    maxLength={500}
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setShowEditForm(false);
+                      setEditError(null);
+                    }}
+                    disabled={isEditing}
+                    className="min-h-[44px]"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={isEditing || !editDescription.trim() || !editAmount}
+                    className="min-h-[44px]"
+                  >
+                    {isEditing ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* ---------- Expense Summary ---------- */}
+        {!showEditForm && (
+          <Card>
+            <CardBody>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg font-medium text-ke-primary">
+                    {expense.description}
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
+                    <span className="font-mono text-sm">
+                      {new Date(expense.expense_date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      Posted by {isCreator ? "You" : (meData?.family ? "Partner" : "Unknown")}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary">
+                      {formatCategory(expense.category)}
+                    </span>
+                    <StatusBadge status={expense.status} />
+                  </div>
+                </div>
+                <p className="shrink-0 text-2xl font-semibold font-mono text-ke-primary">
+                  {formatCurrency(expense.amount_cents)}
+                </p>
+              </div>
+
+              {/* Memo */}
+              {expense.memo && (
+                <p className="mt-3 text-sm text-ke-secondary border-t border-ke-divider pt-3">
+                  {expense.memo}
+                </p>
+              )}
+
+              {/* Link */}
+              {expense.link_url && (
+                <p className="mt-2 text-sm">
+                  <a
+                    href={expense.link_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-ke-accent hover:underline"
+                  >
+                    View link
+                  </a>
+                </p>
+              )}
+            </CardBody>
+          </Card>
+        )}
 
         {/* ---------- Actions ---------- */}
         <div ref={actionsRef}>
@@ -536,7 +845,7 @@ export default function ExpenseDetailPage() {
             </Card>
           )}
 
-          {/* Satisfy / Still Not Satisfied actions */}
+          {/* Satisfy / Still Not Satisfied actions (#87) */}
           {canSatisfy(expense, userId) && (
             <Card>
               <CardBody>
@@ -548,6 +857,17 @@ export default function ExpenseDetailPage() {
                     </p>
                     <p className="mt-1 text-sm text-ke-secondary">
                       Waiting for your confirmation
+                    </p>
+                  </div>
+                )}
+
+                {/* Auto-resolve countdown (#87) */}
+                {daysLeft !== null && (
+                  <div className="mb-4 rounded-lg bg-ke-elevated p-3">
+                    <p className="text-sm text-ke-muted text-center">
+                      {daysLeft === 0
+                        ? "Auto-resolves today if no action is taken"
+                        : `Auto-resolves in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`}
                     </p>
                   </div>
                 )}
@@ -576,7 +896,7 @@ export default function ExpenseDetailPage() {
             </Card>
           )}
 
-          {/* Closed unresolved — read-only badge, no actions */}
+          {/* Closed unresolved -- read-only badge, no actions */}
           {expense.status === "closed_unresolved" && (
             <Card>
               <CardBody>

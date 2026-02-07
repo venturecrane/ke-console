@@ -746,3 +746,111 @@ export async function endFixedExpense(
     userId
   );
 }
+
+// ============================================
+// EDIT / DELETE EXPENSE API (#90)
+// ============================================
+
+export interface EditExpenseRequest {
+  description?: string;
+  amount?: number; // in dollars
+  category?: ExpenseCategory;
+  expenseDate?: string;
+  paidBy?: string;
+  memo?: string | null;
+  linkUrl?: string | null;
+  childIds?: string[] | null;
+}
+
+export async function editExpense(
+  userId: string,
+  expenseId: string,
+  updates: EditExpenseRequest
+): Promise<{ success: boolean; expense: Expense }> {
+  return apiRequest(
+    `/expenses/${expenseId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    },
+    userId
+  );
+}
+
+export async function deleteExpense(
+  userId: string,
+  expenseId: string
+): Promise<{ success: boolean; id: string }> {
+  return apiRequest(
+    `/expenses/${expenseId}`,
+    { method: "DELETE" },
+    userId
+  );
+}
+
+// ============================================
+// SUBSCRIPTION / BILLING API (#92)
+// ============================================
+
+export interface SubscriptionFeatures {
+  free: {
+    fixedExpenses: number;
+    expenseHistory: string;
+    support: string;
+  };
+  pro: {
+    fixedExpenses: string;
+    expenseHistory: string;
+    support: string;
+    analytics: boolean;
+  };
+}
+
+export interface SubscriptionResponse {
+  plan: "free" | "pro";
+  subscription: {
+    id?: string;
+    status?: string;
+    currentPeriodStart?: string;
+    currentPeriodEnd?: string;
+    cancelAtPeriodEnd?: boolean;
+  } | null;
+  features: SubscriptionFeatures;
+}
+
+export async function getSubscription(
+  userId: string,
+  familyId: string
+): Promise<SubscriptionResponse> {
+  return apiRequest<SubscriptionResponse>(
+    `/families/${familyId}/subscription`,
+    { method: "GET" },
+    userId
+  );
+}
+
+export async function createCheckoutSession(
+  userId: string,
+  familyId: string,
+  returnUrl: string
+): Promise<{ checkoutUrl: string; sessionId: string }> {
+  return apiRequest(
+    `/families/${familyId}/subscription/checkout`,
+    {
+      method: "POST",
+      body: JSON.stringify({ returnUrl }),
+    },
+    userId
+  );
+}
+
+export async function cancelSubscription(
+  userId: string,
+  familyId: string
+): Promise<{ success: boolean; message: string }> {
+  return apiRequest(
+    `/families/${familyId}/subscription`,
+    { method: "DELETE" },
+    userId
+  );
+}
