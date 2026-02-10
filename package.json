@@ -1,13 +1,19 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
-    "prepare": "husky"
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "npm run format:check",
+    "prepare": "node -e \"if(process.env.CI)process.exit(0)\" && husky"
   },
   "lint-staged": {
-    "app/**/*.{ts,tsx}": "app/node_modules/.bin/eslint --no-warn-ignored --config app/eslint.config.mjs"
+    "app/**/*.{ts,tsx}": ["prettier --write", "app/node_modules/.bin/eslint --no-warn-ignored --config app/eslint.config.mjs"],
+    "*.{md,json,yml,yaml,css}": ["prettier --write"]
   },
   "devDependencies": {
     "husky": "^9",
-    "lint-staged": "^15"
+    "lint-staged": "^15",
+    "prettier": "^3.4.0"
   }
 }
