@@ -14,10 +14,12 @@ KE Console is the development hub for Kid Expenses (KE). It contains:
 
 ## Session Start
 
-Always run `/sod` at the start of every session to:
-- Create session in Context Worker
-- Download current documentation (includes ke-project-instructions.md)
-- Establish session context for handoffs
+At the start of every session, initialize your context:
+
+1. Call the `crane_preflight` MCP tool (no arguments)
+2. Call the `crane_sod` MCP tool with `venture: "ke"`
+
+This creates a session in the Context Worker, downloads venture documentation, and establishes context for handoffs.
 
 ## Build Commands
 
@@ -125,5 +127,5 @@ These functions are pure and fully tested. When modifying, update tests first (T
 
 ## Related Documentation
 
-Venture-specific instructions (domain rules, business logic) are served by crane-context via `/sod`.
-See the cached `ke-project-instructions.md` for expense statuses, balance algorithm, and pricing tiers.
+Venture-specific instructions (domain rules, business logic) are served by crane-context via the `crane_sod` MCP tool.
+See `ke-project-instructions.md` for expense statuses, balance algorithm, and pricing tiers.
