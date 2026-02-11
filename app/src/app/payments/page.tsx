@@ -1,132 +1,128 @@
-"use client";
+'use client'
 
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type { MeResponse, Payment, SubscriptionResponse } from "@/lib/api";
-import { formatCurrency } from "@/lib/statusColors";
-import { Button, Card, EmptyState, Alert, UpgradeModal } from "@/components/ui";
+import { useUser, UserButton } from '@clerk/nextjs'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { MeResponse, Payment, SubscriptionResponse } from '@/lib/api'
+import { formatCurrency } from '@/lib/statusColors'
+import { Button, Card, EmptyState, Alert, UpgradeModal } from '@/components/ui'
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 20
 
 export default function PaymentListPage() {
-  const { user, isLoaded } = useUser();
-  const api = useApi();
-  const [meData, setMeData] = useState<MeResponse | null>(null);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [totalPayments, setTotalPayments] = useState(0);
-  const [currentOffset, setCurrentOffset] = useState(0);
+  const { user, isLoaded } = useUser()
+  const api = useApi()
+  const [meData, setMeData] = useState<MeResponse | null>(null)
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [totalPayments, setTotalPayments] = useState(0)
+  const [currentOffset, setCurrentOffset] = useState(0)
 
   // CSV Export state
-  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   const fetchPayments = useCallback(
     async (offset: number = 0, append: boolean = false) => {
-      if (!user || !meData?.family) return;
+      if (!user || !meData?.family) return
 
       if (append) {
-        setIsLoadingMore(true);
+        setIsLoadingMore(true)
       } else {
-        setIsLoading(true);
+        setIsLoading(true)
       }
 
       try {
-        const data = await api.getPayments(
-          meData.family.id,
-          ITEMS_PER_PAGE,
-          offset
-        );
+        const data = await api.getPayments(meData.family.id, ITEMS_PER_PAGE, offset)
 
         if (append) {
-          setPayments((prev) => [...prev, ...data.payments]);
+          setPayments((prev) => [...prev, ...data.payments])
         } else {
-          setPayments(data.payments);
+          setPayments(data.payments)
         }
-        setTotalPayments(data.pagination.total);
-        setCurrentOffset(offset + data.payments.length);
+        setTotalPayments(data.pagination.total)
+        setCurrentOffset(offset + data.payments.length)
       } catch (error) {
-        console.error("Failed to fetch payments:", error);
+        console.error('Failed to fetch payments:', error)
       } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
+        setIsLoading(false)
+        setIsLoadingMore(false)
       }
     },
     [user, meData?.family, api]
-  );
+  )
 
   // Fetch user data on load
   useEffect(() => {
     async function loadUserData() {
-      if (!user) return;
+      if (!user) return
       try {
-        const data = await api.getMe();
-        setMeData(data);
+        const data = await api.getMe()
+        setMeData(data)
         if (data.family) {
           try {
-            const sub = await api.getSubscription(data.family.id);
-            setSubscription(sub);
+            const sub = await api.getSubscription(data.family.id)
+            setSubscription(sub)
           } catch {
             // Non-critical
           }
         }
       } catch (error) {
-        console.error("Failed to load user data:", error);
+        console.error('Failed to load user data:', error)
       }
     }
 
     if (isLoaded && user) {
-      loadUserData();
+      loadUserData()
     }
-  }, [isLoaded, user, api]);
+  }, [isLoaded, user, api])
 
   // Fetch payments when user data is available
   useEffect(() => {
     if (meData?.family) {
-      fetchPayments(0, false);
+      fetchPayments(0, false)
     }
-  }, [meData?.family, fetchPayments]);
+  }, [meData?.family, fetchPayments])
 
   const handleLoadMore = () => {
-    fetchPayments(currentOffset, true);
-  };
+    fetchPayments(currentOffset, true)
+  }
 
   async function handleExportCsv() {
-    if (!meData?.family) return;
+    if (!meData?.family) return
 
-    if (subscription && subscription.plan !== "pro") {
-      setShowUpgradeModal(true);
-      return;
+    if (subscription && subscription.plan !== 'pro') {
+      setShowUpgradeModal(true)
+      return
     }
 
-    setIsExporting(true);
+    setIsExporting(true)
     try {
-      const blob = await api.exportPaymentsCsv(meData.family.id);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `payments-${new Date().toISOString().split("T")[0]}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const blob = await api.exportPaymentsCsv(meData.family.id)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payments-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
     } catch (err) {
-      console.error("Failed to export CSV:", err);
+      console.error('Failed to export CSV:', err)
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
   }
 
-  const hasMore = currentOffset < totalPayments;
+  const hasMore = currentOffset < totalPayments
 
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -134,16 +130,8 @@ export default function PaymentListPage() {
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="text-ke-muted hover:text-ke-secondary"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+            <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -152,18 +140,11 @@ export default function PaymentListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">
-              Payments
-            </h1>
+            <h1 className="text-xl font-semibold text-ke-primary">Payments</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleExportCsv}
-              disabled={isExporting}
-            >
-              {isExporting ? "Exporting..." : "Export CSV"}
+            <Button size="sm" variant="secondary" onClick={handleExportCsv} disabled={isExporting}>
+              {isExporting ? 'Exporting...' : 'Export CSV'}
             </Button>
             <Link href="/payments/add">
               <Button size="sm">Record Payment</Button>
@@ -183,10 +164,10 @@ export default function PaymentListPage() {
         {/* Results Summary */}
         <div className="mb-4 text-sm text-ke-muted">
           {isLoading ? (
-            "Loading..."
+            'Loading...'
           ) : (
             <>
-              Showing {payments.length} of {totalPayments} payment{totalPayments !== 1 ? "s" : ""}
+              Showing {payments.length} of {totalPayments} payment{totalPayments !== 1 ? 's' : ''}
             </>
           )}
         </div>
@@ -230,7 +211,7 @@ export default function PaymentListPage() {
                       </span>
                       <div>
                         <p className="font-medium text-ke-primary">
-                          {payment.paid_by === user?.id ? "You paid" : "Partner paid"}
+                          {payment.paid_by === user?.id ? 'You paid' : 'Partner paid'}
                         </p>
                         <p className="text-sm font-mono text-ke-muted">
                           {new Date(payment.payment_date).toLocaleDateString()}
@@ -238,9 +219,7 @@ export default function PaymentListPage() {
                       </div>
                     </div>
                     {payment.notes && (
-                      <p className="mt-2 text-sm text-ke-muted pl-10">
-                        {payment.notes}
-                      </p>
+                      <p className="mt-2 text-sm text-ke-muted pl-10">{payment.notes}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
@@ -257,12 +236,8 @@ export default function PaymentListPage() {
         {/* Load More Button */}
         {hasMore && !isLoading && (
           <div className="mt-6 text-center">
-            <Button
-              variant="secondary"
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore ? "Loading..." : "Load More"}
+            <Button variant="secondary" onClick={handleLoadMore} disabled={isLoadingMore}>
+              {isLoadingMore ? 'Loading...' : 'Load More'}
             </Button>
           </div>
         )}
@@ -276,5 +251,5 @@ export default function PaymentListPage() {
         description="CSV export is a Pro feature. Upgrade to download your payment data."
       />
     </div>
-  );
+  )
 }

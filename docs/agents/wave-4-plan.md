@@ -8,45 +8,47 @@
 
 ### API Engineer A
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #106 | Expense filtering — extend GET query params | `feat/ke-106-expense-filtering` |
-| 2 | #107 | Balance audit trail — breakdown endpoint | `feat/ke-107-balance-audit` |
+| Order | Issue | Description                                 | Branch                          |
+| ----- | ----- | ------------------------------------------- | ------------------------------- |
+| 1     | #106  | Expense filtering — extend GET query params | `feat/ke-106-expense-filtering` |
+| 2     | #107  | Balance audit trail — breakdown endpoint    | `feat/ke-107-balance-audit`     |
 
 ### API Engineer B
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #108 | Leave family flow — POST /families/:id/leave | `feat/ke-108-leave-family` |
+| Order | Issue | Description                                  | Branch                     |
+| ----- | ----- | -------------------------------------------- | -------------------------- |
+| 1     | #108  | Leave family flow — POST /families/:id/leave | `feat/ke-108-leave-family` |
 
 ### Frontend Engineer
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #106 | Filter UI components (filter bar/drawer) | `feat/ke-106-expense-filtering` |
-| 2 | #107 | Balance breakdown page | `feat/ke-107-balance-audit` |
-| 3 | #108 | Leave family confirmation flow | `feat/ke-108-leave-family` |
-| 4 | #109 | User profile settings (Clerk integration) | `feat/ke-109-profile-settings` |
+| Order | Issue | Description                               | Branch                          |
+| ----- | ----- | ----------------------------------------- | ------------------------------- |
+| 1     | #106  | Filter UI components (filter bar/drawer)  | `feat/ke-106-expense-filtering` |
+| 2     | #107  | Balance breakdown page                    | `feat/ke-107-balance-audit`     |
+| 3     | #108  | Leave family confirmation flow            | `feat/ke-108-leave-family`      |
+| 4     | #109  | User profile settings (Clerk integration) | `feat/ke-109-profile-settings`  |
 
 ### QA Engineer
 
-| Order | Focus |
-|-------|-------|
-| 1 | Full regression sweep across all test files |
-| 2 | Phase 2 exit criteria validation |
-| 3 | Edge cases EC-050 through EC-053 (family/onboarding) |
-| 4 | Balance audit trail accuracy verification |
+| Order | Focus                                                |
+| ----- | ---------------------------------------------------- |
+| 1     | Full regression sweep across all test files          |
+| 2     | Phase 2 exit criteria validation                     |
+| 3     | Edge cases EC-050 through EC-053 (family/onboarding) |
+| 4     | Balance audit trail accuracy verification            |
 
 ## Shared File Coordination
 
 ### `index.ts` — New Routes
 
 API Eng B adds:
+
 ```typescript
 // Leave family route is on existing families routes
 ```
 
 API Eng A adds:
+
 ```typescript
 // Balance breakdown is on existing expenses routes
 // Filtering is query param extension, no new routes
@@ -62,9 +64,9 @@ export interface LeaveFamilyResponse { ... }
 
 ### Migrations
 
-| Number | File | Owner | Purpose |
-|--------|------|-------|---------|
-| Continue sequentially from Wave 3 | As needed | |
+| Number                            | File      | Owner | Purpose |
+| --------------------------------- | --------- | ----- | ------- |
+| Continue sequentially from Wave 3 | As needed |       |
 
 ## Parallel Execution Plan
 

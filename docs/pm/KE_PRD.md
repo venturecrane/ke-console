@@ -60,6 +60,7 @@ If the answer is no, the feature does not belong in KE. This test explicitly dep
 ### Persona 1: Sarah - The Organized Primary Custodian
 
 **Demographics**
+
 - Age: 38
 - Occupation: Marketing Manager at a mid-size company
 - Location: Suburban Denver, CO
@@ -72,12 +73,14 @@ If the answer is no, the feature does not belong in KE. This test explicitly dep
 Sarah carries the mental load of tracking most expenses because she's with the kids more often. She's tired of screenshot-based expense sharing via text. She doesn't want conflict with her ex, but she also doesn't want to absorb costs that should be split. The divorce was amicable enough, but money conversations still feel loaded.
 
 **Goals**
+
 - Quickly log expenses when they happen (soccer registration, school supplies, prescriptions)
 - Have a clear, indisputable record when her co-parent questions something
 - Reduce the time she spends on expense coordination from 2+ hours/month to minutes
 - Avoid emotionally charged back-and-forth about money
 
 **Frustrations**
+
 - Her ex sometimes "forgets" to pay their share for months
 - Receipts get lost in text threads
 - She feels like she's nagging when she follows up on payments
@@ -85,18 +88,21 @@ Sarah carries the mental load of tracking most expenses because she's with the k
 - Venmo requests feel passive-aggressive
 
 **Quote**
+
 > "I just want a neutral third party that says 'here's what's owed' so I'm not the bad guy asking for money."
 
 **Jobs to Be Done**
-1. *When I pay for something for the kids,* I want to log it in under 30 seconds *so that* it's recorded before I forget.
-2. *When there's a disagreement about an expense,* I want documented proof of what I paid *so that* conversations stay factual, not emotional.
-3. *When we settle up,* I want a clear net balance *so that* one payment covers everything instead of nickel-and-diming.
+
+1. _When I pay for something for the kids,_ I want to log it in under 30 seconds _so that_ it's recorded before I forget.
+2. _When there's a disagreement about an expense,_ I want documented proof of what I paid _so that_ conversations stay factual, not emotional.
+3. _When we settle up,_ I want a clear net balance _so that_ one payment covers everything instead of nickel-and-diming.
 
 ---
 
 ### Persona 2: Marcus - The Every-Other-Weekend Dad
 
 **Demographics**
+
 - Age: 42
 - Occupation: Software Engineer (remote)
 - Location: Austin, TX
@@ -109,30 +115,35 @@ Sarah carries the mental load of tracking most expenses because she's with the k
 Marcus wants to be an engaged dad but often feels out of the loop on expenses. He gets Venmo requests with minimal context and has questioned whether some charges should really be "shared." He's not trying to be difficult, but he doesn't like rubber-stamping expenses without understanding them. The dynamic with his ex is functional but cool.
 
 **Goals**
+
 - Understand what he's paying for before he pays
 - Have a voice in expense decisions, even if he's not the primary custodian
 - Avoid being perceived as the "difficult" parent who questions everything
 - Pay fairly and feel good about it
 
 **Frustrations**
+
 - Expenses arrive as Venmo requests with one-word descriptions
 - He can't tell if some expenses are truly shared or personal choices
 - Asking for receipts feels adversarial
 - He has no visibility into spending patterns or totals
 
 **Quote**
+
 > "I'm not trying to nickel-and-dime. I just want to know what I'm paying for. Is that so unreasonable?"
 
 **Jobs to Be Done**
-1. *When I receive an expense notification,* I want to see full details (what, when, why, receipt) *so that* I can approve it confidently.
-2. *When something doesn't look right,* I want to ask a clarifying question *so that* I'm not just a rubber stamp.
-3. *When I review monthly expenses,* I want to see patterns and totals *so that* I can plan my own budget.
+
+1. _When I receive an expense notification,_ I want to see full details (what, when, why, receipt) _so that_ I can approve it confidently.
+2. _When something doesn't look right,_ I want to ask a clarifying question _so that_ I'm not just a rubber stamp.
+3. _When I review monthly expenses,_ I want to see patterns and totals _so that_ I can plan my own budget.
 
 ---
 
 ### Persona 3: Jamie - The Recently Separated Parent
 
 **Demographics**
+
 - Age: 34
 - Occupation: Elementary School Teacher
 - Location: Portland, OR
@@ -145,24 +156,28 @@ Marcus wants to be an engaged dad but often feels out of the loop on expenses. H
 Jamie's separation is fresh (6 months). Emotions are still raw. Every interaction with their ex has subtext. Money is particularly fraught because they're both adjusting to single-income households. Jamie wants things to be fair but doesn't want to fight. They're looking for any tool that can reduce friction.
 
 **Goals**
+
 - Establish a neutral, low-conflict system before patterns set in
 - Build a shared expense record from day one
 - Avoid relying on memory or informal agreements
 - Feel empowered to question unfair expenses without starting a war
 
 **Frustrations**
+
 - No established system yet - everything is ad hoc
 - Trust is fragile; transparency feels risky but also necessary
 - They're not sure what expenses should be shared vs. personal
 - They worry about "keeping score" but also about being taken advantage of
 
 **Quote**
+
 > "I don't want this to become another thing we fight about. I need something that just... works, without drama."
 
 **Jobs to Be Done**
-1. *When we start co-parenting,* I want to set up a shared expense system *so that* we have neutral ground rules.
-2. *When I'm unsure if an expense should be shared,* I want clear categories and precedents *so that* I can make fair decisions.
-3. *When the system sends notifications to my ex,* I want the tone to be neutral *so that* the app doesn't add fuel to fire.
+
+1. _When we start co-parenting,_ I want to set up a shared expense system _so that_ we have neutral ground rules.
+2. _When I'm unsure if an expense should be shared,_ I want clear categories and precedents _so that_ I can make fair decisions.
+3. _When the system sends notifications to my ex,_ I want the tone to be neutral _so that_ the app doesn't add fuel to fire.
 
 ---
 
@@ -170,22 +185,23 @@ Jamie's separation is fresh (6 months). Emotions are still raw. Every interactio
 
 ### The Emotional Dimension
 
-Co-parents don't just need expense tracking - they need *emotional cover*. When you ask your ex to pay their share, it feels like asking for a favor. When you question an expense, it feels like an accusation. When you follow up on late payments, it feels like nagging.
+Co-parents don't just need expense tracking - they need _emotional cover_. When you ask your ex to pay their share, it feels like asking for a favor. When you question an expense, it feels like an accusation. When you follow up on late payments, it feels like nagging.
 
 **The core emotional problem:** Financial coordination between co-parents carries psychological weight far beyond the dollar amounts involved. A $15 expense dispute can trigger responses rooted in years of relationship history, feelings of being controlled or not trusted, or anxiety about being seen as petty.
 
 Existing tools fail because they weren't designed for this emotional context:
 
-| Tool | Why It Fails |
-|------|--------------|
-| **Spreadsheets** | Too much maintenance; disputes happen in separate channels; no notifications |
-| **Venmo/PayPal** | Transactional, not relational; no questioning mechanism; requests feel demanding |
-| **Text/Email** | Records are messy; context is lost; threads become combative |
-| **Generic expense apps** | Not designed for split ownership; no question/resolution workflow |
+| Tool                     | Why It Fails                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **Spreadsheets**         | Too much maintenance; disputes happen in separate channels; no notifications     |
+| **Venmo/PayPal**         | Transactional, not relational; no questioning mechanism; requests feel demanding |
+| **Text/Email**           | Records are messy; context is lost; threads become combative                     |
+| **Generic expense apps** | Not designed for split ownership; no question/resolution workflow                |
 
 ### The Practical Dimension
 
 Beyond emotion, there are concrete friction points:
+
 - **Proof burden:** Who paid for what? Where's the receipt?
 - **Net calculation:** When both parents pay for things, what's the actual balance?
 - **Timing:** Expenses from 3 months ago are harder to discuss than yesterday's
@@ -202,7 +218,7 @@ Success is not just "expenses get tracked." Success is:
 4. **Less mental load** - The "bookkeeper" parent spends less time coordinating
 5. **Fewer outside conflicts** - Money stops spilling over into pickup conversations
 
-The emotional test for every feature: *Does this make the next in-person interaction easier or harder?*
+The emotional test for every feature: _Does this make the next in-person interaction easier or harder?_
 
 ---
 
@@ -247,6 +263,7 @@ The Free tier must be genuinely useful, not a crippled demo. Pro features add co
 The co-parenting app market is experiencing significant growth, valued at **$440 million in 2024** and projected to reach **$1.12 billion by 2032**, representing a **12.4% CAGR**. The fastest-growing segment is dual-household co-parenting users, with an estimated growth rate of 15% per annum, driven by rising demand for shared-custody coordination and expense management.
 
 **Market Context:**
+
 - **13 million custodial parents** in the United States (approximately 4% of total population)
 - **22 million children** under 21 have a parent living outside their household
 - **$110+ billion** in unpaid child support in the US, indicating significant pain around financial coordination
@@ -254,35 +271,36 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Key Competitors
 
-| Competitor | Focus | Pricing (per parent) | Key Strength | Key Weakness |
-|------------|-------|---------------------|--------------|--------------|
-| **OurFamilyWizard** | Full-suite | $12.50-25/mo | Court recognition in all 50 states | Expensive, rigid split options, UX debt |
-| **TalkingParents** | Communication | $6-25/mo | Strong documentation, lower price | Expense tracking less robust |
-| **DComply** | Payments | $2.99-5.99/mo | Focused, lowest price | No calendar or messaging |
-| **AppClose** | Full-suite | $8.99/mo | Simple pricing, court-certified | Newer, less recognition |
-| **2Houses** | Balanced | $7/mo | Single subscription covers both | Less US market presence |
-| **Cent** | Free | $0 | Free, professional endorsements | Sustainability questions |
+| Competitor          | Focus         | Pricing (per parent) | Key Strength                       | Key Weakness                            |
+| ------------------- | ------------- | -------------------- | ---------------------------------- | --------------------------------------- |
+| **OurFamilyWizard** | Full-suite    | $12.50-25/mo         | Court recognition in all 50 states | Expensive, rigid split options, UX debt |
+| **TalkingParents**  | Communication | $6-25/mo             | Strong documentation, lower price  | Expense tracking less robust            |
+| **DComply**         | Payments      | $2.99-5.99/mo        | Focused, lowest price              | No calendar or messaging                |
+| **AppClose**        | Full-suite    | $8.99/mo             | Simple pricing, court-certified    | Newer, less recognition                 |
+| **2Houses**         | Balanced      | $7/mo                | Single subscription covers both    | Less US market presence                 |
+| **Cent**            | Free          | $0                   | Free, professional endorsements    | Sustainability questions                |
 
 ### Feature Comparison Matrix
 
-| Feature | KE | OurFamily Wizard | DComply | 2Houses |
-|---------|----|--------------------|---------|---------|
-| **Shared Expense Ledger** | Yes | Yes | Yes | Yes |
-| **Expense Questioning Workflow** | 8 statuses | Binary (approve/refuse) | Basic | Basic |
-| **Configurable Split Ratio** | 0-100% | 50/50, 80/20, 100% | Yes | Yes |
-| **Rolling Balance** | Yes, real-time | Yes | Yes | Yes |
-| **Balance-Excluded Questioning** | Yes | No | Unknown | Unknown |
-| **Full Audit Trail (before/after)** | Yes | Partial | Unknown | Unknown |
-| **Shared Calendar** | No | Yes | No | Yes |
-| **Messaging** | No | Yes | No | Yes |
-| **In-App Payments** | No (external) | Yes (OFWpay) | Yes | No |
-| **Mobile Web** | Yes | Native apps | Native apps | Native + web |
-| **Free Tier** | Yes (3mo history) | No | 7 transactions | 14-day trial |
-| **Per-Parent Pricing** | $5/mo | $12.50-25/mo | $3-6/mo | $7/mo |
+| Feature                             | KE                | OurFamily Wizard        | DComply        | 2Houses      |
+| ----------------------------------- | ----------------- | ----------------------- | -------------- | ------------ |
+| **Shared Expense Ledger**           | Yes               | Yes                     | Yes            | Yes          |
+| **Expense Questioning Workflow**    | 8 statuses        | Binary (approve/refuse) | Basic          | Basic        |
+| **Configurable Split Ratio**        | 0-100%            | 50/50, 80/20, 100%      | Yes            | Yes          |
+| **Rolling Balance**                 | Yes, real-time    | Yes                     | Yes            | Yes          |
+| **Balance-Excluded Questioning**    | Yes               | No                      | Unknown        | Unknown      |
+| **Full Audit Trail (before/after)** | Yes               | Partial                 | Unknown        | Unknown      |
+| **Shared Calendar**                 | No                | Yes                     | No             | Yes          |
+| **Messaging**                       | No                | Yes                     | No             | Yes          |
+| **In-App Payments**                 | No (external)     | Yes (OFWpay)            | Yes            | No           |
+| **Mobile Web**                      | Yes               | Native apps             | Native apps    | Native + web |
+| **Free Tier**                       | Yes (3mo history) | No                      | 7 transactions | 14-day trial |
+| **Per-Parent Pricing**              | $5/mo             | $12.50-25/mo            | $3-6/mo        | $7/mo        |
 
 ### Pricing Benchmarks
 
 **KE at $5/mo is competitively positioned:**
+
 1. **Below OFW** ($12.50-25) - The market leader charges 2.5-5x more
 2. **At DComply Premium** ($5.99) - Closest expense-focused competitor
 3. **Below AppClose** ($8.99) - The rising "all-in-one" threat
@@ -291,14 +309,14 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### KE's Genuine Differentiators
 
-| Differentiator | Why It Matters | Competitor Gap |
-|----------------|----------------|----------------|
-| **8-Status Questioning Workflow** | Real disputes have nuance beyond "approved/refused." Questioning, escalation, timeout, and resolution states model real-world back-and-forth | OFW only has binary approve/refuse; others even less |
-| **Balance-Excluded Questioning** | Questioned items don't count toward who owes whom until resolved. Prevents one parent gaming the balance | No competitor explicitly offers this |
-| **Rolling Balance with Carry Forward** | Monthly resets lose context; rolling balance shows true picture | Some have balance, but carry-forward behavior unclear |
-| **Full Audit Trail (Before/After)** | Every change logged with what was changed, by whom. True accountability | Expense audit trails less comprehensive |
-| **Mobile-Web-First** | No app store friction. Works on any device immediately | Most competitors require native app downloads |
-| **Simple, Focused UX** | Expenses only, not a full co-parenting suite | Competitors bundle everything, creating complexity |
+| Differentiator                         | Why It Matters                                                                                                                               | Competitor Gap                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **8-Status Questioning Workflow**      | Real disputes have nuance beyond "approved/refused." Questioning, escalation, timeout, and resolution states model real-world back-and-forth | OFW only has binary approve/refuse; others even less  |
+| **Balance-Excluded Questioning**       | Questioned items don't count toward who owes whom until resolved. Prevents one parent gaming the balance                                     | No competitor explicitly offers this                  |
+| **Rolling Balance with Carry Forward** | Monthly resets lose context; rolling balance shows true picture                                                                              | Some have balance, but carry-forward behavior unclear |
+| **Full Audit Trail (Before/After)**    | Every change logged with what was changed, by whom. True accountability                                                                      | Expense audit trails less comprehensive               |
+| **Mobile-Web-First**                   | No app store friction. Works on any device immediately                                                                                       | Most competitors require native app downloads         |
+| **Simple, Focused UX**                 | Expenses only, not a full co-parenting suite                                                                                                 | Competitors bundle everything, creating complexity    |
 
 ### Positioning Statement
 
@@ -315,19 +333,20 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Journey A: First-Time Setup (Sarah's perspective)
 
-| Step | Action | Touchpoint | Emotional State | Pain Points |
-|------|--------|------------|-----------------|-------------|
-| 1 | Discovers KE via Google search "co-parent expense app" | Landing page | Hopeful but skeptical | "Is this another app I'll abandon?" |
-| 2 | Signs up with email | Sign-up form | Neutral | "Hope this is quick" |
-| 3 | Prompted to create a Family | Create Family screen | Engaged | "What do I call this?" |
-| 4 | Adds children's names | Add Children form | Invested | None - straightforward |
-| 5 | Sets default split ratio (50/50) | Split settings | Thoughtful | "Can I change this later?" |
-| 6 | Enters ex's email to invite | Invite Partner screen | **Anxiety spike** | "Will they actually accept? How will they react?" |
-| 7 | Invitation sent | Confirmation | Relief + anticipation | "Now I wait..." |
-| 8 | Ex accepts (or doesn't) | Notification / dashboard | Varies: relief or deflation | If declined: "Now what?" |
-| 9 | Logs first expense | Add Expense form | Accomplishment | "Did I do this right?" |
+| Step | Action                                                 | Touchpoint               | Emotional State             | Pain Points                                       |
+| ---- | ------------------------------------------------------ | ------------------------ | --------------------------- | ------------------------------------------------- |
+| 1    | Discovers KE via Google search "co-parent expense app" | Landing page             | Hopeful but skeptical       | "Is this another app I'll abandon?"               |
+| 2    | Signs up with email                                    | Sign-up form             | Neutral                     | "Hope this is quick"                              |
+| 3    | Prompted to create a Family                            | Create Family screen     | Engaged                     | "What do I call this?"                            |
+| 4    | Adds children's names                                  | Add Children form        | Invested                    | None - straightforward                            |
+| 5    | Sets default split ratio (50/50)                       | Split settings           | Thoughtful                  | "Can I change this later?"                        |
+| 6    | Enters ex's email to invite                            | Invite Partner screen    | **Anxiety spike**           | "Will they actually accept? How will they react?" |
+| 7    | Invitation sent                                        | Confirmation             | Relief + anticipation       | "Now I wait..."                                   |
+| 8    | Ex accepts (or doesn't)                                | Notification / dashboard | Varies: relief or deflation | If declined: "Now what?"                          |
+| 9    | Logs first expense                                     | Add Expense form         | Accomplishment              | "Did I do this right?"                            |
 
 **Key Design Implications:**
+
 - Invitation moment is high-anxiety - copy must be warm, not demanding
 - Preview of what co-parent will see when invited
 - Fallback path if co-parent declines or ignores
@@ -336,20 +355,21 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Journey B: Weekly Expense Logging (Sarah's perspective)
 
-| Step | Action | Touchpoint | Emotional State | Pain Points |
-|------|--------|------------|-----------------|-------------|
-| 1 | Gets email receipt from pharmacy for kid's prescription | Email/real world | Neutral | None |
-| 2 | Opens KE app (bookmarked on home screen) | App launch | Habitual | "Hope this is fast" |
-| 3 | Taps "Add Expense" | FAB or nav | Focused | None |
-| 4 | Enters amount, selects category (Medical) | Form | Efficient | "Do I need to itemize?" |
-| 5 | Tags child (Ella) | Child selector | Quick | None |
-| 6 | Adds quick description | Text input | Thoughtful | "How much detail is enough?" |
-| 7 | Optionally uploads receipt photo | Photo upload | Slight friction | "My gallery is a mess" |
-| 8 | Taps Submit | Submit button | Satisfied | None |
-| 9 | Sees expense in list, status = "Posted" | Expense list | Accomplishment | None |
-| 10 | Co-parent gets notification | (Their device) | N/A | "Hope they don't question this" |
+| Step | Action                                                  | Touchpoint       | Emotional State | Pain Points                     |
+| ---- | ------------------------------------------------------- | ---------------- | --------------- | ------------------------------- |
+| 1    | Gets email receipt from pharmacy for kid's prescription | Email/real world | Neutral         | None                            |
+| 2    | Opens KE app (bookmarked on home screen)                | App launch       | Habitual        | "Hope this is fast"             |
+| 3    | Taps "Add Expense"                                      | FAB or nav       | Focused         | None                            |
+| 4    | Enters amount, selects category (Medical)               | Form             | Efficient       | "Do I need to itemize?"         |
+| 5    | Tags child (Ella)                                       | Child selector   | Quick           | None                            |
+| 6    | Adds quick description                                  | Text input       | Thoughtful      | "How much detail is enough?"    |
+| 7    | Optionally uploads receipt photo                        | Photo upload     | Slight friction | "My gallery is a mess"          |
+| 8    | Taps Submit                                             | Submit button    | Satisfied       | None                            |
+| 9    | Sees expense in list, status = "Posted"                 | Expense list     | Accomplishment  | None                            |
+| 10   | Co-parent gets notification                             | (Their device)   | N/A             | "Hope they don't question this" |
 
 **Key Design Implications:**
+
 - Entry flow must be completable in <30 seconds
 - Receipt upload is optional but encouraged for high-value items
 - Confirmation reinforces the value of logging
@@ -358,18 +378,19 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Journey C: Questioning an Expense (Marcus's perspective)
 
-| Step | Action | Touchpoint | Emotional State | Pain Points |
-|------|--------|------------|-----------------|-------------|
-| 1 | Receives push notification: "New expense: $150 - Activities" | Notification | Curious | "What's this for?" |
-| 2 | Opens app, views expense detail | Expense detail screen | Evaluating | "I need more context" |
-| 3 | Sees description: "Soccer camp deposit" | Detail view | Uncertain | "I wasn't consulted about this" |
-| 4 | Taps "Question" button | Expense detail | **Hesitation** | "I don't want to start a fight" |
-| 5 | Writes question: "Was this discussed? I thought we agreed on the YMCA camp?" | Question composer | Careful | "How do I word this diplomatically?" |
-| 6 | Submits question | Submit | Relief + apprehension | "How will she react?" |
-| 7 | Status changes to "Questioned" | Status badge | Neutral | None |
-| 8 | Waits for response | Notification | Anticipation | "Silence is uncomfortable" |
+| Step | Action                                                                       | Touchpoint            | Emotional State       | Pain Points                          |
+| ---- | ---------------------------------------------------------------------------- | --------------------- | --------------------- | ------------------------------------ |
+| 1    | Receives push notification: "New expense: $150 - Activities"                 | Notification          | Curious               | "What's this for?"                   |
+| 2    | Opens app, views expense detail                                              | Expense detail screen | Evaluating            | "I need more context"                |
+| 3    | Sees description: "Soccer camp deposit"                                      | Detail view           | Uncertain             | "I wasn't consulted about this"      |
+| 4    | Taps "Question" button                                                       | Expense detail        | **Hesitation**        | "I don't want to start a fight"      |
+| 5    | Writes question: "Was this discussed? I thought we agreed on the YMCA camp?" | Question composer     | Careful               | "How do I word this diplomatically?" |
+| 6    | Submits question                                                             | Submit                | Relief + apprehension | "How will she react?"                |
+| 7    | Status changes to "Questioned"                                               | Status badge          | Neutral               | None                                 |
+| 8    | Waits for response                                                           | Notification          | Anticipation          | "Silence is uncomfortable"           |
 
 **Key Design Implications:**
+
 - "Question" framing is deliberately non-adversarial
 - Placeholder text in composer should model constructive questioning
 - Status change is visible and immediate
@@ -378,21 +399,22 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Journey D: Resolving a Question (Sarah's perspective, responding to Marcus)
 
-| Step | Action | Touchpoint | Emotional State | Pain Points |
-|------|--------|------------|-----------------|-------------|
-| 1 | Receives notification: "Marcus questioned an expense" | Notification | **Defensive instinct** | "What now?" |
-| 2 | Opens expense detail, reads question | Question thread | Processing | "He has a point, but he's wrong about YMCA" |
-| 3 | Taps "Reply" | Thread | Deliberate | "Stay calm, stick to facts" |
-| 4 | Writes: "YMCA was full. I texted you about it 3 weeks ago. Attaching receipt and the text screenshot." | Composer | Firm but factual | "I have to prove myself again" |
-| 5 | Uploads evidence | Attachment picker | Slightly annoyed | "Finding that text..." |
-| 6 | Submits reply | Submit | Relief | "Ball's in his court" |
-| 7 | Decides to resolve: Taps "Resolve" | Resolve action | Confident | None |
-| 8 | Chooses resolution: "Keep as shared, adjust amount to $125" | Resolution options | Fair-minded | "I'll meet him halfway on the camp tier" |
-| 9 | Status changes to "Pending Satisfaction" | Status badge | Waiting | "Will he accept?" |
-| 10 | Marcus accepts (satisfies) | Notification | **Relief** | None |
-| 11 | Status changes to "Resolved" | Status badge | Closure | None |
+| Step | Action                                                                                                 | Touchpoint         | Emotional State        | Pain Points                                 |
+| ---- | ------------------------------------------------------------------------------------------------------ | ------------------ | ---------------------- | ------------------------------------------- |
+| 1    | Receives notification: "Marcus questioned an expense"                                                  | Notification       | **Defensive instinct** | "What now?"                                 |
+| 2    | Opens expense detail, reads question                                                                   | Question thread    | Processing             | "He has a point, but he's wrong about YMCA" |
+| 3    | Taps "Reply"                                                                                           | Thread             | Deliberate             | "Stay calm, stick to facts"                 |
+| 4    | Writes: "YMCA was full. I texted you about it 3 weeks ago. Attaching receipt and the text screenshot." | Composer           | Firm but factual       | "I have to prove myself again"              |
+| 5    | Uploads evidence                                                                                       | Attachment picker  | Slightly annoyed       | "Finding that text..."                      |
+| 6    | Submits reply                                                                                          | Submit             | Relief                 | "Ball's in his court"                       |
+| 7    | Decides to resolve: Taps "Resolve"                                                                     | Resolve action     | Confident              | None                                        |
+| 8    | Chooses resolution: "Keep as shared, adjust amount to $125"                                            | Resolution options | Fair-minded            | "I'll meet him halfway on the camp tier"    |
+| 9    | Status changes to "Pending Satisfaction"                                                               | Status badge       | Waiting                | "Will he accept?"                           |
+| 10   | Marcus accepts (satisfies)                                                                             | Notification       | **Relief**             | None                                        |
+| 11   | Status changes to "Resolved"                                                                           | Status badge       | Closure                | None                                        |
 
 **Key Design Implications:**
+
 - Reply/resolve flow must feel like conversation, not litigation
 - Evidence uploads should be easy and support multiple file types
 - Resolution options should include adjustment, not just approve/reject
@@ -405,11 +427,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.1 Onboarding & Family Setup
 
 #### US-001: Initial Account Creation
+
 **As a** new user
 **I want to** create an account with email or Google OAuth
 **So that** I can start tracking shared expenses with my co-parent
 
 **Acceptance Criteria:**
+
 - **Given** I am on the signup page
   **When** I provide a valid email and password or choose Google OAuth
   **Then** my account is created and I am redirected to family setup
@@ -425,11 +449,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-002: Family Creation
+
 **As a** new user without a family
 **I want to** create a family by entering my co-parent's email
 **So that** we can share a ledger
 
 **Acceptance Criteria:**
+
 - **Given** I have completed account creation
   **When** I enter my co-parent's email address
   **Then** a family is created with me as parent_a and a pending invite is sent
@@ -448,11 +474,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-003: Family Invitation Acceptance
+
 **As a** co-parent who received an invitation
 **I want to** accept the invitation to join a shared family
 **So that** I can see and manage shared expenses
 
 **Acceptance Criteria:**
+
 - **Given** I receive a family invitation email
   **When** I click the invitation link
   **Then** I am directed to sign up or log in
@@ -471,11 +499,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-004: Configure Split Ratio
+
 **As a** co-parent
 **I want to** set the expense split ratio for our family
 **So that** expenses are automatically divided according to our agreement
 
 **Acceptance Criteria:**
+
 - **Given** I am on the family settings page
   **When** I adjust the parent_a_ratio slider
   **Then** I see real-time updates showing both parents' percentages (sum = 100%)
@@ -496,11 +526,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.2 Expense Management
 
 #### US-005: Create One-Time Expense
+
 **As a** co-parent (Sarah, Marcus, Jamie)
 **I want to** record a child-related expense
 **So that** it appears in our shared ledger and affects the balance
 
 **Acceptance Criteria:**
+
 - **Given** I am on the expense creation form
   **When** I enter description (1-200 chars), amount (positive dollars), category, and paid_by
   **Then** the expense is created in "posted" status and affects the balance immediately
@@ -528,11 +560,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-006: Add Optional Expense Details
+
 **As a** co-parent creating an expense
 **I want to** add optional details like memo, children, and receipt link
 **So that** the expense has complete context
 
 **Acceptance Criteria:**
+
 - **Given** I am creating an expense
   **When** I add a memo (max 500 characters)
   **Then** it is saved and displayed with the expense
@@ -554,11 +588,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-007: Edit Own Posted Expense
+
 **As a** co-parent who created an expense (Sarah)
 **I want to** edit the expense details
 **So that** I can correct mistakes before my co-parent questions it
 
 **Acceptance Criteria:**
+
 - **Given** I created an expense in "posted" status
   **When** I click edit
   **Then** I can modify description, amount, category, date, paid_by, memo, children, and link
@@ -577,11 +613,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-008: Delete Own Posted Expense
+
 **As a** co-parent who created an expense
 **I want to** delete an expense I mistakenly created
 **So that** it no longer affects the ledger or balance
 
 **Acceptance Criteria:**
+
 - **Given** I created an expense in "posted" status
   **When** I click delete and confirm
   **Then** the expense is permanently deleted and removed from balance calculation
@@ -597,11 +635,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-009: View Other Parent's Expense (Cannot Edit)
+
 **As a** co-parent viewing an expense I did not create (Marcus)
 **I want to** see all expense details but not edit them
 **So that** I understand what was spent without ability to modify
 
 **Acceptance Criteria:**
+
 - **Given** I view an expense created by my co-parent
   **When** I open the expense detail
   **Then** I see all fields in read-only mode
@@ -617,11 +657,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-010: Bulk View Expenses in Ledger
+
 **As a** co-parent (Sarah, Marcus, Jamie)
 **I want to** see all expenses in a chronological list
 **So that** I can review our spending history
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** the page loads
   **Then** I see expenses sorted by expense_date descending (newest first)
@@ -640,11 +682,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-011: Filter and Search Expenses
+
 **As a** co-parent
 **I want to** filter expenses by category, status, or date range
 **So that** I can quickly find specific expenses
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** I select a category filter (school, medical, activities, childcare, other)
   **Then** I see only expenses in that category
@@ -665,11 +709,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.3 Questioning Workflow
 
 #### US-012: Question Posted Expense
+
 **As a** co-parent who did not create an expense (Marcus)
 **I want to** question a posted expense
 **So that** I can raise concerns about legitimacy or amount
 
 **Acceptance Criteria:**
+
 - **Given** I view a posted expense created by my co-parent
   **When** I click "Question" and provide a reason + optional note
   **Then** the expense status changes to "questioned" and is immediately excluded from balance
@@ -694,11 +740,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-013: View Questioned Expense Details
+
 **As a** co-parent
 **I want to** see why an expense was questioned
 **So that** I understand the concern and can respond appropriately
 
 **Acceptance Criteria:**
+
 - **Given** an expense is in "questioned" status
   **When** I view the expense detail
   **Then** I see the question reason, question note, questioned_by, and questioned_at timestamp
@@ -714,11 +762,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-014: Resolve - Keep Original
+
 **As a** expense creator responding to a question (Sarah)
 **I want to** keep the expense as-is
 **So that** I can assert the expense is correct and the questioner must confirm
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Keep Original" resolution
   **Then** the status changes to "pending_satisfaction" and the expense remains excluded from balance
@@ -737,11 +787,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-015: Resolve - Edit Amount
+
 **As a** expense creator responding to a question (Sarah)
 **I want to** edit the expense amount
 **So that** I can correct the amount and the questioner must confirm
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Edit Amount" and enter a new positive amount
   **Then** the status changes to "pending_satisfaction" with the updated amount
@@ -760,11 +812,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-016: Resolve - Mark as Personal
+
 **As a** expense creator responding to a question (Sarah)
 **I want to** mark the expense as personal
 **So that** it is excluded from shared expenses permanently
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Mark as Personal"
   **Then** the status changes to "resolved_personal" immediately (no satisfaction needed)
@@ -783,11 +837,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-017: Resolve - Delete Expense
+
 **As a** expense creator responding to a question (Sarah)
 **I want to** delete the questioned expense
 **So that** I can remove an invalid expense
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Delete" and confirm
   **Then** the status changes to "resolved_deleted" immediately (no satisfaction needed)
@@ -806,11 +862,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-018: Satisfy Resolution (Keep or Edit)
+
 **As a** questioner responding to a pending_satisfaction resolution (Marcus)
 **I want to** confirm that the resolution is acceptable
 **So that** the expense is included in the balance again
 
 **Acceptance Criteria:**
+
 - **Given** an expense I questioned is in "pending_satisfaction" status
   **When** I click "Accept Resolution"
   **Then** the status changes to "resolved" and the expense is included in balance calculation
@@ -829,11 +887,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-019: Seven-Day Auto-Resolution Timeout
+
 **As a** expense creator waiting for satisfaction (Sarah)
 **I want to** have the expense automatically resolve after 7 days if the questioner doesn't respond
 **So that** the expense eventually counts toward the balance
 
 **Acceptance Criteria:**
+
 - **Given** an expense has been in "pending_satisfaction" for 7+ days
   **When** anyone views the expense or the system performs a check
   **Then** the status automatically changes to "resolved_creator_decided"
@@ -852,11 +912,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-020: Thirty-Day Closure for Unresolved Questions
+
 **As a** co-parent
 **I want to** have questioned expenses automatically close after 30 days if unresolved
 **So that** old disputes don't remain in limbo indefinitely
 
 **Acceptance Criteria:**
+
 - **Given** an expense has been in "questioned" status for 30+ days
   **When** the system performs a check
   **Then** the status changes to "closed_unresolved"
@@ -875,11 +937,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-021: Questioning Dashboard View
+
 **As a** co-parent (Sarah, Marcus)
 **I want to** see all expenses requiring my action
 **So that** I can quickly respond to questions and pending resolutions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the questioning dashboard
   **When** the page loads
   **Then** I see three sections: "Awaiting Your Resolution", "Awaiting Satisfaction", "Recently Resolved"
@@ -900,11 +964,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.4 Fixed Monthly Expenses (Recurring)
 
 #### US-022: Create Fixed Monthly Expense Template
+
 **As a** co-parent (Sarah)
 **I want to** create a template for a recurring monthly expense
 **So that** it automatically appears in the ledger each month
 
 **Acceptance Criteria:**
+
 - **Given** I am on the recurring expenses page
   **When** I create a template with description, amount, category, paid_by, and frequency
   **Then** the template is saved and will generate expenses on schedule
@@ -926,11 +992,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-023: Edit Fixed Monthly Expense Template
+
 **As a** co-parent
 **I want to** edit a recurring expense template
 **So that** future generated expenses reflect the updated details
 
 **Acceptance Criteria:**
+
 - **Given** I am viewing a fixed expense template
   **When** I edit amount, description, or category
   **Then** the changes apply to future generated expenses only (past expenses unchanged)
@@ -946,11 +1014,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-024: Delete Fixed Monthly Expense Template
+
 **As a** co-parent
 **I want to** delete a recurring expense template
 **So that** it stops generating future expenses
 
 **Acceptance Criteria:**
+
 - **Given** I view a fixed expense template
   **When** I delete it and confirm
   **Then** no future expenses are generated from this template
@@ -966,11 +1036,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-025: Automatic Monthly Expense Generation
+
 **As a** co-parent (Sarah, Marcus)
 **I want to** have fixed expenses automatically added to the ledger on the 1st of each month
 **So that** I don't have to manually enter recurring expenses
 
 **Acceptance Criteria:**
+
 - **Given** a fixed monthly expense template exists
   **When** the 1st of the month occurs
   **Then** a new expense is created in "posted" status with expense_date = 1st of current month
@@ -989,11 +1061,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-026: Edit Generated Fixed Expense
+
 **As a** co-parent
 **I want to** edit an automatically generated fixed expense
 **So that** I can adjust it for one-time variations (e.g., price increase)
 
 **Acceptance Criteria:**
+
 - **Given** a fixed expense has been auto-generated
   **When** I edit it
   **Then** only this instance is modified (template remains unchanged)
@@ -1011,11 +1085,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.5 Balance & Payments
 
 #### US-027: View Current Net Balance
+
 **As a** co-parent (Sarah, Marcus, Jamie)
 **I want to** see the current net balance prominently displayed
 **So that** I know who owes whom and how much
 
 **Acceptance Criteria:**
+
 - **Given** I am on any page with balance visibility
   **When** the balance loads
   **Then** I see a clear display: "Parent A owes Parent B $X.XX" or "Parent B owes Parent A $X.XX"
@@ -1037,17 +1113,19 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-028: Balance Calculation Logic
+
 **As a** system
 **I want to** calculate balance using integer math and specific status rules
 **So that** the balance is accurate and avoids floating-point errors
 
 **Acceptance Criteria:**
+
 - **Given** an expense amount in dollars
   **When** stored in database
   **Then** it is converted to cents (integer)
 - **Given** parent_a_ratio = 0.60 and expense = 10000 cents
   **When** shares are calculated
-  **Then** a_share = floor(10000 * 0.60) = 6000, b_share = 10000 - 6000 = 4000
+  **Then** a_share = floor(10000 \* 0.60) = 6000, b_share = 10000 - 6000 = 4000
 - **Given** expenses in statuses: posted, resolved, resolved_creator_decided
   **When** balance is calculated
   **Then** these expenses are included
@@ -1066,11 +1144,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-029: Record External Payment
+
 **As a** co-parent who paid my co-parent outside the app (Sarah, Marcus)
 **I want to** record the payment (Venmo, Zelle, cash, check)
 **So that** the balance is reduced and the payment is documented
 
 **Acceptance Criteria:**
+
 - **Given** I am on the payment recording form
   **When** I enter paid_by (me), amount (positive), payment_date, method, and optional notes
   **Then** the payment is recorded and reduces the net balance
@@ -1092,11 +1172,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-030: View Payment History
+
 **As a** co-parent
 **I want to** see all recorded payments
 **So that** I can review payment history and verify transactions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the payments page
   **When** the page loads
   **Then** I see all payments sorted by payment_date descending
@@ -1115,11 +1197,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-031: Balance Audit Trail
+
 **As a** co-parent
 **I want to** see a detailed breakdown of how the balance was calculated
 **So that** I can verify accuracy and trace individual contributions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the balance details page
   **When** I view the breakdown
   **Then** I see: starting balance, each included expense with its share split, each payment, and ending balance
@@ -1137,11 +1221,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.6 Activity Feed & Audit Trail
 
 #### US-032: View Activity Feed
+
 **As a** co-parent
 **I want to** see a chronological feed of all family activity
 **So that** I can track changes and stay informed
 
 **Acceptance Criteria:**
+
 - **Given** I am on the activity feed page
   **When** the page loads
   **Then** I see all activity events sorted by created_at descending
@@ -1160,11 +1246,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-033: Activity Event Types
+
 **As a** system
 **I want to** log specific event types for all mutations
 **So that** the audit trail is comprehensive and queryable
 
 **Acceptance Criteria:**
+
 - **Given** an expense is created
   **When** the action completes
   **Then** event_type = "expense_created" is logged
@@ -1204,11 +1292,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-034: View Activity Event Details
+
 **As a** co-parent
 **I want to** click on an activity event to see full details
 **So that** I can understand exactly what changed
 
 **Acceptance Criteria:**
+
 - **Given** I click on an activity event
   **When** the detail view opens
   **Then** I see: full event metadata, before/after snapshots (if applicable), and a link to the target entity
@@ -1226,11 +1316,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.7 Children Management
 
 #### US-035: Add Child to Family
+
 **As a** co-parent (Sarah, Marcus, Jamie)
 **I want to** add a child to our family profile
 **So that** I can associate expenses with specific children
 
 **Acceptance Criteria:**
+
 - **Given** I am on the children management page
   **When** I enter a child's name (1-100 characters)
   **Then** the child is added to the family
@@ -1249,11 +1341,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-036: Edit Child Details
+
 **As a** co-parent
 **I want to** edit a child's name
 **So that** I can correct mistakes or update information
 
 **Acceptance Criteria:**
+
 - **Given** I view a child's profile
   **When** I edit the name and save
   **Then** the child's name is updated
@@ -1269,11 +1363,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-037: Remove Child from Family
+
 **As a** co-parent
 **I want to** remove a child from the family
 **So that** they no longer appear in expense associations
 
 **Acceptance Criteria:**
+
 - **Given** I view a child's profile
   **When** I delete and confirm
   **Then** the child is removed (soft delete)
@@ -1289,11 +1385,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-038: Filter Expenses by Child
+
 **As a** co-parent (Sarah)
 **I want to** filter the ledger to show expenses for a specific child
 **So that** I can see per-child spending
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** I select a child filter
   **Then** I see only expenses associated with that child
@@ -1308,11 +1406,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.8 Settings & Configuration
 
 #### US-039: Update User Profile
+
 **As a** co-parent
 **I want to** update my name and email
 **So that** my profile information is current
 
 **Acceptance Criteria:**
+
 - **Given** I am on the profile settings page
   **When** I update my name or email
   **Then** the changes are saved and reflected across the app
@@ -1328,11 +1428,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-040: Update Notification Preferences
+
 **As a** co-parent
 **I want to** control which notifications I receive
 **So that** I only get alerts for events I care about
 
 **Acceptance Criteria:**
+
 - **Given** I am on notification settings
   **When** I toggle options for expense_created, expense_questioned, question_resolved, payment_recorded
   **Then** my preferences are saved
@@ -1348,11 +1450,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-041: Leave Family
+
 **As a** co-parent
 **I want to** leave the family
 **So that** I can disconnect from the shared ledger if needed
 
 **Acceptance Criteria:**
+
 - **Given** I am on family settings
   **When** I click "Leave Family" and confirm
   **Then** I am removed from the family and lose access to the ledger
@@ -1370,11 +1474,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.9 Tier Management & Billing
 
 #### US-042: View Current Subscription Tier
+
 **As a** co-parent
 **I want to** see which tier I'm on and what features are available
 **So that** I understand my current plan
 
 **Acceptance Criteria:**
+
 - **Given** I am on the billing page
   **When** the page loads
   **Then** I see my current tier (Free or Pro), price, and feature comparison
@@ -1390,11 +1496,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-043: Upgrade to Pro Tier
+
 **As a** co-parent on Free tier (Sarah, Jamie)
 **I want to** upgrade to Pro
 **So that** I can access unlimited history and fixed expenses
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier
   **When** I click "Upgrade to Pro" and complete payment
   **Then** my tier is upgraded and features are immediately available
@@ -1410,11 +1518,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-044: Cancel Pro Subscription
+
 **As a** co-parent on Pro tier
 **I want to** cancel my subscription
 **So that** I can downgrade to Free tier at the end of the billing period
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I cancel my subscription
   **Then** Pro features remain active until the end of the current billing period
@@ -1430,11 +1540,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-045: Tier Limit Enforcement - Fixed Expenses
+
 **As a** system
 **I want to** enforce the 2-fixed-expense limit on Free tier
 **So that** users must upgrade for unlimited templates
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier with 2 fixed expenses
   **When** I attempt to create a third
   **Then** I see a modal "Upgrade to Pro for unlimited fixed expenses" with CTA
@@ -1447,11 +1559,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-046: Tier Limit Enforcement - History Access
+
 **As a** system
 **I want to** limit Free tier users to 3-month history
 **So that** users must upgrade for unlimited access
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier
   **When** I view the ledger
   **Then** I only see expenses from the last 3 months
@@ -1469,11 +1583,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.10 Data Export
 
 #### US-047: Export Ledger to CSV (Pro Only)
+
 **As a** Pro tier co-parent
 **I want to** export the expense ledger to CSV
 **So that** I can analyze data in Excel or for tax purposes
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I click "Export to CSV"
   **Then** a CSV file downloads with all expenses (id, date, description, amount, category, paid_by, status, creator)
@@ -1489,11 +1605,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-048: Export Payments to CSV (Pro Only)
+
 **As a** Pro tier co-parent
 **I want to** export the payment history to CSV
 **So that** I can keep external records
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I click "Export Payments to CSV"
   **Then** a CSV file downloads with all payments (id, date, paid_by, amount, method, notes)
@@ -1508,11 +1626,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ### 8.11 Notifications
 
 #### US-049: Receive Email Notification - Expense Created
+
 **As a** co-parent (Marcus receiving notification from Sarah)
 **I want to** receive an email when my co-parent creates an expense
 **So that** I stay informed of new spending
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent creates an expense
   **When** the expense is saved
   **Then** I receive an email with expense details and a link to view
@@ -1525,11 +1645,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-050: Receive Email Notification - Expense Questioned
+
 **As a** expense creator (Sarah)
 **I want to** receive an email when my expense is questioned
 **So that** I can respond promptly
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent questions my expense
   **When** the question is submitted
   **Then** I receive an email with the question reason, note, and a link to resolve
@@ -1542,11 +1664,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-051: Receive Email Notification - Question Resolved
+
 **As a** questioner (Marcus)
 **I want to** receive an email when the creator resolves my question
 **So that** I can satisfy or review the resolution
 
 **Acceptance Criteria:**
+
 - **Given** the creator resolves my question
   **When** the resolution is submitted
   **Then** I receive an email with the resolution action and a link to satisfy (if needed)
@@ -1559,11 +1683,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-052: Receive Email Notification - Payment Recorded
+
 **As a** co-parent
 **I want to** receive an email when my co-parent records a payment
 **So that** I am aware of balance changes
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent records a payment
   **When** the payment is saved
   **Then** I receive an email with payment details and updated balance
@@ -1576,11 +1702,13 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 ---
 
 #### US-053: Receive Email Notification - Fixed Expense Generated
+
 **As a** co-parent
 **I want to** receive an email when fixed expenses are auto-generated
 **So that** I know new recurring expenses have been added
 
 **Acceptance Criteria:**
+
 - **Given** the 1st of the month occurs and fixed expenses generate
   **When** generation completes
   **Then** both parents receive an email listing all generated expenses
@@ -1645,29 +1773,29 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Screen Hierarchy
 
-| Level | Screen | Access Point |
-|-------|--------|--------------|
-| L1 | Expenses List | Bottom nav (default) |
-| L1 | Payments | Bottom nav |
-| L1 | Activity | Bottom nav |
-| L1 | Settings | Bottom nav |
-| L2 | Expense Detail | Tap expense row |
-| L2 | Add Expense | FAB or "+" in nav |
-| L2 | Record Payment | Button on Payments screen |
-| L3 | Question Thread | Within expense detail |
-| L3 | Resolution Flow | Within expense detail |
-| L3 | Child Management | Within Settings |
-| L3 | Recurring Expenses | Within Settings |
+| Level | Screen             | Access Point              |
+| ----- | ------------------ | ------------------------- |
+| L1    | Expenses List      | Bottom nav (default)      |
+| L1    | Payments           | Bottom nav                |
+| L1    | Activity           | Bottom nav                |
+| L1    | Settings           | Bottom nav                |
+| L2    | Expense Detail     | Tap expense row           |
+| L2    | Add Expense        | FAB or "+" in nav         |
+| L2    | Record Payment     | Button on Payments screen |
+| L3    | Question Thread    | Within expense detail     |
+| L3    | Resolution Flow    | Within expense detail     |
+| L3    | Child Management   | Within Settings           |
+| L3    | Recurring Expenses | Within Settings           |
 
 ### Information Density by Screen
 
-| Screen | Primary Info | Secondary Info | Actions |
-|--------|--------------|----------------|---------|
-| Expenses List | Amount, description, status, date | Category icon, child tag | Filter, sort, tap to detail |
+| Screen         | Primary Info                        | Secondary Info                | Actions                                  |
+| -------------- | ----------------------------------- | ----------------------------- | ---------------------------------------- |
+| Expenses List  | Amount, description, status, date   | Category icon, child tag      | Filter, sort, tap to detail              |
 | Expense Detail | Full expense info, thread, timeline | Metadata (created by, edited) | Question, Resolve, Satisfy, Edit, Delete |
-| Payments | Net balance, recent payments | Period breakdown | Record payment |
-| Activity | Event description, timestamp | Actor name | Tap to related expense |
-| Settings | Preference labels | Current values | Edit each section |
+| Payments       | Net balance, recent payments        | Period breakdown              | Record payment                           |
+| Activity       | Event description, timestamp        | Actor name                    | Tap to related expense                   |
+| Settings       | Preference labels                   | Current values                | Edit each section                        |
 
 ---
 
@@ -1799,13 +1927,13 @@ REQUEST FLOW: Create Expense
 
 ### Deployment Topology
 
-| Component | Platform | Region | CDN |
-|-----------|----------|--------|-----|
-| Frontend (Next.js 16) | Vercel | Edge (auto) | Vercel Edge Network |
-| API (Workers) | Cloudflare | Global (100+ PoPs) | Cloudflare Edge |
-| Database (D1) | Cloudflare | Primary + Replicas | N/A (direct binding) |
-| Auth (Clerk) | Clerk Cloud | US (primary) | Global edge caching |
-| Email (Resend) | Resend Cloud | US | N/A |
+| Component             | Platform     | Region             | CDN                  |
+| --------------------- | ------------ | ------------------ | -------------------- |
+| Frontend (Next.js 16) | Vercel       | Edge (auto)        | Vercel Edge Network  |
+| API (Workers)         | Cloudflare   | Global (100+ PoPs) | Cloudflare Edge      |
+| Database (D1)         | Cloudflare   | Primary + Replicas | N/A (direct binding) |
+| Auth (Clerk)          | Clerk Cloud  | US (primary)       | Global edge caching  |
+| Email (Resend)        | Resend Cloud | US                 | N/A                  |
 
 ### Key Architectural Decisions
 
@@ -1816,12 +1944,14 @@ REQUEST FLOW: Create Expense
 **Decision:** Implement timeout check on-read rather than via scheduled cron job.
 
 **Rationale:**
+
 - Avoids scheduled triggers (Workers crons have cold-start latency)
 - No need for batch processing infrastructure
 - Timeout applies exactly when relevant (user viewing expense)
 - Simpler operational model (no separate cron monitoring)
 
 **Tradeoffs:**
+
 - Expense won't appear as `resolved_creator_decided` until next read
 - Activity feed may show slightly stale status until accessed
 
@@ -1834,22 +1964,24 @@ REQUEST FLOW: Create Expense
 **Decision:** Store all monetary values as INTEGER cents in D1. Convert at API boundary.
 
 **Implementation:**
+
 ```typescript
 export function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
+  return Math.round(dollars * 100)
 }
 
 export function calculateShares(
   amountCents: number,
   parentARatio: number
 ): { aShare: number; bShare: number } {
-  const aShare = Math.floor(amountCents * parentARatio);
-  const bShare = amountCents - aShare;  // Remainder to B
-  return { aShare, bShare };
+  const aShare = Math.floor(amountCents * parentARatio)
+  const bShare = amountCents - aShare // Remainder to B
+  return { aShare, bShare }
 }
 ```
 
 **Rationale:**
+
 - Exact integer arithmetic (no floating-point errors)
 - D1 INTEGER type has no precision limits for typical expense amounts
 - Floor for A's share ensures exact split (B gets remainder)
@@ -1866,6 +1998,7 @@ export function calculateShares(
 **Affected Tables:** children, expenses, fixed_expenses, payments
 
 **Rationale:**
+
 - Preserves audit trail for compliance
 - Enables "undo" functionality
 - Historical balance calculations remain accurate
@@ -1880,6 +2013,7 @@ export function calculateShares(
 **Decision:** Log every mutation with before/after snapshots in `activity_events` table.
 
 **Event Types:**
+
 - `expense.created`, `expense.questioned`, `expense.resolved`, `expense.satisfied`, `expense.generated`
 - `payment.created`
 - `child.created`, `child.deleted`
@@ -1887,6 +2021,7 @@ export function calculateShares(
 - `family.ratio_updated`
 
 **Rationale:**
+
 - Complete audit trail for question resolution
 - Powers activity feed feature
 - Enables future "undo" or "diff view" features
@@ -1901,6 +2036,7 @@ export function calculateShares(
 **Decision:** Implement custom JWT verification with in-memory JWKS cache (1-hour TTL).
 
 **Rationale:**
+
 - Avoids network round-trip to Clerk on every request
 - Handles key rotation gracefully (force refresh on signature failure)
 - Workers have no persistent memory, but cache survives within isolate lifecycle
@@ -1964,16 +2100,16 @@ export function calculateShares(
 
 #### Status Definitions
 
-| Status | Description | Included in Balance? |
-|--------|-------------|---------------------|
-| `posted` | Initial state, expense visible to both parents | Yes |
-| `questioned` | Other parent has raised a question | No |
-| `pending_satisfaction` | Creator responded, awaiting questioner acceptance | No |
-| `resolved` | Questioner accepted creator's response | Yes |
-| `resolved_creator_decided` | 7-day timeout expired, auto-resolved | Yes |
-| `resolved_personal` | Creator marked as personal (not shared) | No |
-| `resolved_deleted` | Creator deleted the expense | No |
-| `closed_unresolved` | Escalated or abandoned questioning | No |
+| Status                     | Description                                       | Included in Balance? |
+| -------------------------- | ------------------------------------------------- | -------------------- |
+| `posted`                   | Initial state, expense visible to both parents    | Yes                  |
+| `questioned`               | Other parent has raised a question                | No                   |
+| `pending_satisfaction`     | Creator responded, awaiting questioner acceptance | No                   |
+| `resolved`                 | Questioner accepted creator's response            | Yes                  |
+| `resolved_creator_decided` | 7-day timeout expired, auto-resolved              | Yes                  |
+| `resolved_personal`        | Creator marked as personal (not shared)           | No                   |
+| `resolved_deleted`         | Creator deleted the expense                       | No                   |
+| `closed_unresolved`        | Escalated or abandoned questioning                | No                   |
 
 ---
 
@@ -2077,37 +2213,41 @@ export function calculateShares(
 ### 11.2 Table Specifications
 
 #### users
+
 Cache of Clerk user data for local joins.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | Clerk user ID (e.g., `user_2abc...`) |
-| email | TEXT | NOT NULL, UNIQUE | User's email address |
-| name | TEXT | | Display name |
-| created_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp |
-| updated_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp |
+| Column     | Type | Constraints           | Description                          |
+| ---------- | ---- | --------------------- | ------------------------------------ |
+| id         | TEXT | PRIMARY KEY           | Clerk user ID (e.g., `user_2abc...`) |
+| email      | TEXT | NOT NULL, UNIQUE      | User's email address                 |
+| name       | TEXT |                       | Display name                         |
+| created_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp                   |
+| updated_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp                   |
 
 **Indexes:**
+
 - `idx_users_email` UNIQUE on (email)
 
 ---
 
 #### families
+
 Parent pair with expense split configuration.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| name | TEXT | | Optional family name |
-| parent_a_id | TEXT | NOT NULL, FK users(id) | First parent (creator) |
-| parent_b_id | TEXT | FK users(id) | Second parent (joiner) |
-| parent_a_ratio | REAL | NOT NULL, DEFAULT 0.5, CHECK (0-1) | Parent A's share (e.g., 0.6 = 60%) |
-| invite_code | TEXT | | 6-char uppercase code |
-| invite_expires_at | TEXT | | ISO 8601 expiry |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
+| Column            | Type | Constraints                        | Description                        |
+| ----------------- | ---- | ---------------------------------- | ---------------------------------- |
+| id                | TEXT | PRIMARY KEY                        | CUID-style ID                      |
+| name              | TEXT |                                    | Optional family name               |
+| parent_a_id       | TEXT | NOT NULL, FK users(id)             | First parent (creator)             |
+| parent_b_id       | TEXT | FK users(id)                       | Second parent (joiner)             |
+| parent_a_ratio    | REAL | NOT NULL, DEFAULT 0.5, CHECK (0-1) | Parent A's share (e.g., 0.6 = 60%) |
+| invite_code       | TEXT |                                    | 6-char uppercase code              |
+| invite_expires_at | TEXT |                                    | ISO 8601 expiry                    |
+| created_at        | TEXT | NOT NULL, DEFAULT now              |                                    |
+| updated_at        | TEXT | NOT NULL, DEFAULT now              |                                    |
 
 **Indexes:**
+
 - `idx_families_invite` UNIQUE on (invite_code) WHERE invite_code IS NOT NULL
 - `idx_families_parent_a` on (parent_a_id)
 - `idx_families_parent_b` on (parent_b_id)
@@ -2115,53 +2255,57 @@ Parent pair with expense split configuration.
 ---
 
 #### children
+
 Children associated with a family for expense attribution.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| name | TEXT | NOT NULL | Child's name (1-100 chars) |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column     | Type | Constraints               | Description                |
+| ---------- | ---- | ------------------------- | -------------------------- |
+| id         | TEXT | PRIMARY KEY               | CUID-style ID              |
+| family_id  | TEXT | NOT NULL, FK families(id) | Parent family              |
+| name       | TEXT | NOT NULL                  | Child's name (1-100 chars) |
+| created_at | TEXT | NOT NULL, DEFAULT now     |                            |
+| deleted_at | TEXT |                           | Soft delete timestamp      |
 
 **Indexes:**
+
 - `idx_children_family` on (family_id)
 
 ---
 
 #### expenses
+
 Individual expense records with 8-status state machine.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| created_by | TEXT | NOT NULL, FK users(id) | User who created |
-| paid_by | TEXT | NOT NULL, FK users(id) | User who paid |
-| fixed_expense_id | TEXT | FK fixed_expenses(id) | Source template (if generated) |
-| description | TEXT | NOT NULL, CHECK (1-200 chars) | Expense description |
-| amount_cents | INTEGER | NOT NULL | Amount in cents |
-| category | TEXT | NOT NULL, CHECK enum | school/medical/activities/childcare/other |
-| expense_date | TEXT | NOT NULL | YYYY-MM-DD |
-| child_ids | TEXT | | JSON array of child IDs |
-| link_url | TEXT | | Optional receipt/reference URL |
-| memo | TEXT | CHECK (<=500 chars) | Additional notes |
-| status | TEXT | NOT NULL, DEFAULT 'posted', CHECK enum | See state machine |
-| questioned_by | TEXT | FK users(id) | Who questioned |
-| questioned_at | TEXT | | When questioned |
-| question_reason | TEXT | CHECK enum | wrong_amount/not_child_related/duplicate/split_dispute/other |
-| question_note | TEXT | | Question details |
-| resolved_at | TEXT | | When resolved |
-| resolution_action | TEXT | | keep/edit/personal/delete |
-| satisfied_at | TEXT | | When questioner accepted |
-| closed_unresolved_at | TEXT | | When closed without resolution |
-| closed_unresolved_by | TEXT | FK users(id) | Who closed |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column               | Type    | Constraints                            | Description                                                  |
+| -------------------- | ------- | -------------------------------------- | ------------------------------------------------------------ |
+| id                   | TEXT    | PRIMARY KEY                            | CUID-style ID                                                |
+| family_id            | TEXT    | NOT NULL, FK families(id)              | Parent family                                                |
+| created_by           | TEXT    | NOT NULL, FK users(id)                 | User who created                                             |
+| paid_by              | TEXT    | NOT NULL, FK users(id)                 | User who paid                                                |
+| fixed_expense_id     | TEXT    | FK fixed_expenses(id)                  | Source template (if generated)                               |
+| description          | TEXT    | NOT NULL, CHECK (1-200 chars)          | Expense description                                          |
+| amount_cents         | INTEGER | NOT NULL                               | Amount in cents                                              |
+| category             | TEXT    | NOT NULL, CHECK enum                   | school/medical/activities/childcare/other                    |
+| expense_date         | TEXT    | NOT NULL                               | YYYY-MM-DD                                                   |
+| child_ids            | TEXT    |                                        | JSON array of child IDs                                      |
+| link_url             | TEXT    |                                        | Optional receipt/reference URL                               |
+| memo                 | TEXT    | CHECK (<=500 chars)                    | Additional notes                                             |
+| status               | TEXT    | NOT NULL, DEFAULT 'posted', CHECK enum | See state machine                                            |
+| questioned_by        | TEXT    | FK users(id)                           | Who questioned                                               |
+| questioned_at        | TEXT    |                                        | When questioned                                              |
+| question_reason      | TEXT    | CHECK enum                             | wrong_amount/not_child_related/duplicate/split_dispute/other |
+| question_note        | TEXT    |                                        | Question details                                             |
+| resolved_at          | TEXT    |                                        | When resolved                                                |
+| resolution_action    | TEXT    |                                        | keep/edit/personal/delete                                    |
+| satisfied_at         | TEXT    |                                        | When questioner accepted                                     |
+| closed_unresolved_at | TEXT    |                                        | When closed without resolution                               |
+| closed_unresolved_by | TEXT    | FK users(id)                           | Who closed                                                   |
+| created_at           | TEXT    | NOT NULL, DEFAULT now                  |                                                              |
+| updated_at           | TEXT    | NOT NULL, DEFAULT now                  |                                                              |
+| deleted_at           | TEXT    |                                        | Soft delete timestamp                                        |
 
 **Indexes:**
+
 - `idx_expenses_family` on (family_id)
 - `idx_expenses_date` on (family_id, expense_date)
 - `idx_expenses_status` on (family_id, status)
@@ -2170,110 +2314,120 @@ Individual expense records with 8-status state machine.
 ---
 
 #### fixed_expenses
+
 Recurring expense templates.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| created_by | TEXT | NOT NULL, FK users(id) | Template creator |
-| description | TEXT | NOT NULL, CHECK (1-200 chars) | Expense description |
-| amount_cents | INTEGER | NOT NULL, CHECK (>0) | Amount in cents |
-| category | TEXT | NOT NULL, CHECK enum | Category |
-| frequency | TEXT | NOT NULL, DEFAULT 'monthly', CHECK enum | weekly/biweekly/monthly/quarterly/annually |
-| child_ids | TEXT | | JSON array of child IDs |
-| link_url | TEXT | | Reference URL |
-| memo | TEXT | CHECK (<=500 chars) | Notes |
-| effective_from | TEXT | NOT NULL | Start date (YYYY-MM-DD) |
-| effective_until | TEXT | | End date (null = ongoing) |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column          | Type    | Constraints                             | Description                                |
+| --------------- | ------- | --------------------------------------- | ------------------------------------------ |
+| id              | TEXT    | PRIMARY KEY                             | CUID-style ID                              |
+| family_id       | TEXT    | NOT NULL, FK families(id)               | Parent family                              |
+| created_by      | TEXT    | NOT NULL, FK users(id)                  | Template creator                           |
+| description     | TEXT    | NOT NULL, CHECK (1-200 chars)           | Expense description                        |
+| amount_cents    | INTEGER | NOT NULL, CHECK (>0)                    | Amount in cents                            |
+| category        | TEXT    | NOT NULL, CHECK enum                    | Category                                   |
+| frequency       | TEXT    | NOT NULL, DEFAULT 'monthly', CHECK enum | weekly/biweekly/monthly/quarterly/annually |
+| child_ids       | TEXT    |                                         | JSON array of child IDs                    |
+| link_url        | TEXT    |                                         | Reference URL                              |
+| memo            | TEXT    | CHECK (<=500 chars)                     | Notes                                      |
+| effective_from  | TEXT    | NOT NULL                                | Start date (YYYY-MM-DD)                    |
+| effective_until | TEXT    |                                         | End date (null = ongoing)                  |
+| created_at      | TEXT    | NOT NULL, DEFAULT now                   |                                            |
+| updated_at      | TEXT    | NOT NULL, DEFAULT now                   |                                            |
+| deleted_at      | TEXT    |                                         | Soft delete timestamp                      |
 
 **Indexes:**
+
 - `idx_fixed_family` on (family_id)
 - `idx_fixed_effective` on (effective_from, effective_until)
 
 ---
 
 #### payments
+
 Direct payments between parents to settle balance.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| paid_by | TEXT | NOT NULL, FK users(id) | Payer |
-| amount_cents | INTEGER | NOT NULL, CHECK (>0) | Amount in cents |
-| payment_date | TEXT | NOT NULL | YYYY-MM-DD |
-| notes | TEXT | | Optional notes |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column       | Type    | Constraints               | Description           |
+| ------------ | ------- | ------------------------- | --------------------- |
+| id           | TEXT    | PRIMARY KEY               | CUID-style ID         |
+| family_id    | TEXT    | NOT NULL, FK families(id) | Parent family         |
+| paid_by      | TEXT    | NOT NULL, FK users(id)    | Payer                 |
+| amount_cents | INTEGER | NOT NULL, CHECK (>0)      | Amount in cents       |
+| payment_date | TEXT    | NOT NULL                  | YYYY-MM-DD            |
+| notes        | TEXT    |                           | Optional notes        |
+| created_at   | TEXT    | NOT NULL, DEFAULT now     |                       |
+| deleted_at   | TEXT    |                           | Soft delete timestamp |
 
 **Indexes:**
+
 - `idx_payments_family` on (family_id)
 - `idx_payments_date` on (family_id, payment_date)
 
 ---
 
 #### activity_events
+
 Audit trail and activity feed.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| user_id | TEXT | NOT NULL, FK users(id) | Acting user |
-| event_type | TEXT | NOT NULL | e.g., expense.created |
-| target_type | TEXT | NOT NULL | expense/payment/child/fixed_expense/family |
-| target_id | TEXT | NOT NULL | ID of affected entity |
-| before_snapshot | TEXT | | JSON of state before change |
-| after_snapshot | TEXT | | JSON of state after change |
-| metadata | TEXT | | Additional JSON context |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column          | Type | Constraints               | Description                                |
+| --------------- | ---- | ------------------------- | ------------------------------------------ |
+| id              | TEXT | PRIMARY KEY               | CUID-style ID                              |
+| family_id       | TEXT | NOT NULL, FK families(id) | Parent family                              |
+| user_id         | TEXT | NOT NULL, FK users(id)    | Acting user                                |
+| event_type      | TEXT | NOT NULL                  | e.g., expense.created                      |
+| target_type     | TEXT | NOT NULL                  | expense/payment/child/fixed_expense/family |
+| target_id       | TEXT | NOT NULL                  | ID of affected entity                      |
+| before_snapshot | TEXT |                           | JSON of state before change                |
+| after_snapshot  | TEXT |                           | JSON of state after change                 |
+| metadata        | TEXT |                           | Additional JSON context                    |
+| created_at      | TEXT | NOT NULL, DEFAULT now     |                                            |
 
 **Indexes:**
+
 - `idx_activity_family` on (family_id, created_at DESC)
 - `idx_activity_target` on (target_type, target_id)
 
 ---
 
 #### subscriptions
+
 Pro tier subscription tracking.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| status | TEXT | NOT NULL, DEFAULT 'active', CHECK enum | active/cancelled/expired |
-| started_at | TEXT | NOT NULL | Subscription start |
-| expires_at | TEXT | | Subscription end |
-| stripe_subscription_id | TEXT | | Stripe sub ID |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
+| Column                 | Type | Constraints                            | Description              |
+| ---------------------- | ---- | -------------------------------------- | ------------------------ |
+| id                     | TEXT | PRIMARY KEY                            | CUID-style ID            |
+| family_id              | TEXT | NOT NULL, FK families(id)              | Parent family            |
+| status                 | TEXT | NOT NULL, DEFAULT 'active', CHECK enum | active/cancelled/expired |
+| started_at             | TEXT | NOT NULL                               | Subscription start       |
+| expires_at             | TEXT |                                        | Subscription end         |
+| stripe_subscription_id | TEXT |                                        | Stripe sub ID            |
+| created_at             | TEXT | NOT NULL, DEFAULT now                  |                          |
+| updated_at             | TEXT | NOT NULL, DEFAULT now                  |                          |
 
 **Indexes:**
+
 - `idx_subscriptions_family` UNIQUE on (family_id)
 
 ---
 
 #### pending_invites
+
 Email-based invite tracking.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Target family |
-| invited_by | TEXT | NOT NULL, FK users(id) | Inviter |
-| invited_email | TEXT | NOT NULL | Invitee email |
-| invite_code | TEXT | NOT NULL | 6-char code |
-| status | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/expired/cancelled |
-| sent_at | TEXT | NOT NULL, DEFAULT now | |
-| expires_at | TEXT | NOT NULL | Expiry timestamp |
-| accepted_at | TEXT | | Acceptance timestamp |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column        | Type | Constraints                             | Description                        |
+| ------------- | ---- | --------------------------------------- | ---------------------------------- |
+| id            | TEXT | PRIMARY KEY                             | CUID-style ID                      |
+| family_id     | TEXT | NOT NULL, FK families(id)               | Target family                      |
+| invited_by    | TEXT | NOT NULL, FK users(id)                  | Inviter                            |
+| invited_email | TEXT | NOT NULL                                | Invitee email                      |
+| invite_code   | TEXT | NOT NULL                                | 6-char code                        |
+| status        | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/expired/cancelled |
+| sent_at       | TEXT | NOT NULL, DEFAULT now                   |                                    |
+| expires_at    | TEXT | NOT NULL                                | Expiry timestamp                   |
+| accepted_at   | TEXT |                                         | Acceptance timestamp               |
+| created_at    | TEXT | NOT NULL, DEFAULT now                   |                                    |
 
 **Indexes:**
+
 - `idx_pending_invites_family` on (family_id)
 - `idx_pending_invites_email` on (invited_email)
 - `idx_pending_invites_code` on (invite_code)
@@ -2281,20 +2435,22 @@ Email-based invite tracking.
 ---
 
 #### fixed_expense_suggestions
+
 Linking ad-hoc expenses to recurring templates (future feature).
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| fixed_expense_id | TEXT | NOT NULL, FK fixed_expenses(id) | Target template |
-| expense_id | TEXT | NOT NULL, FK expenses(id) | Source expense |
-| suggested_by | TEXT | NOT NULL, FK users(id) | User who suggested |
-| suggestion_note | TEXT | | Explanation |
-| status | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/rejected/ignored |
-| resolved_at | TEXT | | Resolution timestamp |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column           | Type | Constraints                             | Description                       |
+| ---------------- | ---- | --------------------------------------- | --------------------------------- |
+| id               | TEXT | PRIMARY KEY                             | CUID-style ID                     |
+| fixed_expense_id | TEXT | NOT NULL, FK fixed_expenses(id)         | Target template                   |
+| expense_id       | TEXT | NOT NULL, FK expenses(id)               | Source expense                    |
+| suggested_by     | TEXT | NOT NULL, FK users(id)                  | User who suggested                |
+| suggestion_note  | TEXT |                                         | Explanation                       |
+| status           | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/rejected/ignored |
+| resolved_at      | TEXT |                                         | Resolution timestamp              |
+| created_at       | TEXT | NOT NULL, DEFAULT now                   |                                   |
 
 **Indexes:**
+
 - `idx_suggestions_fixed` on (fixed_expense_id)
 
 ---
@@ -2355,29 +2511,29 @@ Linking ad-hoc expenses to recurring templates (future feature).
 
 #### Status Definitions
 
-| Status | Description | Included in Balance? |
-|--------|-------------|---------------------|
-| `posted` | Initial state, expense visible to both parents | Yes |
-| `questioned` | Other parent has raised a question | No |
-| `pending_satisfaction` | Creator responded, awaiting questioner acceptance | No |
-| `resolved` | Questioner accepted creator's response | Yes |
-| `resolved_creator_decided` | 7-day timeout expired, auto-resolved | Yes |
-| `resolved_personal` | Creator marked as personal (not shared) | No |
-| `resolved_deleted` | Creator deleted the expense | No |
-| `closed_unresolved` | Escalated or abandoned dispute | No |
+| Status                     | Description                                       | Included in Balance? |
+| -------------------------- | ------------------------------------------------- | -------------------- |
+| `posted`                   | Initial state, expense visible to both parents    | Yes                  |
+| `questioned`               | Other parent has raised a question                | No                   |
+| `pending_satisfaction`     | Creator responded, awaiting questioner acceptance | No                   |
+| `resolved`                 | Questioner accepted creator's response            | Yes                  |
+| `resolved_creator_decided` | 7-day timeout expired, auto-resolved              | Yes                  |
+| `resolved_personal`        | Creator marked as personal (not shared)           | No                   |
+| `resolved_deleted`         | Creator deleted the expense                       | No                   |
+| `closed_unresolved`        | Escalated or abandoned dispute                    | No                   |
 
 #### State Transitions
 
-| From | To | Trigger | Actor |
-|------|----|---------|-------|
-| posted | questioned | POST /expenses/:id/question | Other parent |
-| questioned | pending_satisfaction | POST /expenses/:id/resolve (keep/edit) | Creator |
-| questioned | resolved_personal | POST /expenses/:id/resolve (personal) | Creator |
-| questioned | resolved_deleted | POST /expenses/:id/resolve (delete) | Creator |
-| questioned | closed_unresolved | 30-day timeout | System |
-| pending_satisfaction | resolved | POST /expenses/:id/satisfy | Questioner |
-| pending_satisfaction | resolved_creator_decided | 7-day timeout (on-read) | System |
-| * | closed_unresolved | POST /expenses/:id/close-unresolved | Either parent |
+| From                 | To                       | Trigger                                | Actor         |
+| -------------------- | ------------------------ | -------------------------------------- | ------------- |
+| posted               | questioned               | POST /expenses/:id/question            | Other parent  |
+| questioned           | pending_satisfaction     | POST /expenses/:id/resolve (keep/edit) | Creator       |
+| questioned           | resolved_personal        | POST /expenses/:id/resolve (personal)  | Creator       |
+| questioned           | resolved_deleted         | POST /expenses/:id/resolve (delete)    | Creator       |
+| questioned           | closed_unresolved        | 30-day timeout                         | System        |
+| pending_satisfaction | resolved                 | POST /expenses/:id/satisfy             | Questioner    |
+| pending_satisfaction | resolved_creator_decided | 7-day timeout (on-read)                | System        |
+| \*                   | closed_unresolved        | POST /expenses/:id/close-unresolved    | Either parent |
 
 ---
 
@@ -2400,6 +2556,7 @@ X-User-Id: user_2abc123...
 ```
 
 JWT verification:
+
 1. Parse Authorization header
 2. Decode JWT, extract `kid` from header
 3. Fetch JWKS from Clerk (cached 1 hour)
@@ -2409,62 +2566,68 @@ JWT verification:
 
 ### 12.3 Common Response Codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Validation error |
-| 401 | Authentication required |
-| 403 | Authorization denied |
-| 404 | Resource not found |
-| 500 | Server error |
+| Code | Meaning                 |
+| ---- | ----------------------- |
+| 200  | Success                 |
+| 201  | Created                 |
+| 400  | Validation error        |
+| 401  | Authentication required |
+| 403  | Authorization denied    |
+| 404  | Resource not found      |
+| 500  | Server error            |
 
 ### 12.4 Endpoint Reference
 
 ---
 
 #### GET /health
+
 Health check endpoint.
 
 **Auth:** None
 
 **Response:**
+
 ```typescript
 {
-  status: "ok" | "error";
-  db: "connected" | "disconnected" | "error";
+  status: 'ok' | 'error'
+  db: 'connected' | 'disconnected' | 'error'
 }
 ```
 
 ---
 
 #### GET /me
+
 Get current user info with family context.
 
 **Auth:** Required
 
 **Response:**
+
 ```typescript
 {
   user: {
-    id: string;
-    email: string;
-    name: string | null;
-    created_at: string;
-  };
-  family: Family | null;
-  role: "parent_a" | "parent_b" | null;
+    id: string
+    email: string
+    name: string | null
+    created_at: string
+  }
+  family: Family | null
+  role: 'parent_a' | 'parent_b' | null
 }
 ```
 
 ---
 
 #### POST /users/sync
+
 Sync user from Clerk (called by webhook or frontend).
 
 **Auth:** None (trusted source only)
 
 **Request:**
+
 ```typescript
 {
   id: string;      // Clerk user ID
@@ -2474,18 +2637,24 @@ Sync user from Clerk (called by webhook or frontend).
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; user: User }
+{
+  success: true
+  user: User
+}
 ```
 
 ---
 
 #### POST /families
+
 Create a new family.
 
 **Auth:** Required
 
 **Request:**
+
 ```typescript
 {
   name?: string;  // Optional family name
@@ -2493,38 +2662,47 @@ Create a new family.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: User already belongs to a family
 - 404: User not found
 
 ---
 
 #### GET /families/:id
+
 Get family details with parent info.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  family: Family;
-  parentA: User;
-  parentB: User | null;
+  family: Family
+  parentA: User
+  parentB: User | null
 }
 ```
 
 ---
 
 #### PATCH /families/:id
+
 Update family settings.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   parentARatio?: number;  // 0.0 - 1.0
@@ -2533,114 +2711,140 @@ Update family settings.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: parentARatio out of range
 
 ---
 
 #### POST /families/:id/invite
+
 Generate invite code.
 
 **Auth:** Required (must be parent_a)
 
 **Response:**
+
 ```typescript
 {
-  success: true;
-  inviteCode: string;   // 6-char uppercase
-  expiresAt: string;    // ISO 8601
+  success: true
+  inviteCode: string // 6-char uppercase
+  expiresAt: string // ISO 8601
 }
 ```
 
 **Errors:**
+
 - 400: Family already has two parents
 - 403: Only family creator can generate codes
 
 ---
 
 #### POST /families/:id/invite/email
+
 Send email invite.
 
 **Auth:** Required (must be parent_a)
 
 **Request:**
+
 ```typescript
 {
-  email: string;
+  email: string
 }
 ```
 
 **Response:**
+
 ```typescript
 {
-  success: true;
-  inviteCode: string;
-  inviteLink: string;
-  expiresAt: string;
-  emailSent: boolean;
+  success: true
+  inviteCode: string
+  inviteLink: string
+  expiresAt: string
+  emailSent: boolean
 }
 ```
 
 ---
 
 #### GET /families/:id/invites
+
 List pending invites.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  invites: Array<PendingInvite & { is_expired: boolean }>;
+  invites: Array<PendingInvite & { is_expired: boolean }>
 }
 ```
 
 ---
 
 #### DELETE /families/:id/invites/:inviteId
+
 Cancel a pending invite.
 
 **Auth:** Required (must be parent_a)
 
 **Response:**
+
 ```typescript
-{ success: true }
+{
+  success: true
+}
 ```
 
 ---
 
 #### POST /families/join
+
 Join a family with invite code.
 
 **Auth:** Required
 
 **Request:**
+
 ```typescript
 {
-  inviteCode: string;
+  inviteCode: string
 }
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: Invalid/expired code, already in family, or family full
 
 ---
 
 #### POST /families/:id/expenses
+
 Create an expense.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description: string;        // 1-200 chars
@@ -2655,13 +2859,18 @@ Create an expense.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 ---
 
 #### GET /families/:id/expenses
+
 List expenses with filtering.
 
 **Auth:** Required (must be family member)
@@ -2677,6 +2886,7 @@ List expenses with filtering.
 | offset | number | Default 0 |
 
 **Response:**
+
 ```typescript
 {
   expenses: Expense[];
@@ -2691,69 +2901,77 @@ List expenses with filtering.
 ---
 
 #### GET /families/:id/balance
+
 Get current balance with breakdown.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  balance_cents: number;           // Absolute value
-  payer_id: string | null;         // Who owes
-  payee_id: string | null;         // Who is owed
-  parent_a_id: string;
-  parent_b_id: string | null;
+  balance_cents: number // Absolute value
+  payer_id: string | null // Who owes
+  payee_id: string | null // Who is owed
+  parent_a_id: string
+  parent_b_id: string | null
   breakdown: {
-    total_expenses_cents: number;
-    included_expenses_count: number;
-    a_share_cents: number;
-    b_share_cents: number;
-    a_paid_cents: number;
-    b_paid_cents: number;
-    payments_a_to_b_cents: number;
-    payments_b_to_a_cents: number;
-    questioned_total_cents: number;
-    questioned_count: number;
-  };
+    total_expenses_cents: number
+    included_expenses_count: number
+    a_share_cents: number
+    b_share_cents: number
+    a_paid_cents: number
+    b_paid_cents: number
+    payments_a_to_b_cents: number
+    payments_b_to_a_cents: number
+    questioned_total_cents: number
+    questioned_count: number
+  }
   period: {
-    start: string;
-    end: string;
-    label: string;
-  };
+    start: string
+    end: string
+    label: string
+  }
   current_period: {
-    a_expenses_cents: number;
-    a_payments_cents: number;
-    b_expenses_cents: number;
-    b_payments_cents: number;
-  };
+    a_expenses_cents: number
+    a_payments_cents: number
+    b_expenses_cents: number
+    b_payments_cents: number
+  }
   prior_balance: {
-    balance_cents: number;
-    payer_id: string | null;
-    payee_id: string | null;
-  };
+    balance_cents: number
+    payer_id: string | null
+    payee_id: string | null
+  }
 }
 ```
 
 ---
 
 #### GET /expenses/:id
+
 Get single expense (with timeout check).
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ expense: Expense }
+{
+  expense: Expense
+}
 ```
 
 ---
 
 #### POST /expenses/:id/question
+
 Question an expense.
 
 **Auth:** Required (must be other parent, not creator)
 
 **Request:**
+
 ```typescript
 {
   reason: "wrong_amount" | "not_child_related" | "duplicate" | "split_dispute" | "other";
@@ -2762,21 +2980,28 @@ Question an expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Cannot question own expense, or not in `posted` status
 
 ---
 
 #### POST /expenses/:id/resolve
+
 Resolve a questioned expense.
 
 **Auth:** Required (must be expense creator)
 
 **Request:**
+
 ```typescript
 {
   action: "keep" | "edit" | "personal" | "delete";
@@ -2785,36 +3010,49 @@ Resolve a questioned expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Not in `questioned` status
 
 ---
 
 #### POST /expenses/:id/satisfy
+
 Accept expense resolution.
 
 **Auth:** Required (must be original questioner)
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Not in `pending_satisfaction` status
 
 ---
 
 #### POST /families/:id/payments
+
 Record a payment.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   amount: number;           // dollars
@@ -2824,13 +3062,18 @@ Record a payment.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; payment: Payment }
+{
+  success: true
+  payment: Payment
+}
 ```
 
 ---
 
 #### GET /families/:id/payments
+
 List payments.
 
 **Auth:** Required (must be family member)
@@ -2842,6 +3085,7 @@ List payments.
 | offset | number | Default 0 |
 
 **Response:**
+
 ```typescript
 {
   payments: Payment[];
@@ -2852,18 +3096,21 @@ List payments.
 ---
 
 #### POST /families/:id/children
+
 Add a child.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
-  name: string;  // 1-100 chars
+  name: string // 1-100 chars
 }
 ```
 
 **Response (201):**
+
 ```typescript
 Child
 ```
@@ -2871,6 +3118,7 @@ Child
 ---
 
 #### GET /families/:id/children
+
 List children.
 
 **Auth:** Required (must be family member)
@@ -2881,6 +3129,7 @@ List children.
 | include_deleted | boolean | Include soft-deleted |
 
 **Response:**
+
 ```typescript
 {
   children: Child[];
@@ -2891,23 +3140,30 @@ List children.
 ---
 
 #### DELETE /families/:id/children/:childId
+
 Soft-delete a child.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ id: string; deleted_at: string }
+{
+  id: string
+  deleted_at: string
+}
 ```
 
 ---
 
 #### POST /families/:id/fixed-expenses
+
 Create fixed expense template.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description: string;
@@ -2922,16 +3178,22 @@ Create fixed expense template.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 **Errors:**
+
 - 403: Tier limit reached (Free tier: 2 max)
 
 ---
 
 #### GET /families/:id/fixed-expenses
+
 List fixed expenses.
 
 **Auth:** Required (must be family member)
@@ -2942,6 +3204,7 @@ List fixed expenses.
 | includeEnded | boolean | Include past-effective templates |
 
 **Response:**
+
 ```typescript
 {
   fixedExpenses: FixedExpense[];
@@ -2957,11 +3220,13 @@ List fixed expenses.
 ---
 
 #### PATCH /families/:id/fixed-expenses/:fixedExpenseId
+
 Update fixed expense.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description?: string;
@@ -2975,25 +3240,35 @@ Update fixed expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 ---
 
 #### DELETE /families/:id/fixed-expenses/:fixedExpenseId
+
 End a fixed expense (sets effective_until to today).
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 ---
 
 #### GET /families/:id/activity
+
 Get activity feed.
 
 **Auth:** Required (must be family member)
@@ -3010,6 +3285,7 @@ Get activity feed.
 | expense_id | string | Scope to single expense |
 
 **Response:**
+
 ```typescript
 {
   events: ActivityEvent[];
@@ -3024,11 +3300,12 @@ Get activity feed.
 Currently no rate limiting implemented. Future strategy:
 
 | Tier | Requests/min | Burst |
-|------|--------------|-------|
-| Free | 60 | 10 |
-| Pro | 300 | 50 |
+| ---- | ------------ | ----- |
+| Free | 60           | 10    |
+| Pro  | 300          | 50    |
 
 Implementation approach:
+
 - Use Cloudflare Rate Limiting rules (at edge)
 - Or implement token bucket in KV/D1
 - Key by user ID (from JWT sub claim)
@@ -3039,56 +3316,57 @@ Implementation approach:
 
 ### 13.1 Performance Targets
 
-| Metric | Target | Current Baseline |
-|--------|--------|------------------|
-| API p50 latency | <50ms | ~30ms (Workers cold) |
-| API p95 latency | <200ms | ~100ms |
-| API p99 latency | <500ms | ~250ms |
-| D1 query time | <20ms | ~10-15ms |
-| TTFB (frontend) | <100ms | ~60ms (Vercel Edge) |
-| LCP | <2.5s | Varies by page |
-| FID | <100ms | <50ms |
-| CLS | <0.1 | <0.05 |
+| Metric          | Target | Current Baseline     |
+| --------------- | ------ | -------------------- |
+| API p50 latency | <50ms  | ~30ms (Workers cold) |
+| API p95 latency | <200ms | ~100ms               |
+| API p99 latency | <500ms | ~250ms               |
+| D1 query time   | <20ms  | ~10-15ms             |
+| TTFB (frontend) | <100ms | ~60ms (Vercel Edge)  |
+| LCP             | <2.5s  | Varies by page       |
+| FID             | <100ms | <50ms                |
+| CLS             | <0.1   | <0.05                |
 
 ### 13.2 Availability
 
-| Requirement | Target |
-|-------------|--------|
-| Uptime SLA | 99.9% (Cloudflare Workers) |
-| RTO (Recovery Time Objective) | <15 minutes |
-| RPO (Recovery Point Objective) | <1 hour |
-| Maintenance windows | None (zero-downtime deploys) |
+| Requirement                    | Target                       |
+| ------------------------------ | ---------------------------- |
+| Uptime SLA                     | 99.9% (Cloudflare Workers)   |
+| RTO (Recovery Time Objective)  | <15 minutes                  |
+| RPO (Recovery Point Objective) | <1 hour                      |
+| Maintenance windows            | None (zero-downtime deploys) |
 
 ### 13.3 Scalability
 
-| Dimension | Capacity |
-|-----------|----------|
-| Concurrent users | 10,000+ (Workers auto-scale) |
-| Requests/second | 100,000+ (Workers limit) |
-| D1 database size | 10GB (current limit) |
-| D1 rows | Unlimited within size |
-| Families per deployment | 100,000+ |
+| Dimension               | Capacity                     |
+| ----------------------- | ---------------------------- |
+| Concurrent users        | 10,000+ (Workers auto-scale) |
+| Requests/second         | 100,000+ (Workers limit)     |
+| D1 database size        | 10GB (current limit)         |
+| D1 rows                 | Unlimited within size        |
+| Families per deployment | 100,000+                     |
 
 ### 13.4 Data Retention
 
-| Data Type | Retention | Rationale |
-|-----------|-----------|-----------|
-| Active expenses | Indefinite | Historical reference |
-| Soft-deleted records | 90 days | Recovery period |
-| Activity events | 2 years | Audit compliance |
-| Session tokens | Until expiry | Security |
-| Invite codes | 7 days after expiry | Cleanup |
+| Data Type            | Retention           | Rationale            |
+| -------------------- | ------------------- | -------------------- |
+| Active expenses      | Indefinite          | Historical reference |
+| Soft-deleted records | 90 days             | Recovery period      |
+| Activity events      | 2 years             | Audit compliance     |
+| Session tokens       | Until expiry        | Security             |
+| Invite codes         | 7 days after expiry | Cleanup              |
 
 ### 13.5 Backup Strategy
 
-| Component | Strategy | Frequency | Retention |
-|-----------|----------|-----------|-----------|
-| D1 Database | Cloudflare automatic | Point-in-time | 30 days |
-| D1 Manual backup | Export via API | Weekly | 90 days |
-| Configuration | Git (wrangler.toml) | Every deploy | Forever |
-| Secrets | Cloudflare dashboard | Manual | N/A |
+| Component        | Strategy             | Frequency     | Retention |
+| ---------------- | -------------------- | ------------- | --------- |
+| D1 Database      | Cloudflare automatic | Point-in-time | 30 days   |
+| D1 Manual backup | Export via API       | Weekly        | 90 days   |
+| Configuration    | Git (wrangler.toml)  | Every deploy  | Forever   |
+| Secrets          | Cloudflare dashboard | Manual        | N/A       |
 
 **D1 Backup Commands:**
+
 ```bash
 # Export database
 wrangler d1 export ke-main --remote --output backup.sql
@@ -3100,6 +3378,7 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 ### 13.6 Security Requirements
 
 #### Authentication & Authorization
+
 - [x] Clerk JWT verification with RS256
 - [x] JWKS caching with 1-hour TTL
 - [x] Family membership verification on all routes
@@ -3107,6 +3386,7 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 - [ ] Rate limiting (planned)
 
 #### Data Protection
+
 - [x] All traffic over HTTPS (Cloudflare enforced)
 - [x] Parameterized queries (SQL injection prevention)
 - [x] Input validation on all endpoints
@@ -3114,18 +3394,20 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 - [ ] Encryption at rest (D1 roadmap)
 
 #### Secrets Management
+
 - [x] Environment variables via `wrangler secret`
 - [x] No secrets in codebase
 - [x] Separate secrets per environment
 
 #### Headers
+
 ```typescript
 // CORS configuration
 cors({
   origin: (origin) => {
-    const allowed = ['https://ke-console.vercel.app', 'http://localhost:3000'];
-    if (origin?.endsWith('.vercel.app')) return origin;  // Preview deploys
-    return allowed.includes(origin ?? '') ? origin! : null;
+    const allowed = ['https://ke-console.vercel.app', 'http://localhost:3000']
+    if (origin?.endsWith('.vercel.app')) return origin // Preview deploys
+    return allowed.includes(origin ?? '') ? origin! : null
   },
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
@@ -3134,13 +3416,13 @@ cors({
 
 ### 13.7 Compliance Considerations
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| GDPR (if EU users) | Partial | Need data export/delete flows |
-| CCPA (if CA users) | Partial | Need privacy policy updates |
-| SOC 2 | N/A | Inherited from Cloudflare/Vercel |
-| PCI DSS | N/A | No card data stored (Stripe handles) |
-| COPPA | Review needed | App involves child data |
+| Requirement        | Status        | Notes                                |
+| ------------------ | ------------- | ------------------------------------ |
+| GDPR (if EU users) | Partial       | Need data export/delete flows        |
+| CCPA (if CA users) | Partial       | Need privacy policy updates          |
+| SOC 2              | N/A           | Inherited from Cloudflare/Vercel     |
+| PCI DSS            | N/A           | No card data stored (Stripe handles) |
+| COPPA              | Review needed | App involves child data              |
 
 ---
 
@@ -3148,11 +3430,11 @@ cors({
 
 ### 14.1 Responsive Breakpoints
 
-| Breakpoint | Width | Layout Behavior |
-|------------|-------|-----------------|
-| Mobile (default) | < 640px | Single column, bottom nav, stacked cards |
-| Tablet | 640px - 1024px | Wider content area, same nav pattern |
-| Desktop | > 1024px | Centered content (max 640px), optional side nav |
+| Breakpoint       | Width          | Layout Behavior                                 |
+| ---------------- | -------------- | ----------------------------------------------- |
+| Mobile (default) | < 640px        | Single column, bottom nav, stacked cards        |
+| Tablet           | 640px - 1024px | Wider content area, same nav pattern            |
+| Desktop          | > 1024px       | Centered content (max 640px), optional side nav |
 
 **Mobile-First Principle:** Design for mobile, then adapt up. The core experience is on a phone at pickup/dropoff or while logging receipts.
 
@@ -3160,45 +3442,47 @@ cors({
 
 All interactive elements must meet minimum touch target sizes:
 
-| Element | Minimum Size | Notes |
-|---------|--------------|-------|
-| Buttons | 44px x 44px | Per Apple HIG |
-| List rows | 48px height minimum | Per Material guidelines |
-| Icons (standalone) | 44px touch area | Visual can be smaller, tap area padded |
-| Form inputs | 48px height | Includes padding |
-| Bottom nav items | 48px x 48px minimum | Full-width bar |
+| Element            | Minimum Size        | Notes                                  |
+| ------------------ | ------------------- | -------------------------------------- |
+| Buttons            | 44px x 44px         | Per Apple HIG                          |
+| List rows          | 48px height minimum | Per Material guidelines                |
+| Icons (standalone) | 44px touch area     | Visual can be smaller, tap area padded |
+| Form inputs        | 48px height         | Includes padding                       |
+| Bottom nav items   | 48px x 48px minimum | Full-width bar                         |
 
 ### 14.3 Color Contrast Requirements
 
 All text must meet WCAG 2.1 AA contrast requirements:
 
-| Element | Contrast Requirement | Minimum Ratio |
-|---------|---------------------|---------------|
-| Body text | Normal text | 4.5:1 |
-| Large text (18px+ or 14px+ bold) | Large text | 3:1 |
-| Status badge text | On badge background | 4.5:1 |
-| Icons (informational) | Against background | 3:1 |
-| Focus indicators | Against background | 3:1 |
+| Element                          | Contrast Requirement | Minimum Ratio |
+| -------------------------------- | -------------------- | ------------- |
+| Body text                        | Normal text          | 4.5:1         |
+| Large text (18px+ or 14px+ bold) | Large text           | 3:1           |
+| Status badge text                | On badge background  | 4.5:1         |
+| Icons (informational)            | Against background   | 3:1           |
+| Focus indicators                 | Against background   | 3:1           |
 
 **Status Badge Contrast Verification:**
 
-| Status | Background | Text | Ratio | Pass? |
-|--------|------------|------|-------|-------|
-| Posted | Emerald-50 | Emerald-700 | 5.2:1 | Yes |
-| Questioned | Amber-50 | Amber-700 | 4.8:1 | Yes |
-| Pending | Indigo-50 | Indigo-700 | 5.1:1 | Yes |
-| Closed | Red-50 | Red-700 | 5.5:1 | Yes |
-| Personal/Deleted | Slate-100 | Slate-600 | 4.6:1 | Yes |
+| Status           | Background | Text        | Ratio | Pass? |
+| ---------------- | ---------- | ----------- | ----- | ----- |
+| Posted           | Emerald-50 | Emerald-700 | 5.2:1 | Yes   |
+| Questioned       | Amber-50   | Amber-700   | 4.8:1 | Yes   |
+| Pending          | Indigo-50  | Indigo-700  | 5.1:1 | Yes   |
+| Closed           | Red-50     | Red-700     | 5.5:1 | Yes   |
+| Personal/Deleted | Slate-100  | Slate-600   | 4.6:1 | Yes   |
 
 ### 14.4 Screen Reader Considerations
 
 **Semantic HTML:**
+
 - Use proper heading hierarchy (h1 for page title, h2 for sections)
 - Lists use `<ul>` / `<ol>` with `<li>`
 - Buttons are `<button>`, not styled `<div>`
 - Form inputs have associated `<label>` elements
 
 **ARIA Patterns:**
+
 - Status badges: `role="status"` with `aria-live="polite"` for dynamic updates
 - Expense list: `role="list"` with `role="listitem"` for rows
 - Question thread: `role="log"` with `aria-live="polite"` for new messages
@@ -3206,12 +3490,14 @@ All text must meet WCAG 2.1 AA contrast requirements:
 - Loading states: `aria-busy="true"` on container
 
 **Focus Management:**
+
 - Logical tab order following visual order
 - Focus moves to modal content when opened
 - Focus returns to trigger when modal closed
 - Skip link to main content on each page
 
 **Announcements:**
+
 - "Expense added successfully" after form submission
 - "Question sent" after questioning
 - Status changes announced when they occur
@@ -3221,15 +3507,19 @@ All text must meet WCAG 2.1 AA contrast requirements:
 Respect user's motion preferences via `prefers-reduced-motion` media query.
 
 **When reduced motion is enabled:**
+
 - Disable transitions and animations
 - Instant state changes instead of animated transitions
 - Loading spinners become static progress indicators
 - No auto-scrolling; user controls all scrolling
 
 **CSS Implementation:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -3243,20 +3533,20 @@ Respect user's motion preferences via `prefers-reduced-motion` media query.
 
 ### 15.1 Tier Comparison
 
-| Feature | Free ($0) | Pro ($5/month) |
-|---------|-----------|----------------|
-| Two-parent shared ledger | Yes | Yes |
-| Add expenses | Unlimited | Unlimited |
-| Record payments | Unlimited | Unlimited |
-| Questioning workflow | Full 8-status flow | Full 8-status flow |
-| Audit trail | Full visibility | Full visibility |
-| Split ratio configuration | Yes | Yes |
-| Expense history | 3 months rolling | Unlimited |
-| Recurring expense templates | Max 2 active | Unlimited |
-| CSV export | No | Yes |
-| Receipt image attachments | No | Yes (v1.1) |
-| Annual summary reports | No | Yes (v1.2) |
-| Per-category split ratios | No | Yes (v1.2) |
+| Feature                     | Free ($0)          | Pro ($5/month)     |
+| --------------------------- | ------------------ | ------------------ |
+| Two-parent shared ledger    | Yes                | Yes                |
+| Add expenses                | Unlimited          | Unlimited          |
+| Record payments             | Unlimited          | Unlimited          |
+| Questioning workflow        | Full 8-status flow | Full 8-status flow |
+| Audit trail                 | Full visibility    | Full visibility    |
+| Split ratio configuration   | Yes                | Yes                |
+| Expense history             | 3 months rolling   | Unlimited          |
+| Recurring expense templates | Max 2 active       | Unlimited          |
+| CSV export                  | No                 | Yes                |
+| Receipt image attachments   | No                 | Yes (v1.1)         |
+| Annual summary reports      | No                 | Yes (v1.2)         |
+| Per-category split ratios   | No                 | Yes (v1.2)         |
 
 ### 15.2 Pricing Rationale
 
@@ -3271,17 +3561,18 @@ Respect user's motion preferences via `prefers-reduced-motion` media query.
 
 ### 15.3 Competitive Context
 
-| App | Free Tier | Entry Paid | Mid Tier | Premium |
-|-----|-----------|------------|----------|---------|
-| **KE** | Yes (limited) | $5/mo | - | - |
-| **OurFamilyWizard** | No | $12.50/mo | $18/mo | $24.99/mo |
-| **TalkingParents** | Yes (web) | $6/mo | $10/mo | $25/mo |
-| **DComply** | Trial only | $2.99/mo | $5.99/mo | - |
-| **AppClose** | 60-day trial | $8.99/mo | - | - |
-| **2Houses** | 14-day trial | $7/mo | - | - |
-| **Cent** | Yes (full) | - | - | - |
+| App                 | Free Tier     | Entry Paid | Mid Tier | Premium   |
+| ------------------- | ------------- | ---------- | -------- | --------- |
+| **KE**              | Yes (limited) | $5/mo      | -        | -         |
+| **OurFamilyWizard** | No            | $12.50/mo  | $18/mo   | $24.99/mo |
+| **TalkingParents**  | Yes (web)     | $6/mo      | $10/mo   | $25/mo    |
+| **DComply**         | Trial only    | $2.99/mo   | $5.99/mo | -         |
+| **AppClose**        | 60-day trial  | $8.99/mo   | -        | -         |
+| **2Houses**         | 14-day trial  | $7/mo      | -        | -         |
+| **Cent**            | Yes (full)    | -          | -        | -         |
 
 **KE at $5/mo is competitively positioned:**
+
 - Below OFW ($12.50-25) - The market leader charges 2.5-5x more
 - At DComply Premium ($5.99) - Closest expense-focused competitor
 - Below AppClose ($8.99) - The rising "all-in-one" threat
@@ -3314,22 +3605,22 @@ Free users are most likely to convert when they:
 
 ### 16.1 Primary KPIs
 
-| Metric | Definition | Target | Timeframe |
-|--------|------------|--------|-----------|
-| Weekly Active Families (WAF) | Families with at least one expense or payment logged in the past 7 days | 500 | Month 6 |
-| Monthly Active Families (MAF) | Families with at least one expense or payment logged in the past 30 days | 1,000 | Month 6 |
-| Paid Conversion Rate | % of families with at least one Pro subscription | 5% | Month 6 |
-| Monthly Recurring Revenue (MRR) | Total monthly subscription revenue | $250 | Month 6 |
+| Metric                          | Definition                                                               | Target | Timeframe |
+| ------------------------------- | ------------------------------------------------------------------------ | ------ | --------- |
+| Weekly Active Families (WAF)    | Families with at least one expense or payment logged in the past 7 days  | 500    | Month 6   |
+| Monthly Active Families (MAF)   | Families with at least one expense or payment logged in the past 30 days | 1,000  | Month 6   |
+| Paid Conversion Rate            | % of families with at least one Pro subscription                         | 5%     | Month 6   |
+| Monthly Recurring Revenue (MRR) | Total monthly subscription revenue                                       | $250   | Month 6   |
 
 ### 16.2 Secondary KPIs
 
-| Metric | Definition | Target | Timeframe |
-|--------|------------|--------|-----------|
-| Onboarding Completion Rate | % of signups that create a family and invite a partner | 40% | Month 3 |
-| Partner Join Rate | % of invites that result in the other parent joining | 30% | Month 3 |
-| Questioning Resolution Rate | % of questioned expenses that reach a resolved state (not closed_unresolved) | 80% | Month 3 |
-| Time to Resolution | Median days from questioned to resolved | < 5 days | Month 3 |
-| Churn Rate (Pro) | % of Pro subscribers who cancel in a given month | < 10% | Month 6 |
+| Metric                      | Definition                                                                   | Target   | Timeframe |
+| --------------------------- | ---------------------------------------------------------------------------- | -------- | --------- |
+| Onboarding Completion Rate  | % of signups that create a family and invite a partner                       | 40%      | Month 3   |
+| Partner Join Rate           | % of invites that result in the other parent joining                         | 30%      | Month 3   |
+| Questioning Resolution Rate | % of questioned expenses that reach a resolved state (not closed_unresolved) | 80%      | Month 3   |
+| Time to Resolution          | Median days from questioned to resolved                                      | < 5 days | Month 3   |
+| Churn Rate (Pro)            | % of Pro subscribers who cancel in a given month                             | < 10%    | Month 6   |
 
 ### 16.3 Leading Indicators (Weekly Tracking)
 
@@ -3344,13 +3635,13 @@ Free users are most likely to convert when they:
 
 The product will be discontinued if any of the following conditions are met:
 
-| Condition | Threshold | Evaluation Point |
-|-----------|-----------|------------------|
-| Total families registered | < 100 | Month 4 |
-| Monthly Active Families | < 50 | Month 6 |
-| Partner join rate | < 15% | Month 4 |
-| Paid conversion rate | < 2% | Month 8 |
-| Monthly burn rate | > $500/month net loss | Month 6 |
+| Condition                 | Threshold             | Evaluation Point |
+| ------------------------- | --------------------- | ---------------- |
+| Total families registered | < 100                 | Month 4          |
+| Monthly Active Families   | < 50                  | Month 6          |
+| Partner join rate         | < 15%                 | Month 4          |
+| Paid conversion rate      | < 2%                  | Month 8          |
+| Monthly burn rate         | > $500/month net loss | Month 6          |
 
 **Kill process:** If a kill criterion is triggered, the team has 30 days to present a pivot proposal. If no viable pivot is identified, the product enters sunset mode with 60-day user notice and data export availability.
 
@@ -3360,40 +3651,40 @@ The product will be discontinued if any of the following conditions are met:
 
 ### 17.1 Product Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Only one parent uses the app | High | Critical | Solo mode must be valuable on its own (personal expense tracking). Remind solo users to invite partner. Consider value-add for solo users. |
-| Questioning workflow is too complex | Medium | High | Extensive user testing during beta. Provide in-app guidance. Consider simplified "accept/reject" mode for v1.1. |
-| Users abandon after setup | Medium | High | Onboarding wizard with immediate value demonstration. Email/push reminders for first expense. |
-| Emotional context makes UX hostile | Medium | Medium | Language review with divorce counselor. Neutral terminology (Design Charter). Avoid any language that implies fault. |
+| Risk                                | Likelihood | Impact   | Mitigation                                                                                                                                 |
+| ----------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Only one parent uses the app        | High       | Critical | Solo mode must be valuable on its own (personal expense tracking). Remind solo users to invite partner. Consider value-add for solo users. |
+| Questioning workflow is too complex | Medium     | High     | Extensive user testing during beta. Provide in-app guidance. Consider simplified "accept/reject" mode for v1.1.                            |
+| Users abandon after setup           | Medium     | High     | Onboarding wizard with immediate value demonstration. Email/push reminders for first expense.                                              |
+| Emotional context makes UX hostile  | Medium     | Medium   | Language review with divorce counselor. Neutral terminology (Design Charter). Avoid any language that implies fault.                       |
 
 ### 17.2 Market Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Competitors launch similar product | Medium | Medium | Speed to market. Focus on workflow quality over feature quantity. Build switching costs through audit trail value. |
-| Venmo/Zelle adds expense tracking | Low | High | Differentiate on questioning workflow (they won't build dispute resolution). Emphasize neutrality (they favor the payer). |
-| Target market smaller than expected | Medium | Medium | Validate with divorce statistics. Track family creation rates. Consider adjacent markets (unmarried co-parents, grandparents). |
-| Negative association with divorce | Low | Medium | Position as "for parents who share expenses" not "for divorced parents." Emphasize conflict reduction, not divorce tooling. |
+| Risk                                | Likelihood | Impact | Mitigation                                                                                                                     |
+| ----------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Competitors launch similar product  | Medium     | Medium | Speed to market. Focus on workflow quality over feature quantity. Build switching costs through audit trail value.             |
+| Venmo/Zelle adds expense tracking   | Low        | High   | Differentiate on questioning workflow (they won't build dispute resolution). Emphasize neutrality (they favor the payer).      |
+| Target market smaller than expected | Medium     | Medium | Validate with divorce statistics. Track family creation rates. Consider adjacent markets (unmarried co-parents, grandparents). |
+| Negative association with divorce   | Low        | Medium | Position as "for parents who share expenses" not "for divorced parents." Emphasize conflict reduction, not divorce tooling.    |
 
 ### 17.3 Technical Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| D1 database size limit (10GB) | Low | High | Monitor size; implement archival strategy for old activity_events |
-| D1 no transactions | Medium | Medium | Use D1 `batch()` for atomic multi-statement ops |
-| Balance calculation bugs | Medium | Critical | Extensive unit tests for calculation module. All money as integers (cents). Automated regression testing. |
-| 7-day timeout cron reliability | Medium | Medium | Multiple fallback mechanisms. Check timeout on read, not just cron. Alert on missed transitions. |
-| JWT key compromise | Low | Critical | JWKS rotation by Clerk; short token expiry |
-| SQL injection | Low | Critical | All queries use `.bind()`; no string concatenation |
+| Risk                           | Likelihood | Impact   | Mitigation                                                                                                |
+| ------------------------------ | ---------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| D1 database size limit (10GB)  | Low        | High     | Monitor size; implement archival strategy for old activity_events                                         |
+| D1 no transactions             | Medium     | Medium   | Use D1 `batch()` for atomic multi-statement ops                                                           |
+| Balance calculation bugs       | Medium     | Critical | Extensive unit tests for calculation module. All money as integers (cents). Automated regression testing. |
+| 7-day timeout cron reliability | Medium     | Medium   | Multiple fallback mechanisms. Check timeout on read, not just cron. Alert on missed transitions.          |
+| JWT key compromise             | Low        | Critical | JWKS rotation by Clerk; short token expiry                                                                |
+| SQL injection                  | Low        | Critical | All queries use `.bind()`; no string concatenation                                                        |
 
 ### 17.4 Operational Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Support burden from emotional users | High | Medium | Self-service first. FAQ covering common disputes. Clear "we don't mediate" policy. Escalation path for abuse. |
-| Legal liability from disputed expenses | Low | High | Terms of Service explicitly disclaim KE as legal record. No legal advice. Encourage professional mediators. |
-| GDPR/privacy compliance | Medium | Medium | Minimal data collection. Clear privacy policy. Data export and deletion flows. |
+| Risk                                   | Likelihood | Impact | Mitigation                                                                                                    |
+| -------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| Support burden from emotional users    | High       | Medium | Self-service first. FAQ covering common disputes. Clear "we don't mediate" policy. Escalation path for abuse. |
+| Legal liability from disputed expenses | Low        | High   | Terms of Service explicitly disclaim KE as legal record. No legal advice. Encourage professional mediators.   |
+| GDPR/privacy compliance                | Medium     | Medium | Minimal data collection. Clear privacy policy. Data export and deletion flows.                                |
 
 ---
 
@@ -3406,6 +3697,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How should we model users who have children with multiple ex-partners?
 
 **Options:**
+
 1. One user can belong to multiple families, switching context manually
 2. Separate accounts per family relationship
 3. "Family groups" within a single family record
@@ -3421,6 +3713,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How and when should we notify users about activity?
 
 **Options:**
+
 1. Email-only notifications
 2. Push notifications (requires PWA or native wrapper)
 3. In-app only (check the app)
@@ -3437,6 +3730,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** Where should receipt images be stored?
 
 **Options:**
+
 1. Cloudflare R2 (native to our stack)
 2. Third-party image hosting (Cloudinary, Uploadcare)
 3. Client-side compression + base64 in D1 (not recommended)
@@ -3454,6 +3748,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Current behavior:** Excluded from balance permanently.
 
 **Open questions:**
+
 - Can they be reopened?
 - Should they count toward any reporting?
 - How do they appear in annual summaries?
@@ -3467,6 +3762,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How should professional third-party access work?
 
 **Options:**
+
 1. Read-only invite link (time-limited)
 2. Separate professional account type with different permissions
 3. PDF/export-based sharing (no live access)
@@ -3482,6 +3778,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** Should KE work offline?
 
 **Options:**
+
 1. No offline support (require connectivity)
 2. Read-only offline (cache recent data)
 3. Full offline with sync (complex)
@@ -3502,24 +3799,24 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Included
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Clerk authentication (email + Google) | Complete | |
-| Family creation + invite flow | Complete | |
-| Add expense (manual entry) | Complete | |
-| Expense list view | Complete | |
-| Expense detail page | Complete | |
-| Balance calculation + display | Complete | |
-| Question expense (initiate) | Complete | |
-| Resolve question (creator response) | Complete | |
-| Satisfy resolution (questioner confirms) | In Progress | |
-| 7-day timeout auto-resolution | In Progress | |
-| Payment recording | In Progress | |
-| Activity feed | Partial | |
-| Children management | Complete | |
-| Recurring expense templates | In Progress | |
-| Stripe integration (Pro tier) | Not Started | |
-| Settings (split ratio, family) | Partial | |
+| Feature                                  | Status      | Notes |
+| ---------------------------------------- | ----------- | ----- |
+| Clerk authentication (email + Google)    | Complete    |       |
+| Family creation + invite flow            | Complete    |       |
+| Add expense (manual entry)               | Complete    |       |
+| Expense list view                        | Complete    |       |
+| Expense detail page                      | Complete    |       |
+| Balance calculation + display            | Complete    |       |
+| Question expense (initiate)              | Complete    |       |
+| Resolve question (creator response)      | Complete    |       |
+| Satisfy resolution (questioner confirms) | In Progress |       |
+| 7-day timeout auto-resolution            | In Progress |       |
+| Payment recording                        | In Progress |       |
+| Activity feed                            | Partial     |       |
+| Children management                      | Complete    |       |
+| Recurring expense templates              | In Progress |       |
+| Stripe integration (Pro tier)            | Not Started |       |
+| Settings (split ratio, family)           | Partial     |       |
 
 #### Exit Criteria for Phase 1
 
@@ -3540,16 +3837,16 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Planned
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Email notifications for questions | P1 | Resend integration |
-| Stale question alerts (14-day warning) | P1 | Reduce closed_unresolved rate |
-| Receipt image upload | P1 | Pro feature, R2 storage |
-| Child tagging on expenses | P2 | Optional metadata |
-| Improved onboarding wizard | P1 | Increase completion rate |
-| Partner reminder emails | P2 | Nudge pending invites |
-| CSV export (Pro) | P1 | Required for Pro value |
-| Annual summary view | P2 | Pro feature, tax season |
+| Feature                                | Priority | Notes                         |
+| -------------------------------------- | -------- | ----------------------------- |
+| Email notifications for questions      | P1       | Resend integration            |
+| Stale question alerts (14-day warning) | P1       | Reduce closed_unresolved rate |
+| Receipt image upload                   | P1       | Pro feature, R2 storage       |
+| Child tagging on expenses              | P2       | Optional metadata             |
+| Improved onboarding wizard             | P1       | Increase completion rate      |
+| Partner reminder emails                | P2       | Nudge pending invites         |
+| CSV export (Pro)                       | P1       | Required for Pro value        |
+| Annual summary view                    | P2       | Pro feature, tax season       |
 
 #### Exit Criteria for Phase 2
 
@@ -3568,15 +3865,15 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Planned
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Per-category split ratios | P1 | Long-requested Pro feature |
-| Multiple families per user | P1 | ADR-001 must be resolved |
-| Annual summary reports (PDF) | P2 | Tax documentation |
-| Therapist/mediator view | P3 | ADR-005 must be resolved |
-| Court-ready export format | P3 | Legal use case |
-| Push notifications (PWA) | P2 | Mobile engagement |
-| Expense search and filtering | P2 | Quality of life |
+| Feature                      | Priority | Notes                      |
+| ---------------------------- | -------- | -------------------------- |
+| Per-category split ratios    | P1       | Long-requested Pro feature |
+| Multiple families per user   | P1       | ADR-001 must be resolved   |
+| Annual summary reports (PDF) | P2       | Tax documentation          |
+| Therapist/mediator view      | P3       | ADR-005 must be resolved   |
+| Court-ready export format    | P3       | Legal use case             |
+| Push notifications (PWA)     | P2       | Mobile engagement          |
+| Expense search and filtering | P2       | Quality of life            |
 
 #### Exit Criteria for Phase 3
 
@@ -3779,20 +4076,20 @@ The shared expense tracking system where either parent can add expenses but only
 
 **State Definitions:**
 
-| Status | In Balance? | Transition |
-|--------|-------------|------------|
-| **posted** | Yes | Other parent questions -> questioned |
-| **questioned** | No | Creator resolves with keep/edit -> pending_satisfaction |
-| | | Creator resolves with personal -> resolved_personal |
-| | | Creator resolves with delete -> resolved_deleted |
-| | | 30 days elapse -> closed_unresolved |
-| **pending_satisfaction** | No | Questioner satisfies -> resolved |
-| | | 7 days elapse -> resolved_creator_decided |
-| **resolved** | Yes | (terminal) |
-| **resolved_creator_decided** | Yes | (terminal) |
-| **resolved_personal** | No | (terminal) |
-| **resolved_deleted** | No | (terminal) |
-| **closed_unresolved** | No | (terminal) |
+| Status                       | In Balance? | Transition                                              |
+| ---------------------------- | ----------- | ------------------------------------------------------- |
+| **posted**                   | Yes         | Other parent questions -> questioned                    |
+| **questioned**               | No          | Creator resolves with keep/edit -> pending_satisfaction |
+|                              |             | Creator resolves with personal -> resolved_personal     |
+|                              |             | Creator resolves with delete -> resolved_deleted        |
+|                              |             | 30 days elapse -> closed_unresolved                     |
+| **pending_satisfaction**     | No          | Questioner satisfies -> resolved                        |
+|                              |             | 7 days elapse -> resolved_creator_decided               |
+| **resolved**                 | Yes         | (terminal)                                              |
+| **resolved_creator_decided** | Yes         | (terminal)                                              |
+| **resolved_personal**        | No          | (terminal)                                              |
+| **resolved_deleted**         | No          | (terminal)                                              |
+| **closed_unresolved**        | No          | (terminal)                                              |
 
 ---
 
@@ -3812,21 +4109,21 @@ The shared expense tracking system where either parent can add expenses but only
 
 **Share calculation for each included expense:**
 
-| Expense | Total (cents) | A Share (60%) | B Share (40%) |
-|---------|---------------|---------------|---------------|
-| Soccer cleats | 10,000 | floor(10000 * 0.6) = 6,000 | 10000 - 6000 = 4,000 |
-| School lunch | 4,500 | floor(4500 * 0.6) = 2,700 | 4500 - 2700 = 1,800 |
-| Tutor | 20,000 | floor(20000 * 0.6) = 12,000 | 20000 - 12000 = 8,000 |
-| **Totals** | 34,500 | 20,700 | 13,800 |
+| Expense       | Total (cents) | A Share (60%)                | B Share (40%)         |
+| ------------- | ------------- | ---------------------------- | --------------------- |
+| Soccer cleats | 10,000        | floor(10000 \* 0.6) = 6,000  | 10000 - 6000 = 4,000  |
+| School lunch  | 4,500         | floor(4500 \* 0.6) = 2,700   | 4500 - 2700 = 1,800   |
+| Tutor         | 20,000        | floor(20000 \* 0.6) = 12,000 | 20000 - 12000 = 8,000 |
+| **Totals**    | 34,500        | 20,700                       | 13,800                |
 
 **Payment tracking:**
 
-| Expense | Paid By | A Paid | B Paid |
-|---------|---------|--------|--------|
-| Soccer cleats | A | 10,000 | 0 |
-| School lunch | A | 4,500 | 0 |
-| Tutor | B | 0 | 20,000 |
-| **Totals** | | 14,500 | 20,000 |
+| Expense       | Paid By | A Paid | B Paid |
+| ------------- | ------- | ------ | ------ |
+| Soccer cleats | A       | 10,000 | 0      |
+| School lunch  | A       | 4,500  | 0      |
+| Tutor         | B       | 0      | 20,000 |
+| **Totals**    |         | 14,500 | 20,000 |
 
 **Balance calculation:**
 
@@ -3841,6 +4138,7 @@ Net balance = A's net = -6,200 cents = -$62.00
 
 **Payments applied:**
 If Parent A sends Parent B $62.00:
+
 - Net balance = -6,200 + 6,200 = 0 cents
 - Display: "All settled up!"
 
@@ -3887,19 +4185,23 @@ Alternative scenario:
 #### Feature Reactions
 
 **What excites:**
+
 > "The rolling balance is HUGE. I'm so tired of doing mental math every time we settle up."
 
 > "The payment recording feature is really appealing. Right now when my ex Venmos me, I have no idea what it's for."
 
 **What concerns:**
+
 > "The 8-status workflow sounds complicated. I read through it twice and I'm still not 100% clear."
 
 > "The 7-day auto-resolution thing makes me nervous - what if I'm on vacation and miss it?"
 
 **On terminology:**
+
 > "'Questioned' feels softer. 'Disputed' sounds legal and adversarial. I appreciate the choice of words."
 
 **On pricing:**
+
 > "$5/mo feels fair IF my ex also pays, so it's $2.50/month each."
 
 > "2 recurring expenses max is so limiting it feels like a trap. I'd need at least 5 to make this work for my actual life."
@@ -3996,9 +4298,10 @@ When converting dollars to cents: `cents = round(dollars * 100)`. When convertin
 
 **BR-023: Share Calculation**
 Given an expense of `amount_cents` and `parent_a_ratio`:
+
 - `parent_a_share = floor(amount_cents * parent_a_ratio)`
 - `parent_b_share = amount_cents - parent_a_share`
-This ensures shares always sum exactly to amount_cents.
+  This ensures shares always sum exactly to amount_cents.
 
 **BR-024: Balance Calculation Inclusion**
 Only expenses with status "posted", "resolved", or "resolved_creator_decided" are included in balance calculation.
@@ -4007,6 +4310,7 @@ Only expenses with status "posted", "resolved", or "resolved_creator_decided" ar
 Expenses with status "questioned", "pending_satisfaction", "resolved_personal", "resolved_deleted", or "closed_unresolved" are excluded from balance calculation.
 
 **BR-026: Balance Direction**
+
 - Positive balance means Parent A owes Parent B.
 - Negative balance means Parent B owes Parent A.
 - Zero balance means all settled.
@@ -4167,7 +4471,7 @@ All secrets (API keys, database credentials) are stored in environment variables
 
 **EC-006: Odd-Cent Split**
 **Scenario:** parent_a_ratio = 0.5, expense amount = $10.01 (1001 cents).
-**Expected Behavior:** parent_a_share = floor(1001 * 0.5) = 500 cents, parent_b_share = 1001 - 500 = 501 cents. Extra cent goes to parent B.
+**Expected Behavior:** parent_a_share = floor(1001 \* 0.5) = 500 cents, parent_b_share = 1001 - 500 = 501 cents. Extra cent goes to parent B.
 
 **EC-007: Create Expense with Future Date**
 **Scenario:** User sets expense_date to a future date.
@@ -4212,8 +4516,8 @@ All secrets (API keys, database credentials) are stored in environment variables
 **Expected Behavior:** Validation error: "Amount must be positive."
 
 **EC-017: Resolution Note Without Selecting "Other"**
-**Scenario:** Questioner provides a question_note but selects reason "wrong_amount".
-**Expected Behavior:** Note is saved regardless of reason. "Other" only *requires* a note, but notes are optional for other reasons.
+**Scenario:** Questioner provides a question*note but selects reason "wrong_amount".
+**Expected Behavior:** Note is saved regardless of reason. "Other" only \_requires* a note, but notes are optional for other reasons.
 
 **EC-018: Rapid Status Transitions**
 **Scenario:** Expense is questioned, resolved, and satisfied within seconds.
@@ -4377,17 +4681,18 @@ All secrets (API keys, database credentials) are stored in environment variables
 
 ### Appendix F: State Machine Transition Table
 
-| From Status | Event | To Status | Guard Conditions | Effects |
-|-------------|-------|-----------|------------------|---------|
-| posted | question | questioned | Actor = other parent (not creator) | Exclude from balance; set questioned_at, questioned_by, question_reason, question_note; notify creator |
-| questioned | resolve (keep/edit) | pending_satisfaction | Actor = creator; action = "keep" or "edit" | Set resolved_at, resolution_action; if edit, update amount_cents; notify questioner |
-| questioned | resolve (personal) | resolved_personal | Actor = creator; action = "personal" | Set resolved_at, resolution_action; permanent exclusion; no satisfaction required |
-| questioned | resolve (delete) | resolved_deleted | Actor = creator; action = "delete" | Set resolved_at, resolution_action; soft delete; permanent exclusion; no satisfaction required |
-| questioned | 30-day timeout | closed_unresolved | questioned_at > 30 days ago; system-triggered | Set closed_unresolved_at, closed_unresolved_by = "system"; permanent exclusion; log system event |
-| pending_satisfaction | satisfy | resolved | Actor = questioner | Set satisfied_at; include in balance; notify creator |
-| pending_satisfaction | 7-day timeout | resolved_creator_decided | resolved_at > 7 days ago; system-triggered (on-read) | Include in balance; log system timeout event |
+| From Status          | Event               | To Status                | Guard Conditions                                     | Effects                                                                                                |
+| -------------------- | ------------------- | ------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| posted               | question            | questioned               | Actor = other parent (not creator)                   | Exclude from balance; set questioned_at, questioned_by, question_reason, question_note; notify creator |
+| questioned           | resolve (keep/edit) | pending_satisfaction     | Actor = creator; action = "keep" or "edit"           | Set resolved_at, resolution_action; if edit, update amount_cents; notify questioner                    |
+| questioned           | resolve (personal)  | resolved_personal        | Actor = creator; action = "personal"                 | Set resolved_at, resolution_action; permanent exclusion; no satisfaction required                      |
+| questioned           | resolve (delete)    | resolved_deleted         | Actor = creator; action = "delete"                   | Set resolved_at, resolution_action; soft delete; permanent exclusion; no satisfaction required         |
+| questioned           | 30-day timeout      | closed_unresolved        | questioned_at > 30 days ago; system-triggered        | Set closed_unresolved_at, closed_unresolved_by = "system"; permanent exclusion; log system event       |
+| pending_satisfaction | satisfy             | resolved                 | Actor = questioner                                   | Set satisfied_at; include in balance; notify creator                                                   |
+| pending_satisfaction | 7-day timeout       | resolved_creator_decided | resolved_at > 7 days ago; system-triggered (on-read) | Include in balance; log system timeout event                                                           |
 
 **Terminal States (no further transitions):**
+
 - resolved
 - resolved_creator_decided
 - resolved_personal
@@ -4396,19 +4701,19 @@ All secrets (API keys, database credentials) are stored in environment variables
 
 **Balance Inclusion by Status:**
 
-| Status | Included in Balance? |
-|--------|---------------------|
-| posted | Yes |
-| questioned | No |
-| pending_satisfaction | No |
-| resolved | Yes |
-| resolved_creator_decided | Yes |
-| resolved_personal | No |
-| resolved_deleted | No |
-| closed_unresolved | No |
+| Status                   | Included in Balance? |
+| ------------------------ | -------------------- |
+| posted                   | Yes                  |
+| questioned               | No                   |
+| pending_satisfaction     | No                   |
+| resolved                 | Yes                  |
+| resolved_creator_decided | Yes                  |
+| resolved_personal        | No                   |
+| resolved_deleted         | No                   |
+| closed_unresolved        | No                   |
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 6, 2026*
-*Generated by: PRD Synthesis Agent*
+_Document Version: 1.0_
+_Last Updated: February 6, 2026_
+_Generated by: PRD Synthesis Agent_

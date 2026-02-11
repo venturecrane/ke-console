@@ -1,34 +1,34 @@
-"use client";
+'use client'
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import { Button, Card, CardBody, Alert } from "@/components/ui";
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import { Button, Card, CardBody, Alert } from '@/components/ui'
 
 export default function CreateFamilyPage() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-  const api = useApi();
-  const [familyName, setFamilyName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded } = useUser()
+  const router = useRouter()
+  const api = useApi()
+  const [familyName, setFamilyName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return;
+    e.preventDefault()
+    if (!user) return
 
-    setIsSubmitting(true);
-    setError(null);
+    setIsSubmitting(true)
+    setError(null)
 
     try {
-      await api.createFamily(familyName || undefined);
-      router.push("/dashboard");
+      await api.createFamily(familyName || undefined)
+      router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create family");
+      setError(err instanceof Error ? err.message : 'Failed to create family')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -37,7 +37,7 @@ export default function CreateFamilyPage() {
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -47,12 +47,15 @@ export default function CreateFamilyPage() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-ke-primary">
-              Create Your Family
-            </h1>
+            <h1 className="text-2xl font-semibold text-ke-primary">Create Your Family</h1>
           </div>
           <p className="mt-2 text-ke-secondary">
             Set up a shared expense ledger with your co-parent
@@ -88,12 +91,8 @@ export default function CreateFamilyPage() {
                 </Alert>
               )}
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                fullWidth
-              >
-                {isSubmitting ? "Creating..." : "Create Family"}
+              <Button type="submit" disabled={isSubmitting} fullWidth>
+                {isSubmitting ? 'Creating...' : 'Create Family'}
               </Button>
             </form>
           </CardBody>
@@ -101,17 +100,13 @@ export default function CreateFamilyPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-ke-secondary">
-            Already have an invite code?{" "}
-            <Link
-              href="/family/join"
-              className="font-medium text-ke-primary hover:underline"
-            >
+            Already have an invite code?{' '}
+            <Link href="/family/join" className="font-medium text-ke-primary hover:underline">
               Join a family
             </Link>
           </p>
         </div>
-
       </div>
     </div>
-  );
+  )
 }

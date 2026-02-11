@@ -13,13 +13,13 @@ Track 3 covers dispute workflow, activity logging, children management, and fixe
 
 ### Issue Dependency Matrix
 
-| Issue | Title | Dependencies | Status |
-|-------|-------|--------------|--------|
-| #9 | Question Expense | Track 2 (#5 Expenses) | BLOCKED |
-| #10 | Resolve Dispute | #9 Question Expense | BLOCKED |
-| #11 | Activity Feed | All mutations (Track 1, 2, 3) | BLOCKED |
-| #12 | Children Management | Track 1 (#4 Family) | PARTIALLY BLOCKED |
-| #13 | Fixed Expenses | Track 2 (#5 Expenses) | BLOCKED |
+| Issue | Title               | Dependencies                  | Status            |
+| ----- | ------------------- | ----------------------------- | ----------------- |
+| #9    | Question Expense    | Track 2 (#5 Expenses)         | BLOCKED           |
+| #10   | Resolve Dispute     | #9 Question Expense           | BLOCKED           |
+| #11   | Activity Feed       | All mutations (Track 1, 2, 3) | BLOCKED           |
+| #12   | Children Management | Track 1 (#4 Family)           | PARTIALLY BLOCKED |
+| #13   | Fixed Expenses      | Track 2 (#5 Expenses)         | BLOCKED           |
 
 ### Recommended Implementation Order
 
@@ -34,14 +34,17 @@ Track 3 covers dispute workflow, activity logging, children management, and fixe
 ## Issue #12: Children Management
 
 ### Overview
+
 Simple CRUD for child records within a family. Optional feature for tagging expenses to specific children.
 
 ### API Contract
 
 #### POST /families/:id/children
+
 **Create a child record**
 
 Request:
+
 ```json
 {
   "name": "string (required, 1-100 chars)"
@@ -49,6 +52,7 @@ Request:
 ```
 
 Response (201):
+
 ```json
 {
   "id": "child_uuid",
@@ -60,15 +64,18 @@ Response (201):
 ```
 
 Errors:
+
 - 400: Missing/invalid name
 - 401: Unauthorized
 - 403: User not in this family
 - 404: Family not found
 
 #### GET /families/:id/children
+
 **List all children (excluding soft-deleted)**
 
 Response (200):
+
 ```json
 {
   "children": [
@@ -85,12 +92,15 @@ Response (200):
 ```
 
 Query params:
+
 - `include_deleted=true` - Include soft-deleted children
 
 #### DELETE /families/:id/children/:childId
+
 **Soft-delete a child**
 
 Response (200):
+
 ```json
 {
   "id": "child_uuid",
@@ -99,6 +109,7 @@ Response (200):
 ```
 
 Notes:
+
 - Soft delete only (sets deleted_at)
 - Historical expenses retain child_ids reference
 - Hidden from UI but preserved in database
@@ -124,12 +135,13 @@ Notes:
 
 ### Activity Events
 
-| Event Type | Target Type | When |
-|------------|-------------|------|
-| `child.created` | `child` | Child added |
-| `child.deleted` | `child` | Child soft-deleted |
+| Event Type      | Target Type | When               |
+| --------------- | ----------- | ------------------ |
+| `child.created` | `child`     | Child added        |
+| `child.deleted` | `child`     | Child soft-deleted |
 
 Event payload example:
+
 ```json
 {
   "event_type": "child.created",
@@ -153,14 +165,17 @@ Event payload example:
 ## Issue #9: Question Expense (Dispute Initiation)
 
 ### Overview
+
 Allows Parent B to formally question an expense created by Parent A. Questioned expenses are excluded from balance calculation until resolved.
 
 ### API Contract
 
 #### POST /expenses/:id/question
+
 **Question an expense**
 
 Request:
+
 ```json
 {
   "reason": "wrong_amount | not_child_related | duplicate | split_dispute | other",
@@ -169,6 +184,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "id": "expense_uuid",
@@ -181,6 +197,7 @@ Response (200):
 ```
 
 Errors:
+
 - 400: Invalid reason, note too long
 - 401: Unauthorized
 - 403: Cannot question own expense, expense already questioned
@@ -194,6 +211,7 @@ Errors:
 4. **Activity logging** - expense.questioned event created
 
 ### State Transition
+
 ```
 posted → questioned
 ```
@@ -220,6 +238,7 @@ QuestionExpenseModal
 ### Visual Indicators
 
 Questioned expenses should display:
+
 - Orange/yellow badge with "Questioned" text
 - Strikethrough or dimmed amount
 - Question icon
@@ -227,11 +246,12 @@ Questioned expenses should display:
 
 ### Activity Events
 
-| Event Type | Target Type | When |
-|------------|-------------|------|
-| `expense.questioned` | `expense` | Expense questioned |
+| Event Type           | Target Type | When               |
+| -------------------- | ----------- | ------------------ |
+| `expense.questioned` | `expense`   | Expense questioned |
 
 Event payload:
+
 ```json
 {
   "event_type": "expense.questioned",
@@ -255,47 +275,55 @@ Event payload:
 ## Issue #10: Resolve Dispute (Creator Response)
 
 ### Overview
+
 Allows the expense creator to respond to a question with four possible actions: keep as-is, edit amount, mark as personal, or delete.
 
 ### API Contract
 
 #### POST /expenses/:id/resolve
+
 **Creator resolves a questioned expense**
 
 Request:
+
 ```json
 {
   "action": "keep | edit | personal | delete",
-  "new_amount_cents": 4500  // required only if action="edit"
+  "new_amount_cents": 4500 // required only if action="edit"
 }
 ```
 
 Response (200):
+
 ```json
 {
   "id": "expense_uuid",
   "status": "pending_satisfaction | resolved_personal | resolved_deleted",
   "resolution_action": "kept | edited | personal | deleted",
   "resolved_at": "2026-01-27T14:00:00Z",
-  "amount_cents": 4500  // updated if edited
+  "amount_cents": 4500 // updated if edited
 }
 ```
 
 Errors:
+
 - 400: Invalid action, missing new_amount for edit
 - 401: Unauthorized
 - 403: Not the creator, expense not in questioned status
 - 404: Expense not found
 
 #### POST /expenses/:id/satisfy
+
 **Questioner confirms satisfaction**
 
 Request:
+
 ```json
-{}  // No body needed
+{} // No body needed
 ```
 
 Response (200):
+
 ```json
 {
   "id": "expense_uuid",
@@ -305,6 +333,7 @@ Response (200):
 ```
 
 Errors:
+
 - 401: Unauthorized
 - 403: Not the questioner, not in pending_satisfaction status
 - 404: Expense not found
@@ -322,10 +351,12 @@ pending_satisfaction → resolved_creator_decided (7-day timeout)
 ### Timeout Logic
 
 After 7 days in `pending_satisfaction`:
+
 - Status auto-changes to `resolved_creator_decided`
 - Expense re-included in balance
 
 Implementation options:
+
 1. **On-read check**: When fetching expense, check if 7 days passed and update
 2. **Scheduled worker**: Cron job runs daily to update stale disputes
 3. **Hybrid**: On-read check + nightly cleanup
@@ -334,12 +365,12 @@ Recommended: **Option 1 (on-read)** for simplicity in v1.0.
 
 ### Business Rules
 
-| Action | Status After | Balance Impact |
-|--------|--------------|----------------|
-| keep | pending_satisfaction | Excluded until satisfied |
-| edit | pending_satisfaction | Excluded until satisfied |
-| personal | resolved_personal | Permanently excluded |
-| delete | resolved_deleted | Permanently excluded (soft delete) |
+| Action   | Status After         | Balance Impact                     |
+| -------- | -------------------- | ---------------------------------- |
+| keep     | pending_satisfaction | Excluded until satisfied           |
+| edit     | pending_satisfaction | Excluded until satisfied           |
+| personal | resolved_personal    | Permanently excluded               |
+| delete   | resolved_deleted     | Permanently excluded (soft delete) |
 
 ### Component Hierarchy
 
@@ -374,11 +405,11 @@ ExpenseCard (pending_satisfaction, questioned_by === currentUser)
 
 ### Activity Events
 
-| Event Type | Target Type | When |
-|------------|-------------|------|
-| `expense.resolved` | `expense` | Creator responds |
-| `expense.satisfied` | `expense` | Questioner satisfied |
-| `expense.timeout_resolved` | `expense` | 7-day timeout |
+| Event Type                 | Target Type | When                 |
+| -------------------------- | ----------- | -------------------- |
+| `expense.resolved`         | `expense`   | Creator responds     |
+| `expense.satisfied`        | `expense`   | Questioner satisfied |
+| `expense.timeout_resolved` | `expense`   | 7-day timeout        |
 
 ### Implementation Notes
 
@@ -393,19 +424,23 @@ ExpenseCard (pending_satisfaction, questioned_by === currentUser)
 ## Issue #11: Activity Feed
 
 ### Overview
+
 Chronological feed of all family actions for transparency and audit trail. Read-only display of activity_events table.
 
 ### API Contract
 
 #### GET /families/:id/activity
+
 **Get paginated activity feed**
 
 Query params:
+
 - `limit` (default: 20, max: 100)
 - `offset` (default: 0)
 - `type` (optional filter: expense.created, expense.questioned, etc.)
 
 Response (200):
+
 ```json
 {
   "events": [
@@ -434,21 +469,21 @@ Response (200):
 
 ### Event Types
 
-| Event Type | Description | Target Type |
-|------------|-------------|-------------|
-| `expense.created` | New expense added | expense |
-| `expense.edited` | Expense modified | expense |
-| `expense.questioned` | Dispute initiated | expense |
-| `expense.resolved` | Creator responded | expense |
-| `expense.satisfied` | Questioner confirmed | expense |
-| `expense.timeout_resolved` | 7-day auto-resolve | expense |
-| `payment.created` | Payment recorded | payment |
-| `child.created` | Child added | child |
-| `child.deleted` | Child removed | child |
-| `fixed_expense.created` | Template created | fixed_expense |
-| `fixed_expense.updated` | Template modified | fixed_expense |
-| `fixed_expense.ended` | Template deactivated | fixed_expense |
-| `family.settings_changed` | Split ratio changed | family |
+| Event Type                 | Description          | Target Type   |
+| -------------------------- | -------------------- | ------------- |
+| `expense.created`          | New expense added    | expense       |
+| `expense.edited`           | Expense modified     | expense       |
+| `expense.questioned`       | Dispute initiated    | expense       |
+| `expense.resolved`         | Creator responded    | expense       |
+| `expense.satisfied`        | Questioner confirmed | expense       |
+| `expense.timeout_resolved` | 7-day auto-resolve   | expense       |
+| `payment.created`          | Payment recorded     | payment       |
+| `child.created`            | Child added          | child         |
+| `child.deleted`            | Child removed        | child         |
+| `fixed_expense.created`    | Template created     | fixed_expense |
+| `fixed_expense.updated`    | Template modified    | fixed_expense |
+| `fixed_expense.ended`      | Template deactivated | fixed_expense |
+| `family.settings_changed`  | Split ratio changed  | family        |
 
 ### Component Hierarchy
 
@@ -477,18 +512,18 @@ Each event type needs custom rendering:
 const renderEvent = (event: ActivityEvent) => {
   switch (event.event_type) {
     case 'expense.created':
-      return `${event.user_name} added expense "${after.description}" for ${formatCents(after.amount_cents)}`;
+      return `${event.user_name} added expense "${after.description}" for ${formatCents(after.amount_cents)}`
     case 'expense.edited':
-      return `${event.user_name} edited expense "${after.description}"`;
+      return `${event.user_name} edited expense "${after.description}"`
     case 'expense.questioned':
-      return `${event.user_name} questioned expense "${after.description}" - Reason: ${metadata.reason}`;
+      return `${event.user_name} questioned expense "${after.description}" - Reason: ${metadata.reason}`
     case 'expense.resolved':
-      return `${event.user_name} resolved dispute: ${metadata.action}`;
+      return `${event.user_name} resolved dispute: ${metadata.action}`
     case 'payment.created':
-      return `${event.user_name} recorded payment of ${formatCents(after.amount_cents)}`;
+      return `${event.user_name} recorded payment of ${formatCents(after.amount_cents)}`
     // ... etc
   }
-};
+}
 ```
 
 ### Timestamp Formatting
@@ -497,7 +532,7 @@ const renderEvent = (event: ActivityEvent) => {
 - < 1 hour: "X minutes ago"
 - < 24 hours: "X hours ago"
 - < 7 days: "X days ago"
-- >= 7 days: "Jan 27, 2026"
+- > = 7 days: "Jan 27, 2026"
 
 ### Implementation Notes
 
@@ -512,28 +547,32 @@ const renderEvent = (event: ActivityEvent) => {
 ## Issue #13: Fixed Expenses (Recurring Templates)
 
 ### Overview
+
 Templates for recurring monthly expenses that auto-generate on the 1st of each month. Reduces data entry for predictable costs like tuition, rent, etc.
 
 ### API Contract
 
 #### POST /families/:id/fixed-expenses
+
 **Create a fixed expense template**
 
 Request:
+
 ```json
 {
   "description": "string (required, 1-200 chars)",
   "amount_cents": 15000,
   "category": "school | medical | activities | childcare | other",
   "effective_from": "2026-02-01",
-  "effective_until": "2026-12-31",  // optional
-  "child_ids": ["child_uuid"],  // optional
-  "link_url": "https://...",  // optional
-  "memo": "Monthly tuition"  // optional
+  "effective_until": "2026-12-31", // optional
+  "child_ids": ["child_uuid"], // optional
+  "link_url": "https://...", // optional
+  "memo": "Monthly tuition" // optional
 }
 ```
 
 Response (201):
+
 ```json
 {
   "id": "fixed_expense_uuid",
@@ -552,6 +591,7 @@ Response (201):
 ```
 
 Errors:
+
 - 400: Validation error
 - 401: Unauthorized
 - 402: Tier limit exceeded (Free: max 2 active)
@@ -559,12 +599,15 @@ Errors:
 - 404: Family not found
 
 #### GET /families/:id/fixed-expenses
+
 **List fixed expense templates**
 
 Query params:
+
 - `include_ended=true` - Include expired/ended templates
 
 Response (200):
+
 ```json
 {
   "fixed_expenses": [...],
@@ -575,13 +618,16 @@ Response (200):
 ```
 
 #### PUT /families/:id/fixed-expenses/:fixedExpenseId
+
 **Update a fixed expense template**
 
 Notes:
+
 - Changes apply to FUTURE generated expenses only
 - Historical expenses unchanged
 
 #### DELETE /families/:id/fixed-expenses/:fixedExpenseId
+
 **End a fixed expense template**
 
 Actually sets `effective_until = today`, doesn't hard delete.
@@ -591,6 +637,7 @@ Actually sets `effective_until = today`, doesn't hard delete.
 **Trigger**: 1st of each month OR first app open after 1st
 
 **Algorithm**:
+
 ```typescript
 async function generateMonthlyExpenses(familyId: string, month: string) {
   const templates = await getActiveTemplates(familyId, month);
@@ -634,6 +681,7 @@ async function generateMonthlyExpenses(familyId: string, month: string) {
 ```
 
 **Active template query**:
+
 ```sql
 SELECT * FROM fixed_expenses
 WHERE family_id = ?
@@ -646,17 +694,22 @@ AND (effective_until IS NULL OR effective_until >= ?)
 
 ```typescript
 async function canCreateFixedExpense(familyId: string): Promise<boolean> {
-  const subscription = await getSubscription(familyId);
-  if (subscription?.status === 'active') return true;  // Pro = unlimited
+  const subscription = await getSubscription(familyId)
+  if (subscription?.status === 'active') return true // Pro = unlimited
 
-  const count = await db.prepare(`
+  const count = await db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM fixed_expenses
     WHERE family_id = ?
     AND deleted_at IS NULL
     AND (effective_until IS NULL OR effective_until >= date('now'))
-  `).bind(familyId).first();
+  `
+    )
+    .bind(familyId)
+    .first()
 
-  return count.count < 2;  // Free tier limit
+  return count.count < 2 // Free tier limit
 }
 ```
 
@@ -692,11 +745,11 @@ async function canCreateFixedExpense(familyId: string): Promise<boolean> {
 
 ### Activity Events
 
-| Event Type | Target Type | When |
-|------------|-------------|------|
-| `fixed_expense.created` | `fixed_expense` | Template created |
-| `fixed_expense.updated` | `fixed_expense` | Template modified |
-| `fixed_expense.ended` | `fixed_expense` | Template deactivated |
+| Event Type              | Target Type     | When                 |
+| ----------------------- | --------------- | -------------------- |
+| `fixed_expense.created` | `fixed_expense` | Template created     |
+| `fixed_expense.updated` | `fixed_expense` | Template modified    |
+| `fixed_expense.ended`   | `fixed_expense` | Template deactivated |
 
 ### Implementation Notes
 
@@ -724,33 +777,38 @@ async function canCreateFixedExpense(familyId: string): Promise<boolean> {
 ```typescript
 // lib/activity.ts
 interface ActivityLogParams {
-  familyId: string;
-  userId: string;
-  eventType: string;
-  targetType: 'expense' | 'payment' | 'child' | 'fixed_expense' | 'family';
-  targetId: string;
-  before?: object | null;
-  after?: object | null;
-  metadata?: object | null;
+  familyId: string
+  userId: string
+  eventType: string
+  targetType: 'expense' | 'payment' | 'child' | 'fixed_expense' | 'family'
+  targetId: string
+  before?: object | null
+  after?: object | null
+  metadata?: object | null
 }
 
 export async function logActivity(db: D1Database, params: ActivityLogParams) {
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     INSERT INTO activity_events (
       id, family_id, user_id, event_type, target_type, target_id,
       before_snapshot, after_snapshot, metadata, created_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-  `).bind(
-    generateUUID(),
-    params.familyId,
-    params.userId,
-    params.eventType,
-    params.targetType,
-    params.targetId,
-    params.before ? JSON.stringify(params.before) : null,
-    params.after ? JSON.stringify(params.after) : null,
-    params.metadata ? JSON.stringify(params.metadata) : null
-  ).run();
+  `
+    )
+    .bind(
+      generateUUID(),
+      params.familyId,
+      params.userId,
+      params.eventType,
+      params.targetType,
+      params.targetId,
+      params.before ? JSON.stringify(params.before) : null,
+      params.after ? JSON.stringify(params.after) : null,
+      params.metadata ? JSON.stringify(params.metadata) : null
+    )
+    .run()
 }
 ```
 
@@ -758,7 +816,7 @@ export async function logActivity(db: D1Database, params: ActivityLogParams) {
 
 ```typescript
 // In expense creation handler
-const expense = await createExpense(db, expenseData);
+const expense = await createExpense(db, expenseData)
 
 await logActivity(db, {
   familyId: expense.family_id,
@@ -770,9 +828,9 @@ await logActivity(db, {
   after: {
     description: expense.description,
     amount_cents: expense.amount_cents,
-    category: expense.category
-  }
-});
+    category: expense.category,
+  },
+})
 ```
 
 ### Transaction Wrapper
@@ -797,24 +855,31 @@ await db.batch([
 **Decision**: On-read check with eventual consistency.
 
 **Rationale**:
+
 - Simpler to implement (no cron infrastructure needed)
 - Acceptable UX (status updates when viewed)
 - Can add scheduled job later for notifications
 
 **Implementation**:
+
 ```typescript
 // In expense fetch logic
 if (expense.status === 'pending_satisfaction') {
-  const resolvedAt = new Date(expense.resolved_at);
-  const now = new Date();
-  const daysSinceResolved = (now - resolvedAt) / (1000 * 60 * 60 * 24);
+  const resolvedAt = new Date(expense.resolved_at)
+  const now = new Date()
+  const daysSinceResolved = (now - resolvedAt) / (1000 * 60 * 60 * 24)
 
   if (daysSinceResolved >= 7) {
     // Update status
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       UPDATE expenses SET status = 'resolved_creator_decided' WHERE id = ?
-    `).bind(expense.id).run();
-    expense.status = 'resolved_creator_decided';
+    `
+      )
+      .bind(expense.id)
+      .run()
+    expense.status = 'resolved_creator_decided'
   }
 }
 ```
@@ -826,25 +891,27 @@ if (expense.status === 'pending_satisfaction') {
 **Decision**: Cloudflare Workers Cron Trigger + on-login fallback.
 
 **Rationale**:
+
 - Cron ensures reliable generation even if no user logs in
 - On-login fallback catches any missed generations
 - Workers Cron is free and simple
 
 **Implementation**:
+
 ```typescript
 // wrangler.toml
-[triggers]
-crons = ["0 0 1 * *"]  // Run at midnight on 1st of each month
+;[triggers]
+crons = ['0 0 1 * *'] // Run at midnight on 1st of each month
 
 // In worker
 export default {
   async scheduled(event, env, ctx) {
-    const families = await getAllFamilies(env.DB);
+    const families = await getAllFamilies(env.DB)
     for (const family of families) {
-      await generateMonthlyExpenses(env.DB, family.id, getCurrentMonth());
+      await generateMonthlyExpenses(env.DB, family.id, getCurrentMonth())
     }
-  }
-};
+  },
+}
 ```
 
 ### Decision 3: Soft Delete Strategy
@@ -854,12 +921,14 @@ export default {
 **Decision**: Universal soft delete with `deleted_at` timestamp.
 
 **Rationale**:
+
 - Preserves audit trail
 - Allows recovery
 - Maintains referential integrity
 - Historical reports remain accurate
 
 **Convention**:
+
 - All queries filter `WHERE deleted_at IS NULL` by default
 - Admin/export queries can include deleted records
 - Hard delete only via explicit data retention policy
@@ -871,6 +940,7 @@ export default {
 **Decision**: Offset-based pagination for v1.0.
 
 **Rationale**:
+
 - Simpler to implement
 - Adequate for expected data volumes
 - Can migrate to cursor-based if needed
@@ -898,20 +968,23 @@ export default {
 
 ```typescript
 // lib/auth.ts
-export function getUserFamilyId(userId: string): Promise<string | null>;
-export function isUserInFamily(userId: string, familyId: string): Promise<boolean>;
-export function isFamilyMember(userId: string, familyId: string): Promise<'parent_a' | 'parent_b' | null>;
+export function getUserFamilyId(userId: string): Promise<string | null>
+export function isUserInFamily(userId: string, familyId: string): Promise<boolean>
+export function isFamilyMember(
+  userId: string,
+  familyId: string
+): Promise<'parent_a' | 'parent_b' | null>
 
 // lib/money.ts
-export function formatCents(cents: number): string;  // 4500 -> "$45.00"
-export function dollarsToCents(dollars: number): number;  // 45.00 -> 4500
+export function formatCents(cents: number): string // 4500 -> "$45.00"
+export function dollarsToCents(dollars: number): number // 45.00 -> 4500
 
 // lib/uuid.ts
-export function generateUUID(): string;
+export function generateUUID(): string
 
 // lib/time.ts
-export function getCurrentMonth(): string;  // "2026-01"
-export function formatRelativeTime(date: string): string;
+export function getCurrentMonth(): string // "2026-01"
+export function formatRelativeTime(date: string): string
 ```
 
 ---
@@ -919,24 +992,29 @@ export function formatRelativeTime(date: string): string;
 ## Ready-to-Implement Checklist
 
 ### Issue #12 (Children Management)
+
 - [ ] Track 1 completes Family API (#4)
 - [ ] Family membership verification utility available
 - [ ] Activity logging function available
 
 ### Issue #9 (Question Expense)
+
 - [ ] Track 2 completes Add Expense (#5)
 - [ ] Expense list/detail available
 - [ ] Activity logging function available
 
 ### Issue #10 (Resolve Dispute)
+
 - [ ] Issue #9 (Question Expense) complete
 - [ ] Timeout check logic decided
 
 ### Issue #11 (Activity Feed)
+
 - [ ] Activity events table populated by other features
 - [ ] User name join available
 
 ### Issue #13 (Fixed Expenses)
+
 - [ ] Track 2 completes expense infrastructure
 - [ ] Subscription/tier checking available (or stub for Free tier)
 - [ ] Cron trigger configured in Workers
@@ -948,12 +1026,14 @@ export function formatRelativeTime(date: string): string;
 This document provides complete API contracts, component hierarchies, and implementation details for all Track 3 issues. The team can begin implementation immediately once dependencies from Track 1 and Track 2 are available.
 
 **Recommended next steps**:
+
 1. Track 1 agent: Complete Family API (#4)
 2. Track 2 agent: Complete Add Expense (#5) with activity logging
 3. Track 3 agent: Start with Children Management (#12) once Family API is ready
 4. All tracks: Coordinate on shared utility functions
 
 **Questions for Captain/PM**:
+
 1. Should fixed expenses generate for the current month if template created mid-month?
 2. Confirm 7-day timeout behavior - should it auto-resolve or just allow creator to force-resolve?
 3. Activity feed filtering - do we need type filters in v1.0?

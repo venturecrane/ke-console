@@ -1,104 +1,104 @@
-"use client";
+'use client'
 
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type { MeResponse, NotificationPreferences } from "@/lib/api";
-import { Button, Card, CardHeader, CardBody, Alert } from "@/components/ui";
+import { useUser, UserButton } from '@clerk/nextjs'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { MeResponse, NotificationPreferences } from '@/lib/api'
+import { Button, Card, CardHeader, CardBody, Alert } from '@/components/ui'
 
-type PreferenceKey = keyof NotificationPreferences;
+type PreferenceKey = keyof NotificationPreferences
 
 const NOTIFICATION_TYPES: { key: PreferenceKey; label: string; description: string }[] = [
   {
-    key: "expense_created",
-    label: "Expense Created",
-    description: "When your co-parent adds an expense",
+    key: 'expense_created',
+    label: 'Expense Created',
+    description: 'When your co-parent adds an expense',
   },
   {
-    key: "expense_questioned",
-    label: "Expense Questioned",
-    description: "When your co-parent questions your expense",
+    key: 'expense_questioned',
+    label: 'Expense Questioned',
+    description: 'When your co-parent questions your expense',
   },
   {
-    key: "question_resolved",
-    label: "Question Resolved",
-    description: "When the creator resolves your question",
+    key: 'question_resolved',
+    label: 'Question Resolved',
+    description: 'When the creator resolves your question',
   },
   {
-    key: "payment_recorded",
-    label: "Payment Recorded",
-    description: "When your co-parent records a payment",
+    key: 'payment_recorded',
+    label: 'Payment Recorded',
+    description: 'When your co-parent records a payment',
   },
   {
-    key: "recurring_generated",
-    label: "Recurring Generated",
-    description: "Monthly auto-generated expense summary",
+    key: 'recurring_generated',
+    label: 'Recurring Generated',
+    description: 'Monthly auto-generated expense summary',
   },
-];
+]
 
 export default function NotificationSettingsPage() {
-  const { user, isLoaded } = useUser();
-  const api = useApi();
-  const [meData, setMeData] = useState<MeResponse | null>(null);
-  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [savingKey, setSavingKey] = useState<PreferenceKey | null>(null);
-  const [savedKey, setSavedKey] = useState<PreferenceKey | null>(null);
+  const { user, isLoaded } = useUser()
+  const api = useApi()
+  const [meData, setMeData] = useState<MeResponse | null>(null)
+  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [savingKey, setSavingKey] = useState<PreferenceKey | null>(null)
+  const [savedKey, setSavedKey] = useState<PreferenceKey | null>(null)
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
+    if (!user) return
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const me = await api.getMe();
-      setMeData(me);
+      const me = await api.getMe()
+      setMeData(me)
 
       if (me.family) {
-        const prefs = await api.getNotificationPreferences(me.family.id);
-        setPreferences(prefs);
+        const prefs = await api.getNotificationPreferences(me.family.id)
+        setPreferences(prefs)
       }
     } catch (err) {
-      console.error("Failed to load notification preferences:", err);
-      setError("Failed to load notification preferences. Please try again.");
+      console.error('Failed to load notification preferences:', err)
+      setError('Failed to load notification preferences. Please try again.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [user, api]);
+  }, [user, api])
 
   useEffect(() => {
     if (isLoaded && user) {
-      fetchData();
+      fetchData()
     }
-  }, [isLoaded, user, fetchData]);
+  }, [isLoaded, user, fetchData])
 
   async function handleToggle(key: PreferenceKey) {
-    if (!meData?.family || !preferences) return;
+    if (!meData?.family || !preferences) return
 
-    const newValue = !preferences[key];
-    setSavingKey(key);
-    setSavedKey(null);
+    const newValue = !preferences[key]
+    setSavingKey(key)
+    setSavedKey(null)
 
     // Optimistic update
-    setPreferences((prev) => prev ? { ...prev, [key]: newValue } : prev);
+    setPreferences((prev) => (prev ? { ...prev, [key]: newValue } : prev))
 
     try {
       const updated = await api.updateNotificationPreferences(meData.family.id, {
         [key]: newValue,
-      });
-      setPreferences(updated);
-      setSavedKey(key);
-      setTimeout(() => setSavedKey(null), 2000);
+      })
+      setPreferences(updated)
+      setSavedKey(key)
+      setTimeout(() => setSavedKey(null), 2000)
     } catch (err) {
-      console.error("Failed to update preference:", err);
+      console.error('Failed to update preference:', err)
       // Revert optimistic update
-      setPreferences((prev) => prev ? { ...prev, [key]: !newValue } : prev);
-      setError("Failed to save. Please try again.");
+      setPreferences((prev) => (prev ? { ...prev, [key]: !newValue } : prev))
+      setError('Failed to save. Please try again.')
     } finally {
-      setSavingKey(null);
+      setSavingKey(null)
     }
   }
 
@@ -107,7 +107,7 @@ export default function NotificationSettingsPage() {
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   if (!meData?.family) {
@@ -118,7 +118,12 @@ export default function NotificationSettingsPage() {
             <div className="flex items-center gap-4">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </Link>
               <h1 className="text-xl font-semibold text-ke-primary">Notifications</h1>
@@ -137,7 +142,7 @@ export default function NotificationSettingsPage() {
           </Card>
         </main>
       </div>
-    );
+    )
   }
 
   return (
@@ -147,7 +152,12 @@ export default function NotificationSettingsPage() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <h1 className="text-xl font-semibold text-ke-primary">Notifications</h1>
@@ -199,7 +209,7 @@ export default function NotificationSettingsPage() {
                       onClick={() => handleToggle(key)}
                       disabled={savingKey === key}
                       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ke-focus focus:ring-offset-2 disabled:opacity-50 ${
-                        preferences[key] ? "bg-ke-accent" : "bg-ke-border"
+                        preferences[key] ? 'bg-ke-accent' : 'bg-ke-border'
                       }`}
                       role="switch"
                       aria-checked={preferences[key]}
@@ -207,7 +217,7 @@ export default function NotificationSettingsPage() {
                     >
                       <span
                         className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          preferences[key] ? "translate-x-5" : "translate-x-0"
+                          preferences[key] ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
                     </button>
@@ -219,5 +229,5 @@ export default function NotificationSettingsPage() {
         </Card>
       </main>
     </div>
-  );
+  )
 }

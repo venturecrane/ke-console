@@ -1,45 +1,41 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { Button } from "./Button";
-import { Card, CardBody } from "./Card";
+import { useRouter } from 'next/navigation'
+import { Button } from './Button'
+import { Card, CardBody } from './Card'
 
 interface UpgradeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   /** Optional: customize the title shown in the modal */
-  title?: string;
+  title?: string
   /** Optional: customize the description */
-  description?: string;
+  description?: string
 }
 
 const PRO_BENEFITS = [
-  "Unlimited recurring expense templates",
-  "Full expense history (no time limit)",
-  "Priority support",
-  "Advanced analytics (coming soon)",
-];
+  'Unlimited recurring expense templates',
+  'Full expense history (no time limit)',
+  'Priority support',
+  'Advanced analytics (coming soon)',
+]
 
 function UpgradeModal({
   isOpen,
   onClose,
-  title = "Upgrade to Pro",
+  title = 'Upgrade to Pro',
   description = "You've reached the limit on the Free plan. Unlock more with Pro.",
 }: UpgradeModalProps) {
-  const router = useRouter();
+  const router = useRouter()
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <Card className="w-full max-w-sm">
         <CardBody>
-          <h3 className="text-lg font-semibold text-ke-primary">
-            {title}
-          </h3>
-          <p className="mt-2 text-sm text-ke-secondary">
-            {description}
-          </p>
+          <h3 className="text-lg font-semibold text-ke-primary">{title}</h3>
+          <p className="mt-2 text-sm text-ke-secondary">{description}</p>
 
           <ul className="mt-4 space-y-2">
             {PRO_BENEFITS.map((benefit) => (
@@ -66,26 +62,21 @@ function UpgradeModal({
             <Button
               fullWidth
               onClick={() => {
-                onClose();
-                router.push("/settings/billing");
+                onClose()
+                router.push('/settings/billing')
               }}
               className="min-h-[44px]"
             >
               Upgrade Now
             </Button>
-            <Button
-              variant="ghost"
-              fullWidth
-              onClick={onClose}
-              className="min-h-[44px]"
-            >
+            <Button variant="ghost" fullWidth onClick={onClose} className="min-h-[44px]">
               Maybe Later
             </Button>
           </div>
         </CardBody>
       </Card>
     </div>
-  );
+  )
 }
 
-export { UpgradeModal, type UpgradeModalProps };
+export { UpgradeModal, type UpgradeModalProps }

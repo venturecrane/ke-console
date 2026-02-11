@@ -8,40 +8,40 @@
 
 ### API Engineer A (Track 1+2)
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #100 | Notification preferences — new table + endpoints | `feat/ke-100-notification-prefs` |
-| 2 | #101 | CSV export — Pro-only export endpoint | `feat/ke-101-csv-export` |
-| 3 | #104 | Optional expense details — expense_children junction table | `feat/ke-104-expense-details` |
+| Order | Issue | Description                                                | Branch                           |
+| ----- | ----- | ---------------------------------------------------------- | -------------------------------- |
+| 1     | #100  | Notification preferences — new table + endpoints           | `feat/ke-100-notification-prefs` |
+| 2     | #101  | CSV export — Pro-only export endpoint                      | `feat/ke-101-csv-export`         |
+| 3     | #104  | Optional expense details — expense_children junction table | `feat/ke-104-expense-details`    |
 
 ### API Engineer B (Track 3)
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #98 | Email notifications — notification service (after #100 prefs done) | `feat/ke-98-email-notifications` |
-| 2 | #99 | Generated expense email — monthly summary (after #96+#98) | `feat/ke-99-generated-email` |
-| 3 | #102 | Questioning dashboard — dashboard query endpoint | `feat/ke-102-questioning-dashboard` |
-| 4 | #103 | Activity event types — ensure all mutations log events | `feat/ke-103-activity-events` |
+| Order | Issue | Description                                                        | Branch                              |
+| ----- | ----- | ------------------------------------------------------------------ | ----------------------------------- |
+| 1     | #98   | Email notifications — notification service (after #100 prefs done) | `feat/ke-98-email-notifications`    |
+| 2     | #99   | Generated expense email — monthly summary (after #96+#98)          | `feat/ke-99-generated-email`        |
+| 3     | #102  | Questioning dashboard — dashboard query endpoint                   | `feat/ke-102-questioning-dashboard` |
+| 4     | #103  | Activity event types — ensure all mutations log events             | `feat/ke-103-activity-events`       |
 
 ### Frontend Engineer
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #100 | Settings page: notification toggles | `feat/ke-100-notification-prefs` |
-| 2 | #101 | Export buttons + tier gate modal | `feat/ke-101-csv-export` |
-| 3 | #102 | Questioning dashboard page | `feat/ke-102-questioning-dashboard` |
-| 4 | #103 | Activity detail view | `feat/ke-103-activity-events` |
-| 5 | #104 | Expense form: memo, receipt, children fields | `feat/ke-104-expense-details` |
-| 6 | #105 | Child edit/remove UI | `feat/ke-105-child-management` |
+| Order | Issue | Description                                  | Branch                              |
+| ----- | ----- | -------------------------------------------- | ----------------------------------- |
+| 1     | #100  | Settings page: notification toggles          | `feat/ke-100-notification-prefs`    |
+| 2     | #101  | Export buttons + tier gate modal             | `feat/ke-101-csv-export`            |
+| 3     | #102  | Questioning dashboard page                   | `feat/ke-102-questioning-dashboard` |
+| 4     | #103  | Activity detail view                         | `feat/ke-103-activity-events`       |
+| 5     | #104  | Expense form: memo, receipt, children fields | `feat/ke-104-expense-details`       |
+| 6     | #105  | Child edit/remove UI                         | `feat/ke-105-child-management`      |
 
 ### QA Engineer
 
-| Order | Focus | Test File |
-|-------|-------|-----------|
-| 1 | #105: Child management (soft delete edge cases) | `__tests__/children.test.ts` (NEW) |
-| 2 | #98: Notification delivery, preference respect | `__tests__/notifications.test.ts` (NEW) |
-| 3 | #101: CSV format, cents→dollars conversion | `__tests__/export.test.ts` (NEW) |
-| 4 | Edge case sweep: EC-040 through EC-049 | Various files |
+| Order | Focus                                           | Test File                               |
+| ----- | ----------------------------------------------- | --------------------------------------- |
+| 1     | #105: Child management (soft delete edge cases) | `__tests__/children.test.ts` (NEW)      |
+| 2     | #98: Notification delivery, preference respect  | `__tests__/notifications.test.ts` (NEW) |
+| 3     | #101: CSV format, cents→dollars conversion      | `__tests__/export.test.ts` (NEW)        |
+| 4     | Edge case sweep: EC-040 through EC-049          | Various files                           |
 
 ## Intra-Wave Dependencies
 
@@ -55,6 +55,7 @@ API Eng A: #100 (prefs) ──→ API Eng B: #98 (notifications) ──→ API E
 ```
 
 **Sequencing:**
+
 1. API Eng A starts with #100 (notification preferences)
 2. API Eng B starts with #102 + #103 (parallel, no dependencies)
 3. After #100 done → API Eng B starts #98 (email notifications)
@@ -67,22 +68,25 @@ API Eng A: #100 (prefs) ──→ API Eng B: #98 (notifications) ──→ API E
 ### `index.ts` — New Route Registrations
 
 API Eng A adds:
+
 ```typescript
-import notificationPrefsRoutes from './routes/notification-prefs';
-import exportRoutes from './routes/export';
-app.route('/me', notificationPrefsRoutes);           // /me/notification-preferences
-app.route('/families', exportRoutes);                 // /families/:id/expenses/export
+import notificationPrefsRoutes from './routes/notification-prefs'
+import exportRoutes from './routes/export'
+app.route('/me', notificationPrefsRoutes) // /me/notification-preferences
+app.route('/families', exportRoutes) // /families/:id/expenses/export
 ```
 
 API Eng B adds:
+
 ```typescript
-import questioningRoutes from './routes/questioning';
-app.route('/families', questioningRoutes);            // /families/:id/questioning-dashboard
+import questioningRoutes from './routes/questioning'
+app.route('/families', questioningRoutes) // /families/:id/questioning-dashboard
 ```
 
 ### `types.ts` — New Type Definitions
 
 API Eng A appends:
+
 ```typescript
 export interface NotificationPreferences { ... }
 export interface UpdateNotificationPreferencesRequest { ... }
@@ -90,6 +94,7 @@ export interface CsvExportOptions { ... }
 ```
 
 API Eng B appends:
+
 ```typescript
 export interface QuestioningDashboard { ... }
 export interface NotificationEvent { ... }
@@ -97,11 +102,11 @@ export interface NotificationEvent { ... }
 
 ### Migrations
 
-| Number | File | Owner | Purpose |
-|--------|------|-------|---------|
-| 0009 | `0009_notification_preferences.sql` | API Eng A | notification_preferences table |
-| 0010 | `0010_expense_children.sql` | API Eng A | expense_children junction table |
-| 0011 | Reserved | Buffer | |
+| Number | File                                | Owner     | Purpose                         |
+| ------ | ----------------------------------- | --------- | ------------------------------- |
+| 0009   | `0009_notification_preferences.sql` | API Eng A | notification_preferences table  |
+| 0010   | `0010_expense_children.sql`         | API Eng A | expense_children junction table |
+| 0011   | Reserved                            | Buffer    |                                 |
 
 ## Parallel Execution Plan
 

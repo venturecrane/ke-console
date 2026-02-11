@@ -5,11 +5,13 @@
 ### 1.1 Onboarding & Family Setup
 
 #### US-001: Initial Account Creation
+
 **As a** new user
 **I want to** create an account with email or Google OAuth
 **So that** I can start tracking shared expenses with my co-parent
 
 **Acceptance Criteria:**
+
 - **Given** I am on the signup page
   **When** I provide a valid email and password or choose Google OAuth
   **Then** my account is created and I am redirected to family setup
@@ -23,11 +25,13 @@
 **Priority:** P0
 
 #### US-002: Family Creation
+
 **As a** new user without a family
 **I want to** create a family by entering my co-parent's email
 **So that** we can share a ledger
 
 **Acceptance Criteria:**
+
 - **Given** I have completed account creation
   **When** I enter my co-parent's email address
   **Then** a family is created with me as parent_a and a pending invite is sent
@@ -44,11 +48,13 @@
 **Priority:** P0
 
 #### US-003: Family Invitation Acceptance
+
 **As a** co-parent who received an invitation
 **I want to** accept the invitation to join a shared family
 **So that** I can see and manage shared expenses
 
 **Acceptance Criteria:**
+
 - **Given** I receive a family invitation email
   **When** I click the invitation link
   **Then** I am directed to sign up or log in
@@ -65,11 +71,13 @@
 **Priority:** P0
 
 #### US-004: Configure Split Ratio
+
 **As a** co-parent
 **I want to** set the expense split ratio for our family
 **So that** expenses are automatically divided according to our agreement
 
 **Acceptance Criteria:**
+
 - **Given** I am on the family settings page
   **When** I adjust the parent_a_ratio slider
   **Then** I see real-time updates showing both parents' percentages (sum = 100%)
@@ -88,11 +96,13 @@
 ### 1.2 Expense Management
 
 #### US-005: Create One-Time Expense
+
 **As a** co-parent
 **I want to** record a child-related expense
 **So that** it appears in our shared ledger and affects the balance
 
 **Acceptance Criteria:**
+
 - **Given** I am on the expense creation form
   **When** I enter description (1-200 chars), amount (positive dollars), category, and paid_by
   **Then** the expense is created in "posted" status and affects the balance immediately
@@ -118,11 +128,13 @@
 **Priority:** P0
 
 #### US-006: Add Optional Expense Details
+
 **As a** co-parent creating an expense
 **I want to** add optional details like memo, children, and receipt link
 **So that** the expense has complete context
 
 **Acceptance Criteria:**
+
 - **Given** I am creating an expense
   **When** I add a memo (max 500 characters)
   **Then** it is saved and displayed with the expense
@@ -142,11 +154,13 @@
 **Priority:** P1
 
 #### US-007: Edit Own Posted Expense
+
 **As a** co-parent who created an expense
 **I want to** edit the expense details
 **So that** I can correct mistakes before my co-parent questions it
 
 **Acceptance Criteria:**
+
 - **Given** I created an expense in "posted" status
   **When** I click edit
   **Then** I can modify description, amount, category, date, paid_by, memo, children, and link
@@ -163,11 +177,13 @@
 **Priority:** P0
 
 #### US-008: Delete Own Posted Expense
+
 **As a** co-parent who created an expense
 **I want to** delete an expense I mistakenly created
 **So that** it no longer affects the ledger or balance
 
 **Acceptance Criteria:**
+
 - **Given** I created an expense in "posted" status
   **When** I click delete and confirm
   **Then** the expense is permanently deleted and removed from balance calculation
@@ -181,11 +197,13 @@
 **Priority:** P1
 
 #### US-009: View Other Parent's Expense (Cannot Edit)
+
 **As a** co-parent viewing an expense I did not create
 **I want to** see all expense details but not edit them
 **So that** I understand what was spent without ability to modify
 
 **Acceptance Criteria:**
+
 - **Given** I view an expense created by my co-parent
   **When** I open the expense detail
   **Then** I see all fields in read-only mode
@@ -199,11 +217,13 @@
 **Priority:** P0
 
 #### US-010: Bulk View Expenses in Ledger
+
 **As a** co-parent
 **I want to** see all expenses in a chronological list
 **So that** I can review our spending history
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** the page loads
   **Then** I see expenses sorted by expense_date descending (newest first)
@@ -220,11 +240,13 @@
 **Priority:** P0
 
 #### US-011: Filter and Search Expenses
+
 **As a** co-parent
 **I want to** filter expenses by category, status, or date range
 **So that** I can quickly find specific expenses
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** I select a category filter (school, medical, activities, childcare, other)
   **Then** I see only expenses in that category
@@ -243,11 +265,13 @@
 ### 1.3 Dispute Workflow
 
 #### US-012: Question Posted Expense
+
 **As a** co-parent who did not create an expense
 **I want to** question a posted expense
 **So that** I can raise concerns about legitimacy or amount
 
 **Acceptance Criteria:**
+
 - **Given** I view a posted expense created by my co-parent
   **When** I click "Question" and provide a reason + optional note
   **Then** the expense status changes to "questioned" and is immediately excluded from balance
@@ -270,11 +294,13 @@
 **Priority:** P0
 
 #### US-013: View Questioned Expense Details
+
 **As a** co-parent
 **I want to** see why an expense was questioned
 **So that** I understand the concern and can respond appropriately
 
 **Acceptance Criteria:**
+
 - **Given** an expense is in "questioned" status
   **When** I view the expense detail
   **Then** I see the question reason, question note, questioned_by, and questioned_at timestamp
@@ -288,11 +314,13 @@
 **Priority:** P0
 
 #### US-014: Resolve - Keep Original
+
 **As a** expense creator responding to a question
 **I want to** keep the expense as-is
 **So that** I can assert the expense is correct and the questioner must confirm
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Keep Original" resolution
   **Then** the status changes to "pending_satisfaction" and the expense remains excluded from balance
@@ -309,11 +337,13 @@
 **Priority:** P0
 
 #### US-015: Resolve - Edit Amount
+
 **As a** expense creator responding to a question
 **I want to** edit the expense amount
 **So that** I can correct the amount and the questioner must confirm
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Edit Amount" and enter a new positive amount
   **Then** the status changes to "pending_satisfaction" with the updated amount
@@ -330,11 +360,13 @@
 **Priority:** P0
 
 #### US-016: Resolve - Mark as Personal
+
 **As a** expense creator responding to a question
 **I want to** mark the expense as personal
 **So that** it is excluded from shared expenses permanently
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Mark as Personal"
   **Then** the status changes to "resolved_personal" immediately (no satisfaction needed)
@@ -351,11 +383,13 @@
 **Priority:** P0
 
 #### US-017: Resolve - Delete Expense
+
 **As a** expense creator responding to a question
 **I want to** delete the questioned expense
 **So that** I can remove an invalid expense
 
 **Acceptance Criteria:**
+
 - **Given** my expense is questioned
   **When** I choose "Delete" and confirm
   **Then** the status changes to "resolved_deleted" immediately (no satisfaction needed)
@@ -372,11 +406,13 @@
 **Priority:** P0
 
 #### US-018: Satisfy Resolution (Keep or Edit)
+
 **As a** questioner responding to a pending_satisfaction resolution
 **I want to** confirm that the resolution is acceptable
 **So that** the expense is included in the balance again
 
 **Acceptance Criteria:**
+
 - **Given** an expense I questioned is in "pending_satisfaction" status
   **When** I click "Accept Resolution"
   **Then** the status changes to "resolved" and the expense is included in balance calculation
@@ -393,11 +429,13 @@
 **Priority:** P0
 
 #### US-019: Seven-Day Auto-Resolution Timeout
+
 **As a** expense creator waiting for satisfaction
 **I want to** have the expense automatically resolve after 7 days if the questioner doesn't respond
 **So that** the expense eventually counts toward the balance
 
 **Acceptance Criteria:**
+
 - **Given** an expense has been in "pending_satisfaction" for 7+ days
   **When** anyone views the expense or the system performs a check
   **Then** the status automatically changes to "resolved_creator_decided"
@@ -414,11 +452,13 @@
 **Priority:** P0
 
 #### US-020: Thirty-Day Closure for Unresolved Questions
+
 **As a** co-parent
 **I want to** have questioned expenses automatically close after 30 days if unresolved
 **So that** old disputes don't remain in limbo indefinitely
 
 **Acceptance Criteria:**
+
 - **Given** an expense has been in "questioned" status for 30+ days
   **When** the system performs a check
   **Then** the status changes to "closed_unresolved"
@@ -435,11 +475,13 @@
 **Priority:** P1
 
 #### US-021: Dispute Dashboard View
+
 **As a** co-parent
 **I want to** see all expenses requiring my action
 **So that** I can quickly respond to questions and pending resolutions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the dispute dashboard
   **When** the page loads
   **Then** I see three sections: "Awaiting Your Resolution", "Awaiting Satisfaction", "Recently Resolved"
@@ -458,11 +500,13 @@
 ### 1.4 Fixed Monthly Expenses (Recurring)
 
 #### US-022: Create Fixed Monthly Expense Template
+
 **As a** co-parent
 **I want to** create a template for a recurring monthly expense
 **So that** it automatically appears in the ledger each month
 
 **Acceptance Criteria:**
+
 - **Given** I am on the recurring expenses page
   **When** I create a template with description, amount, category, paid_by, and frequency
   **Then** the template is saved and will generate expenses on schedule
@@ -482,11 +526,13 @@
 **Priority:** P0
 
 #### US-023: Edit Fixed Monthly Expense Template
+
 **As a** co-parent
 **I want to** edit a recurring expense template
 **So that** future generated expenses reflect the updated details
 
 **Acceptance Criteria:**
+
 - **Given** I am viewing a fixed expense template
   **When** I edit amount, description, or category
   **Then** the changes apply to future generated expenses only (past expenses unchanged)
@@ -500,11 +546,13 @@
 **Priority:** P1
 
 #### US-024: Delete Fixed Monthly Expense Template
+
 **As a** co-parent
 **I want to** delete a recurring expense template
 **So that** it stops generating future expenses
 
 **Acceptance Criteria:**
+
 - **Given** I view a fixed expense template
   **When** I delete it and confirm
   **Then** no future expenses are generated from this template
@@ -518,11 +566,13 @@
 **Priority:** P1
 
 #### US-025: Automatic Monthly Expense Generation
+
 **As a** co-parent
 **I want to** have fixed expenses automatically added to the ledger on the 1st of each month
 **So that** I don't have to manually enter recurring expenses
 
 **Acceptance Criteria:**
+
 - **Given** a fixed monthly expense template exists
   **When** the 1st of the month occurs
   **Then** a new expense is created in "posted" status with expense_date = 1st of current month
@@ -539,11 +589,13 @@
 **Priority:** P0
 
 #### US-026: Edit Generated Fixed Expense
+
 **As a** co-parent
 **I want to** edit an automatically generated fixed expense
 **So that** I can adjust it for one-time variations (e.g., price increase)
 
 **Acceptance Criteria:**
+
 - **Given** a fixed expense has been auto-generated
   **When** I edit it
   **Then** only this instance is modified (template remains unchanged)
@@ -559,11 +611,13 @@
 ### 1.5 Balance & Payments
 
 #### US-027: View Current Net Balance
+
 **As a** co-parent
 **I want to** see the current net balance prominently displayed
 **So that** I know who owes whom and how much
 
 **Acceptance Criteria:**
+
 - **Given** I am on any page with balance visibility
   **When** the balance loads
   **Then** I see a clear display: "Parent A owes Parent B $X.XX" or "Parent B owes Parent A $X.XX"
@@ -583,17 +637,19 @@
 **Priority:** P0
 
 #### US-028: Balance Calculation Logic
+
 **As a** system
 **I want to** calculate balance using integer math and specific status rules
 **So that** the balance is accurate and avoids floating-point errors
 
 **Acceptance Criteria:**
+
 - **Given** an expense amount in dollars
   **When** stored in database
   **Then** it is converted to cents (integer)
 - **Given** parent_a_ratio = 0.60 and expense = 10000 cents
   **When** shares are calculated
-  **Then** a_share = floor(10000 * 0.60) = 6000, b_share = 10000 - 6000 = 4000
+  **Then** a_share = floor(10000 \* 0.60) = 6000, b_share = 10000 - 6000 = 4000
 - **Given** expenses in statuses: posted, resolved, resolved_creator_decided
   **When** balance is calculated
   **Then** these expenses are included
@@ -610,11 +666,13 @@
 **Priority:** P0
 
 #### US-029: Record External Payment
+
 **As a** co-parent who paid my co-parent outside the app
 **I want to** record the payment (Venmo, Zelle, cash, check)
 **So that** the balance is reduced and the payment is documented
 
 **Acceptance Criteria:**
+
 - **Given** I am on the payment recording form
   **When** I enter paid_by (me), amount (positive), payment_date, method, and optional notes
   **Then** the payment is recorded and reduces the net balance
@@ -634,11 +692,13 @@
 **Priority:** P0
 
 #### US-030: View Payment History
+
 **As a** co-parent
 **I want to** see all recorded payments
 **So that** I can review payment history and verify transactions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the payments page
   **When** the page loads
   **Then** I see all payments sorted by payment_date descending
@@ -655,11 +715,13 @@
 **Priority:** P1
 
 #### US-031: Balance Audit Trail
+
 **As a** co-parent
 **I want to** see a detailed breakdown of how the balance was calculated
 **So that** I can verify accuracy and trace individual contributions
 
 **Acceptance Criteria:**
+
 - **Given** I am on the balance details page
   **When** I view the breakdown
   **Then** I see: starting balance, each included expense with its share split, each payment, and ending balance
@@ -675,11 +737,13 @@
 ### 1.6 Activity Feed & Audit Trail
 
 #### US-032: View Activity Feed
+
 **As a** co-parent
 **I want to** see a chronological feed of all family activity
 **So that** I can track changes and stay informed
 
 **Acceptance Criteria:**
+
 - **Given** I am on the activity feed page
   **When** the page loads
   **Then** I see all activity events sorted by created_at descending
@@ -696,11 +760,13 @@
 **Priority:** P1
 
 #### US-033: Activity Event Types
+
 **As a** system
 **I want to** log specific event types for all mutations
 **So that** the audit trail is comprehensive and queryable
 
 **Acceptance Criteria:**
+
 - **Given** an expense is created
   **When** the action completes
   **Then** event_type = "expense_created" is logged
@@ -738,11 +804,13 @@
 **Priority:** P0
 
 #### US-034: View Activity Event Details
+
 **As a** co-parent
 **I want to** click on an activity event to see full details
 **So that** I can understand exactly what changed
 
 **Acceptance Criteria:**
+
 - **Given** I click on an activity event
   **When** the detail view opens
   **Then** I see: full event metadata, before/after snapshots (if applicable), and a link to the target entity
@@ -758,11 +826,13 @@
 ### 1.7 Children Management
 
 #### US-035: Add Child to Family
+
 **As a** co-parent
 **I want to** add a child to our family profile
 **So that** I can associate expenses with specific children
 
 **Acceptance Criteria:**
+
 - **Given** I am on the children management page
   **When** I enter a child's name (1-100 characters)
   **Then** the child is added to the family
@@ -779,11 +849,13 @@
 **Priority:** P1
 
 #### US-036: Edit Child Details
+
 **As a** co-parent
 **I want to** edit a child's name
 **So that** I can correct mistakes or update information
 
 **Acceptance Criteria:**
+
 - **Given** I view a child's profile
   **When** I edit the name and save
   **Then** the child's name is updated
@@ -797,11 +869,13 @@
 **Priority:** P2
 
 #### US-037: Remove Child from Family
+
 **As a** co-parent
 **I want to** remove a child from the family
 **So that** they no longer appear in expense associations
 
 **Acceptance Criteria:**
+
 - **Given** I view a child's profile
   **When** I delete and confirm
   **Then** the child is removed (soft delete)
@@ -815,11 +889,13 @@
 **Priority:** P2
 
 #### US-038: Filter Expenses by Child
+
 **As a** co-parent
 **I want to** filter the ledger to show expenses for a specific child
 **So that** I can see per-child spending
 
 **Acceptance Criteria:**
+
 - **Given** I am on the ledger page
   **When** I select a child filter
   **Then** I see only expenses associated with that child
@@ -832,11 +908,13 @@
 ### 1.8 Settings & Configuration
 
 #### US-039: Update User Profile
+
 **As a** co-parent
 **I want to** update my name and email
 **So that** my profile information is current
 
 **Acceptance Criteria:**
+
 - **Given** I am on the profile settings page
   **When** I update my name or email
   **Then** the changes are saved and reflected across the app
@@ -850,11 +928,13 @@
 **Priority:** P2
 
 #### US-040: Update Notification Preferences
+
 **As a** co-parent
 **I want to** control which notifications I receive
 **So that** I only get alerts for events I care about
 
 **Acceptance Criteria:**
+
 - **Given** I am on notification settings
   **When** I toggle options for expense_created, expense_questioned, question_resolved, payment_recorded
   **Then** my preferences are saved
@@ -868,11 +948,13 @@
 **Priority:** P2
 
 #### US-041: Leave Family
+
 **As a** co-parent
 **I want to** leave the family
 **So that** I can disconnect from the shared ledger if needed
 
 **Acceptance Criteria:**
+
 - **Given** I am on family settings
   **When** I click "Leave Family" and confirm
   **Then** I am removed from the family and lose access to the ledger
@@ -888,11 +970,13 @@
 ### 1.9 Tier Management & Billing
 
 #### US-042: View Current Subscription Tier
+
 **As a** co-parent
 **I want to** see which tier I'm on and what features are available
 **So that** I understand my current plan
 
 **Acceptance Criteria:**
+
 - **Given** I am on the billing page
   **When** the page loads
   **Then** I see my current tier (Free or Pro), price, and feature comparison
@@ -906,11 +990,13 @@
 **Priority:** P1
 
 #### US-043: Upgrade to Pro Tier
+
 **As a** co-parent on Free tier
 **I want to** upgrade to Pro
 **So that** I can access unlimited history and fixed expenses
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier
   **When** I click "Upgrade to Pro" and complete payment
   **Then** my tier is upgraded and features are immediately available
@@ -924,11 +1010,13 @@
 **Priority:** P1
 
 #### US-044: Cancel Pro Subscription
+
 **As a** co-parent on Pro tier
 **I want to** cancel my subscription
 **So that** I can downgrade to Free tier at the end of the billing period
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I cancel my subscription
   **Then** Pro features remain active until the end of the current billing period
@@ -942,11 +1030,13 @@
 **Priority:** P2
 
 #### US-045: Tier Limit Enforcement - Fixed Expenses
+
 **As a** system
 **I want to** enforce the 2-fixed-expense limit on Free tier
 **So that** users must upgrade for unlimited templates
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier with 2 fixed expenses
   **When** I attempt to create a third
   **Then** I see a modal "Upgrade to Pro for unlimited fixed expenses" with CTA
@@ -957,11 +1047,13 @@
 **Priority:** P0
 
 #### US-046: Tier Limit Enforcement - History Access
+
 **As a** system
 **I want to** limit Free tier users to 3-month history
 **So that** users must upgrade for unlimited access
 
 **Acceptance Criteria:**
+
 - **Given** I am on Free tier
   **When** I view the ledger
   **Then** I only see expenses from the last 3 months
@@ -977,11 +1069,13 @@
 ### 1.10 Data Export
 
 #### US-047: Export Ledger to CSV (Pro Only)
+
 **As a** Pro tier co-parent
 **I want to** export the expense ledger to CSV
 **So that** I can analyze data in Excel or for tax purposes
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I click "Export to CSV"
   **Then** a CSV file downloads with all expenses (id, date, description, amount, category, paid_by, status, creator)
@@ -995,11 +1089,13 @@
 **Priority:** P2
 
 #### US-048: Export Payments to CSV (Pro Only)
+
 **As a** Pro tier co-parent
 **I want to** export the payment history to CSV
 **So that** I can keep external records
 
 **Acceptance Criteria:**
+
 - **Given** I am on Pro tier
   **When** I click "Export Payments to CSV"
   **Then** a CSV file downloads with all payments (id, date, paid_by, amount, method, notes)
@@ -1012,11 +1108,13 @@
 ### 1.11 Notifications
 
 #### US-049: Receive Email Notification - Expense Created
+
 **As a** co-parent
 **I want to** receive an email when my co-parent creates an expense
 **So that** I stay informed of new spending
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent creates an expense
   **When** the expense is saved
   **Then** I receive an email with expense details and a link to view
@@ -1027,11 +1125,13 @@
 **Priority:** P1
 
 #### US-050: Receive Email Notification - Expense Questioned
+
 **As a** expense creator
 **I want to** receive an email when my expense is questioned
 **So that** I can respond promptly
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent questions my expense
   **When** the question is submitted
   **Then** I receive an email with the question reason, note, and a link to resolve
@@ -1042,11 +1142,13 @@
 **Priority:** P1
 
 #### US-051: Receive Email Notification - Question Resolved
+
 **As a** questioner
 **I want to** receive an email when the creator resolves my question
 **So that** I can satisfy or review the resolution
 
 **Acceptance Criteria:**
+
 - **Given** the creator resolves my question
   **When** the resolution is submitted
   **Then** I receive an email with the resolution action and a link to satisfy (if needed)
@@ -1057,11 +1159,13 @@
 **Priority:** P1
 
 #### US-052: Receive Email Notification - Payment Recorded
+
 **As a** co-parent
 **I want to** receive an email when my co-parent records a payment
 **So that** I am aware of balance changes
 
 **Acceptance Criteria:**
+
 - **Given** my co-parent records a payment
   **When** the payment is saved
   **Then** I receive an email with payment details and updated balance
@@ -1072,11 +1176,13 @@
 **Priority:** P1
 
 #### US-053: Receive Email Notification - Fixed Expense Generated
+
 **As a** co-parent
 **I want to** receive an email when fixed expenses are auto-generated
 **So that** I know new recurring expenses have been added
 
 **Acceptance Criteria:**
+
 - **Given** the 1st of the month occurs and fixed expenses generate
   **When** generation completes
   **Then** both parents receive an email listing all generated expenses
@@ -1164,9 +1270,10 @@ When converting dollars to cents: `cents = round(dollars * 100)`. When convertin
 
 **BR-023: Share Calculation**
 Given an expense of `amount_cents` and `parent_a_ratio`:
+
 - `parent_a_share = floor(amount_cents * parent_a_ratio)`
 - `parent_b_share = amount_cents - parent_a_share`
-This ensures shares always sum exactly to amount_cents.
+  This ensures shares always sum exactly to amount_cents.
 
 **BR-024: Balance Calculation Inclusion**
 Only expenses with status "posted", "resolved", or "resolved_creator_decided" are included in balance calculation.
@@ -1175,6 +1282,7 @@ Only expenses with status "posted", "resolved", or "resolved_creator_decided" ar
 Expenses with status "questioned", "pending_satisfaction", "resolved_personal", "resolved_deleted", or "closed_unresolved" are excluded from balance calculation.
 
 **BR-026: Balance Direction**
+
 - Positive balance means Parent A owes Parent B.
 - Negative balance means Parent B owes Parent A.
 - Zero balance means all settled.
@@ -1354,60 +1462,69 @@ The expense lifecycle is governed by an 8-status state machine:
 ### 3.2 State Definitions
 
 **posted**
+
 - **Description:** Expense has been created and is visible to both parents. Included in balance.
 - **Guards:** None (initial state)
 - **Effects:** Balance recalculated to include this expense.
 
 **questioned**
+
 - **Description:** The other parent has raised a concern. Excluded from balance until resolved.
 - **Guards:** Must be in "posted" status; actor must be other parent.
 - **Effects:** Balance recalculated to exclude this expense; notification sent to creator.
 
 **pending_satisfaction**
+
 - **Description:** Creator has resolved with "keep" or "edit"; awaiting questioner confirmation. Still excluded from balance.
 - **Guards:** Must be in "questioned" status; actor must be creator; resolution_action = "keep" or "edit".
 - **Effects:** resolved_at timestamp set; notification sent to questioner.
 
 **resolved**
+
 - **Description:** Questioner has confirmed the resolution. Included in balance again.
 - **Guards:** Must be in "pending_satisfaction" status; actor must be questioner.
 - **Effects:** satisfied_at timestamp set; balance recalculated to include expense; notification sent to creator.
 
 **resolved_creator_decided**
+
 - **Description:** 7-day timeout expired while in "pending_satisfaction". Creator's resolution stands. Included in balance.
 - **Guards:** Must be in "pending_satisfaction" status; more than 7 days since resolved_at; system-triggered.
 - **Effects:** Balance recalculated to include expense; activity event logged as "system_timeout".
 
 **resolved_personal**
+
 - **Description:** Creator acknowledged expense as personal (not child-related). Permanently excluded from balance.
 - **Guards:** Must be in "questioned" status; actor must be creator; resolution_action = "personal".
 - **Effects:** resolved_at timestamp set; permanently excluded from balance; no satisfaction required.
 
 **resolved_deleted**
+
 - **Description:** Creator acknowledged expense as invalid and deleted it. Permanently excluded from balance.
 - **Guards:** Must be in "questioned" status; actor must be creator; resolution_action = "delete".
 - **Effects:** resolved_at timestamp set; permanently excluded from balance; soft delete (still visible in history); no satisfaction required.
 
 **closed_unresolved**
+
 - **Description:** 30-day timeout expired while in "questioned" status. Creator never resolved. Permanently excluded from balance.
 - **Guards:** Must be in "questioned" status; more than 30 days since questioned_at; system-triggered.
 - **Effects:** Permanently excluded from balance; activity event logged as "system_closure".
 
 ### 3.3 Transition Table
 
-| From Status            | Event                   | To Status              | Guard Conditions                                      | Effects                                              |
-|------------------------|-------------------------|------------------------|-------------------------------------------------------|------------------------------------------------------|
-| posted                 | question                | questioned             | Actor = other parent                                  | Exclude from balance; notify creator                 |
-| questioned             | resolve (keep/edit)     | pending_satisfaction   | Actor = creator                                       | Set resolved_at; notify questioner                   |
-| questioned             | resolve (personal)      | resolved_personal      | Actor = creator; action = personal                    | Set resolved_at; permanent exclusion                 |
-| questioned             | resolve (delete)        | resolved_deleted       | Actor = creator; action = delete                      | Set resolved_at; soft delete; permanent exclusion    |
-| questioned             | 30-day timeout          | closed_unresolved      | questioned_at > 30 days ago                           | Permanent exclusion; system event                    |
-| pending_satisfaction   | satisfy                 | resolved               | Actor = questioner                                    | Set satisfied_at; include in balance; notify creator |
-| pending_satisfaction   | 7-day timeout           | resolved_creator_decided | resolved_at > 7 days ago                            | Include in balance; system event                     |
+| From Status          | Event               | To Status                | Guard Conditions                   | Effects                                              |
+| -------------------- | ------------------- | ------------------------ | ---------------------------------- | ---------------------------------------------------- |
+| posted               | question            | questioned               | Actor = other parent               | Exclude from balance; notify creator                 |
+| questioned           | resolve (keep/edit) | pending_satisfaction     | Actor = creator                    | Set resolved_at; notify questioner                   |
+| questioned           | resolve (personal)  | resolved_personal        | Actor = creator; action = personal | Set resolved_at; permanent exclusion                 |
+| questioned           | resolve (delete)    | resolved_deleted         | Actor = creator; action = delete   | Set resolved_at; soft delete; permanent exclusion    |
+| questioned           | 30-day timeout      | closed_unresolved        | questioned_at > 30 days ago        | Permanent exclusion; system event                    |
+| pending_satisfaction | satisfy             | resolved                 | Actor = questioner                 | Set satisfied_at; include in balance; notify creator |
+| pending_satisfaction | 7-day timeout       | resolved_creator_decided | resolved_at > 7 days ago           | Include in balance; system event                     |
 
 ### 3.4 Terminal States
 
 The following states are terminal (no further transitions possible):
+
 - **resolved**
 - **resolved_creator_decided**
 - **resolved_personal**
@@ -1444,7 +1561,7 @@ Once an expense reaches a terminal state, its status cannot change.
 
 **EC-006: Odd-Cent Split**
 **Scenario:** parent_a_ratio = 0.5, expense amount = $10.01 (1001 cents).
-**Expected Behavior:** parent_a_share = floor(1001 * 0.5) = 500 cents, parent_b_share = 1001 - 500 = 501 cents. Extra cent goes to parent B.
+**Expected Behavior:** parent_a_share = floor(1001 \* 0.5) = 500 cents, parent_b_share = 1001 - 500 = 501 cents. Extra cent goes to parent B.
 
 **EC-007: Create Expense with Future Date**
 **Scenario:** User sets expense_date to a future date.
@@ -1489,8 +1606,8 @@ Once an expense reaches a terminal state, its status cannot change.
 **Expected Behavior:** Validation error: "Amount must be positive."
 
 **EC-017: Resolution Note Without Selecting "Other"**
-**Scenario:** Questioner provides a question_note but selects reason "wrong_amount".
-**Expected Behavior:** Note is saved regardless of reason. "Other" only *requires* a note, but notes are optional for other reasons.
+**Scenario:** Questioner provides a question*note but selects reason "wrong_amount".
+**Expected Behavior:** Note is saved regardless of reason. "Other" only \_requires* a note, but notes are optional for other reasons.
 
 **EC-018: Rapid Status Transitions**
 **Scenario:** Expense is questioned, resolved, and satisfied within seconds.

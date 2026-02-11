@@ -1,4 +1,5 @@
 # Target Customer Feedback: Kid Expenses
+
 **Profile:** Sarah, 38, divorced 2 years, two kids (8 and 11), 50/50 custody, currently using Google Sheets
 
 ---
@@ -23,12 +24,14 @@ The other thing: if it took me less than 5 minutes to set up and see real value.
 ## 2. Pain Point Validation
 
 **Problems this solves (for me):**
+
 1. ✅ **The "who owes who" calculation** — This is 80% of our arguments. The rolling balance would eliminate this entirely.
 2. ✅ **Payment disconnect** — Linking Venmo payments to specific expenses would be amazing. Right now it's total chaos.
 3. ✅ **Audit trail** — When my ex claims he "already paid for that," having a timestamped log would shut that down immediately.
 4. ✅ **Recurring expenses** — We have like 8 things that repeat every month (lunch accounts, music lessons, etc.). Templates would save me from logging the same thing over and over.
 
 **Problems this misses:**
+
 1. ❌ **Trust issues** — The real problem isn't tracking expenses, it's that I don't trust my ex to log things honestly. Can he edit expenses after I've approved them? Can he delete things retroactively? The app doesn't address the fundamental trust problem.
 2. ❌ **Reimbursement timing** — We're supposed to settle up monthly, but he's always late. Does this app have any enforcement mechanism? Reminders? Anything?
 3. ❌ **The "it's not in the budget" fight** — Sometimes he logs an expense I think is ridiculous (like $300 for a trampoline). The questioning workflow might help, but it doesn't solve the core issue: we never agreed on what's shareable vs personal in the first place.
@@ -37,18 +40,15 @@ The other thing: if it took me less than 5 minutes to set up and see real value.
 ## 3. Feature Priority (from my perspective)
 
 **Features I'd use constantly:**
+
 1. **Rolling balance** — Every single day. This is the killer feature.
 2. **Payment recording** — Every time we settle up (monthly).
 3. **Adding expenses** — Multiple times per week.
 4. **Recurring expense templates** — Would set up once and use forever.
 
-**Features I'd use occasionally:**
-5. **Activity audit trail** — Only when we're arguing about something.
-6. **Questioning workflow** — Maybe once a month when he logs something suspicious.
-7. **Categories** — I'd probably use them but wouldn't change my behavior if they disappeared.
+**Features I'd use occasionally:** 5. **Activity audit trail** — Only when we're arguing about something. 6. **Questioning workflow** — Maybe once a month when he logs something suspicious. 7. **Categories** — I'd probably use them but wouldn't change my behavior if they disappeared.
 
-**Features I'd probably never touch:**
-8. **CSV export** — I don't even know what I'd do with this. Who exports CSVs? Accountants? I'm not printing expense reports, I'm just trying to survive co-parenting.
+**Features I'd probably never touch:** 8. **CSV export** — I don't even know what I'd do with this. Who exports CSVs? Accountants? I'm not printing expense reports, I'm just trying to survive co-parenting.
 
 ## 4. Willingness to Pay
 
@@ -60,6 +60,7 @@ I'd start on the Free tier and see if my ex actually uses it. If he logs in twic
 If we both actually used it for 2-3 months and it reduced our fights, then yes, I'd pay $5/mo. That's less than a single therapy session about money arguments.
 
 **What would make me upgrade to Pro:**
+
 - **Unlimited history** — 3 months is barely enough to see patterns. What if we're arguing about whether he reimbursed me for summer camp last July? I'd need to see back further.
 - **Unlimited recurring expenses** — 2 recurring expenses is a joke. We have: school lunch accounts (2 kids), music lessons (2 kids), soccer league fees, gymnastics, after-school care, health insurance premiums. That's 8 right there, and I'm not even counting irregular stuff like annual sports physicals.
 
@@ -67,6 +68,7 @@ The CSV export thing doesn't move the needle for me at all. I don't care about t
 
 **Is the price right?**
 $5/mo feels fair IF:
+
 - My ex also pays, so it's $2.50/month each
 - It demonstrably reduces conflict (hard to measure, but I'd know)
 - It works reliably and doesn't require constant maintenance
@@ -113,6 +115,7 @@ Him: "Sounds like you're trying to control how I spend money on the kids."
 - It might feel like "over-engineering" a simple problem to people who don't experience the conflict
 
 **What MIGHT work:**
+
 - If a mediator or therapist suggested it (neutral third party)
 - If it had a "try it solo" mode where I could import our Google Sheet and show him a working balance to prove value
 - If there was a "read-only guest access" where he could see the balance without committing to logging expenses yet
@@ -193,6 +196,7 @@ Also, the 30-day nuclear option to close unresolved items feels extreme. Like, w
 If you use red for "questioned" or "disputed," that's going to trigger people. Red = bad = conflict. Maybe use neutral colors (blue, gray, yellow) for intermediate states and green for "resolved."
 
 **Terminology check:**
+
 - "Balance" → neutral, good
 - "You owe" / "They owe" → factual, good
 - "Questioned" → softer than disputed, good

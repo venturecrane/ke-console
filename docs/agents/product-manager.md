@@ -42,40 +42,45 @@ For each issue reviewed:
 ## Issue #{number}: {title}
 
 ### Acceptance Criteria
+
 - [x] AC-1: {description} — PASS
 - [ ] AC-2: {description} — FAIL: {reason}
 
 ### Business Rules Validated
+
 - BR-xxx: {status}
 
 ### Edge Cases Checked
+
 - EC-xxx: {status}
 
 ### Recommendation: APPROVE / REQUEST CHANGES
+
 {details if requesting changes}
 ```
 
 ## Key Business Rules to Always Check
 
-| Rule | Description |
-|------|-------------|
-| BR-001 | Only 2 parents per family |
-| BR-006 | Only questioner can satisfy |
-| BR-007 | Creator cannot question own expense |
-| BR-010 | Questioned expenses excluded from balance |
-| BR-021 | All money as integer cents |
-| BR-037 | Free tier: 2 fixed expense templates |
+| Rule   | Description                                                   |
+| ------ | ------------------------------------------------------------- |
+| BR-001 | Only 2 parents per family                                     |
+| BR-006 | Only questioner can satisfy                                   |
+| BR-007 | Creator cannot question own expense                           |
+| BR-010 | Questioned expenses excluded from balance                     |
+| BR-021 | All money as integer cents                                    |
+| BR-037 | Free tier: 2 fixed expense templates                          |
 | BR-040 | Recurring generation idempotent by (template_id, month, year) |
-| BR-043 | Free tier: 3-month history window |
-| BR-047 | Upgrade immediate, downgrade end-of-period |
-| BR-049 | Activity events for all mutations |
-| BR-054 | Check notification preferences before sending |
-| BR-055 | Never notify self for own actions |
-| BR-056 | Email is fire-and-forget, never blocks mutations |
+| BR-043 | Free tier: 3-month history window                             |
+| BR-047 | Upgrade immediate, downgrade end-of-period                    |
+| BR-049 | Activity events for all mutations                             |
+| BR-054 | Check notification preferences before sending                 |
+| BR-055 | Never notify self for own actions                             |
+| BR-056 | Email is fire-and-forget, never blocks mutations              |
 
 ## Expense Status State Machine
 
 Valid transitions:
+
 ```
 posted → questioned (by co-parent)
 posted → [edit/delete by creator] (remains posted or removed)
@@ -88,6 +93,7 @@ pending_satisfaction → resolved_creator_decided (7-day timeout)
 ```
 
 Terminal states (no further transitions):
+
 - resolved
 - resolved_creator_decided
 - resolved_personal

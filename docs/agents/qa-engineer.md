@@ -15,65 +15,65 @@ edge case validation, and integration testing.
 
 ### Wave 1 Tests (P0 — write these first)
 
-| Issue | Test Focus | File |
-|-------|-----------|------|
-| #88 | 7-day timeout logic (mock dates, verify state transition) | `__tests__/timeout.test.ts` (NEW) |
-| #93 | Tier limit enforcement (free=2 templates, 3-month history) | `__tests__/tier-limits.test.ts` (NEW) |
-| #96 | Idempotent recurring generation (run twice, no duplicates) | `__tests__/recurring.test.ts` (NEW) |
-| #87 | Satisfy authorization (only questioner can satisfy) | `__tests__/routes.test.ts` (extend) |
+| Issue | Test Focus                                                 | File                                  |
+| ----- | ---------------------------------------------------------- | ------------------------------------- |
+| #88   | 7-day timeout logic (mock dates, verify state transition)  | `__tests__/timeout.test.ts` (NEW)     |
+| #93   | Tier limit enforcement (free=2 templates, 3-month history) | `__tests__/tier-limits.test.ts` (NEW) |
+| #96   | Idempotent recurring generation (run twice, no duplicates) | `__tests__/recurring.test.ts` (NEW)   |
+| #87   | Satisfy authorization (only questioner can satisfy)        | `__tests__/routes.test.ts` (extend)   |
 
 ### Wave 2 Tests
 
-| Issue | Test Focus | File |
-|-------|-----------|------|
-| #89 | 30-day closure (mock dates, verify closed_unresolved state) | `__tests__/timeout.test.ts` (extend) |
-| #95 | Template independence (edit template, verify past expenses unchanged) | `__tests__/recurring.test.ts` (extend) |
-| — | Full dispute lifecycle: posted → questioned → resolved → satisfied | `__tests__/state-machine.test.ts` (NEW) |
-| — | Full dispute lifecycle: posted → questioned → pending_satisfaction → 7-day timeout | `__tests__/state-machine.test.ts` |
+| Issue | Test Focus                                                                         | File                                    |
+| ----- | ---------------------------------------------------------------------------------- | --------------------------------------- |
+| #89   | 30-day closure (mock dates, verify closed_unresolved state)                        | `__tests__/timeout.test.ts` (extend)    |
+| #95   | Template independence (edit template, verify past expenses unchanged)              | `__tests__/recurring.test.ts` (extend)  |
+| —     | Full dispute lifecycle: posted → questioned → resolved → satisfied                 | `__tests__/state-machine.test.ts` (NEW) |
+| —     | Full dispute lifecycle: posted → questioned → pending_satisfaction → 7-day timeout | `__tests__/state-machine.test.ts`       |
 
 ### Wave 3 Tests
 
-| Issue | Test Focus | File |
-|-------|-----------|------|
-| #98 | Notification preference respect (disabled = no email) | `__tests__/notifications.test.ts` (NEW) |
-| #101 | CSV export format (cents→dollars, 2 decimal places) | `__tests__/export.test.ts` (NEW) |
-| #105 | Child soft delete (expenses retain archived association) | `__tests__/children.test.ts` (NEW) |
+| Issue | Test Focus                                               | File                                    |
+| ----- | -------------------------------------------------------- | --------------------------------------- |
+| #98   | Notification preference respect (disabled = no email)    | `__tests__/notifications.test.ts` (NEW) |
+| #101  | CSV export format (cents→dollars, 2 decimal places)      | `__tests__/export.test.ts` (NEW)        |
+| #105  | Child soft delete (expenses retain archived association) | `__tests__/children.test.ts` (NEW)      |
 
 ### Wave 4 Tests
 
-| Focus | File |
-|-------|------|
-| Full regression sweep | All test files |
+| Focus                            | File             |
+| -------------------------------- | ---------------- |
+| Full regression sweep            | All test files   |
 | Phase 2 exit criteria validation | Manual checklist |
 
 ## Test File Locations
 
-| File | Status | Purpose |
-|------|--------|---------|
-| `__tests__/calculations.test.ts` | Existing (420 lines) | Money math, shares, balance |
-| `__tests__/routes.test.ts` | Existing (124 lines) | Route wiring, auth middleware |
-| `__tests__/timeout.test.ts` | NEW | 7-day + 30-day timeout logic |
-| `__tests__/tier-limits.test.ts` | NEW | Free/Pro tier enforcement |
-| `__tests__/recurring.test.ts` | NEW | Cron generation, idempotency |
-| `__tests__/state-machine.test.ts` | NEW | All status transitions |
-| `__tests__/notifications.test.ts` | NEW | Email dispatch, preferences |
-| `__tests__/export.test.ts` | NEW | CSV format validation |
-| `__tests__/children.test.ts` | NEW | Child management, soft delete |
+| File                              | Status               | Purpose                       |
+| --------------------------------- | -------------------- | ----------------------------- |
+| `__tests__/calculations.test.ts`  | Existing (420 lines) | Money math, shares, balance   |
+| `__tests__/routes.test.ts`        | Existing (124 lines) | Route wiring, auth middleware |
+| `__tests__/timeout.test.ts`       | NEW                  | 7-day + 30-day timeout logic  |
+| `__tests__/tier-limits.test.ts`   | NEW                  | Free/Pro tier enforcement     |
+| `__tests__/recurring.test.ts`     | NEW                  | Cron generation, idempotency  |
+| `__tests__/state-machine.test.ts` | NEW                  | All status transitions        |
+| `__tests__/notifications.test.ts` | NEW                  | Email dispatch, preferences   |
+| `__tests__/export.test.ts`        | NEW                  | CSV format validation         |
+| `__tests__/children.test.ts`      | NEW                  | Child management, soft delete |
 
 ## Edge Cases to Verify (PRD Appendix E)
 
 Priority edge cases that MUST have test coverage:
 
-| ID | Scenario | Test File |
-|----|----------|-----------|
-| EC-002 | Edit while being questioned (race condition) | state-machine.test.ts |
-| EC-006 | Odd-cent split ($10.01 at 50/50 = 500 + 501 cents) | calculations.test.ts |
-| EC-008 | Free tier past-date expense (created but hidden in 3mo window) | tier-limits.test.ts |
-| EC-013 | Resolve after 30-day closure (must fail) | state-machine.test.ts |
-| EC-014 | Satisfy after 7-day timeout (must fail) | timeout.test.ts |
-| EC-021 | Payment larger than balance (balance flips direction) | calculations.test.ts |
-| EC-028 | Double generation in same month (idempotent skip) | recurring.test.ts |
-| EC-033 | Pro downgrade with 10 templates (existing continue generating) | tier-limits.test.ts |
+| ID     | Scenario                                                       | Test File             |
+| ------ | -------------------------------------------------------------- | --------------------- |
+| EC-002 | Edit while being questioned (race condition)                   | state-machine.test.ts |
+| EC-006 | Odd-cent split ($10.01 at 50/50 = 500 + 501 cents)             | calculations.test.ts  |
+| EC-008 | Free tier past-date expense (created but hidden in 3mo window) | tier-limits.test.ts   |
+| EC-013 | Resolve after 30-day closure (must fail)                       | state-machine.test.ts |
+| EC-014 | Satisfy after 7-day timeout (must fail)                        | timeout.test.ts       |
+| EC-021 | Payment larger than balance (balance flips direction)          | calculations.test.ts  |
+| EC-028 | Double generation in same month (idempotent skip)              | recurring.test.ts     |
+| EC-033 | Pro downgrade with 10 templates (existing continue generating) | tier-limits.test.ts   |
 
 ## Testing Rules
 
@@ -89,7 +89,7 @@ Priority edge cases that MUST have test coverage:
 ### Mocking D1 Database
 
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest'
 
 // Mock D1 for unit tests
 function createMockDB() {
@@ -99,28 +99,28 @@ function createMockDB() {
     first: vi.fn(),
     all: vi.fn(),
     run: vi.fn(),
-  };
+  }
 }
 ```
 
 ### Mocking Dates for Timeout Tests
 
 ```typescript
-import { vi, beforeEach, afterEach } from 'vitest';
+import { vi, beforeEach, afterEach } from 'vitest'
 
 beforeEach(() => {
-  vi.useFakeTimers();
-});
+  vi.useFakeTimers()
+})
 
 afterEach(() => {
-  vi.useRealTimers();
-});
+  vi.useRealTimers()
+})
 
 it('applies 7-day timeout', () => {
-  const resolvedDate = new Date('2026-01-01T00:00:00Z');
-  vi.setSystemTime(new Date('2026-01-08T00:01:00Z')); // 7 days + 1 min later
+  const resolvedDate = new Date('2026-01-01T00:00:00Z')
+  vi.setSystemTime(new Date('2026-01-08T00:01:00Z')) // 7 days + 1 min later
   // ... test timeout logic
-});
+})
 ```
 
 ### Testing State Machine Transitions
@@ -136,7 +136,7 @@ describe('Expense State Machine', () => {
     { from: 'pending_satisfaction', action: 'satisfy', to: 'resolved' },
     { from: 'pending_satisfaction', action: 'timeout_7d', to: 'resolved_creator_decided' },
     { from: 'questioned', action: 'timeout_30d', to: 'closed_unresolved' },
-  ];
+  ]
 
   const invalidTransitions = [
     { from: 'resolved', action: 'question', should: 'fail' },
@@ -144,8 +144,8 @@ describe('Expense State Machine', () => {
     { from: 'resolved_creator_decided', action: 'satisfy', should: 'fail' },
     { from: 'posted', action: 'satisfy', should: 'fail' },
     { from: 'questioned', action: 'satisfy', should: 'fail' },
-  ];
-});
+  ]
+})
 ```
 
 ### Testing Money Math
@@ -154,19 +154,19 @@ describe('Expense State Machine', () => {
 describe('Money Math', () => {
   it('never uses floating point', () => {
     // All values must be integers
-    const result = dollarsToCents(10.01);
-    expect(result).toBe(1001);
-    expect(Number.isInteger(result)).toBe(true);
-  });
+    const result = dollarsToCents(10.01)
+    expect(result).toBe(1001)
+    expect(Number.isInteger(result)).toBe(true)
+  })
 
   it('handles odd-cent split correctly', () => {
     // EC-006: $10.01 at 50/50
-    const { aShare, bShare } = calculateShares(1001, 0.5);
-    expect(aShare + bShare).toBe(1001); // Must sum to total
-    expect(aShare).toBe(500); // Floor goes to A
-    expect(bShare).toBe(501); // Remainder goes to B
-  });
-});
+    const { aShare, bShare } = calculateShares(1001, 0.5)
+    expect(aShare + bShare).toBe(1001) // Must sum to total
+    expect(aShare).toBe(500) // Floor goes to A
+    expect(bShare).toBe(501) // Remainder goes to B
+  })
+})
 ```
 
 ## Test Commands
@@ -181,19 +181,19 @@ npx vitest run __tests__/timeout.test.ts  # Single file
 
 ## Issues Requiring Tests (test:required label)
 
-| Issue | Description | Test Coverage |
-|-------|-------------|---------------|
-| #88 | 7-day timeout | timeout.test.ts |
-| #89 | 30-day closure | timeout.test.ts |
-| #90 | Edit own expense | state-machine.test.ts |
-| #91 | Delete own expense | state-machine.test.ts |
-| #92 | Stripe integration | billing.test.ts (if applicable) |
-| #93 | Free tier limits | tier-limits.test.ts |
-| #96 | Auto-generate recurring | recurring.test.ts |
-| #97 | Split ratio | calculations.test.ts (extend) |
-| #101 | CSV export | export.test.ts |
-| #107 | Balance audit trail | calculations.test.ts (extend) |
-| #108 | Leave family | families.test.ts (new) |
+| Issue | Description             | Test Coverage                   |
+| ----- | ----------------------- | ------------------------------- |
+| #88   | 7-day timeout           | timeout.test.ts                 |
+| #89   | 30-day closure          | timeout.test.ts                 |
+| #90   | Edit own expense        | state-machine.test.ts           |
+| #91   | Delete own expense      | state-machine.test.ts           |
+| #92   | Stripe integration      | billing.test.ts (if applicable) |
+| #93   | Free tier limits        | tier-limits.test.ts             |
+| #96   | Auto-generate recurring | recurring.test.ts               |
+| #97   | Split ratio             | calculations.test.ts (extend)   |
+| #101  | CSV export              | export.test.ts                  |
+| #107  | Balance audit trail     | calculations.test.ts (extend)   |
+| #108  | Leave family            | families.test.ts (new)          |
 
 ## Working Directory
 

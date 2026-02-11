@@ -16,16 +16,17 @@ previous wave's exit criteria are met. Each wave's plan is in
 
 Before each wave, verify file ownership assignments and migration reservations:
 
-| File | Rule | Owner |
-|------|------|-------|
-| `workers/ke-api/src/index.ts` | Append-only `app.route()` calls | You verify |
-| `workers/ke-api/src/types.ts` | Append-only type definitions | You verify |
-| `app/src/lib/api.ts` | Append-only function exports | Frontend Eng |
-| `workers/ke-api/src/calculations.ts` | **READ-ONLY** | All (changes need PM+QA) |
-| `workers/ke-api/migrations/` | Sequential numbered, reserved per wave | You assign |
-| `workers/ke-api/src/services/activity.ts` | Append-only event handlers | You verify |
+| File                                      | Rule                                   | Owner                    |
+| ----------------------------------------- | -------------------------------------- | ------------------------ |
+| `workers/ke-api/src/index.ts`             | Append-only `app.route()` calls        | You verify               |
+| `workers/ke-api/src/types.ts`             | Append-only type definitions           | You verify               |
+| `app/src/lib/api.ts`                      | Append-only function exports           | Frontend Eng             |
+| `workers/ke-api/src/calculations.ts`      | **READ-ONLY**                          | All (changes need PM+QA) |
+| `workers/ke-api/migrations/`              | Sequential numbered, reserved per wave | You assign               |
+| `workers/ke-api/src/services/activity.ts` | Append-only event handlers             | You verify               |
 
 Migration reservations:
+
 - Wave 1: 0004-0006 (0004=Stripe, 0005=notification_prefs, 0006=buffer)
 - Wave 2: 0007-0008
 - Wave 3: 0009+
@@ -34,6 +35,7 @@ Migration reservations:
 ### 3. Merge Coordination
 
 After each wave, verify:
+
 - No merge conflicts in shared files
 - All branches merge cleanly to main
 - `cd workers/ke-api && npm test` passes
@@ -44,6 +46,7 @@ After each wave, verify:
 ### 4. Issue Management
 
 Use `gh issue` to manage status:
+
 - `status:in-progress` — when agents start work
 - `status:review` — when PRs are ready
 - `status:done` — when PM approves
@@ -60,6 +63,7 @@ Use `gh issue` to manage status:
 Before marking a wave complete, ALL must pass:
 
 **Orchestrator checks:**
+
 - [ ] No merge conflicts in shared files
 - [ ] All branches merge cleanly to main
 - [ ] `cd workers/ke-api && npm test` passes
@@ -68,6 +72,7 @@ Before marking a wave complete, ALL must pass:
 - [ ] `cd app && npm run build` succeeds
 
 **PM checks:**
+
 - [ ] Each issue's acceptance criteria verified
 - [ ] Business rules from PRD Appendix D enforced
 - [ ] Edge cases from PRD Appendix E handled
@@ -76,6 +81,7 @@ Before marking a wave complete, ALL must pass:
 - [ ] GitHub issues moved to status:done
 
 **QA checks:**
+
 - [ ] Tests written for all test:required issues
 - [ ] State machine transitions tested (success + failure)
 - [ ] Money math tests use exact integer comparison
@@ -92,6 +98,7 @@ Before marking a wave complete, ALL must pass:
 ## Conflict Resolution
 
 If two agents modify the same file:
+
 1. Check if changes are in different sections (append-only files should not conflict)
 2. If conflict exists, the agent working on the lower issue number has priority
 3. Manually merge if needed, preserving both changes

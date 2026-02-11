@@ -4,24 +4,24 @@
 
 A single integer (`balance_cents`) representing who owes whom.
 
-| Value | Meaning |
-|-------|---------|
+| Value    | Meaning                |
+| -------- | ---------------------- |
 | Positive | Parent A owes Parent B |
 | Negative | Parent B owes Parent A |
-| Zero | Settled |
+| Zero     | Settled                |
 
 ## What counts toward balance
 
-| Status | Included? |
-|--------|-----------|
-| `posted` | Yes |
-| `resolved` | Yes |
-| `resolved_creator_decided` | Yes |
-| `questioned` | No (tracked separately) |
-| `pending_satisfaction` | No (tracked separately) |
-| `resolved_personal` | No |
-| `resolved_deleted` | No |
-| `closed_unresolved` | No |
+| Status                     | Included?               |
+| -------------------------- | ----------------------- |
+| `posted`                   | Yes                     |
+| `resolved`                 | Yes                     |
+| `resolved_creator_decided` | Yes                     |
+| `questioned`               | No (tracked separately) |
+| `pending_satisfaction`     | No (tracked separately) |
+| `resolved_personal`        | No                      |
+| `resolved_deleted`         | No                      |
+| `closed_unresolved`        | No                      |
 
 Questioned/pending expenses are reported separately as `questioned_total_cents` and `questioned_count` in the balance breakdown.
 
@@ -40,17 +40,17 @@ b_share = amount_cents - a_share
 
 For each included expense:
 
-| Who paid | Balance effect |
-|----------|---------------|
+| Who paid      | Balance effect                                        |
+| ------------- | ----------------------------------------------------- |
 | Parent A paid | `balance += (a_share - amount)` (negative = B owes A) |
-| Parent B paid | `balance += a_share` (positive = A owes B) |
+| Parent B paid | `balance += a_share` (positive = A owes B)            |
 
 For each payment:
 
-| Direction | Balance effect |
-|-----------|---------------|
-| A pays B | `balance -= amount` |
-| B pays A | `balance += amount` |
+| Direction | Balance effect      |
+| --------- | ------------------- |
+| A pays B  | `balance -= amount` |
+| B pays A  | `balance += amount` |
 
 ## Rounding
 
@@ -66,11 +66,11 @@ For each payment:
 
 ## Edge cases
 
-| Scenario | Behavior |
-|----------|----------|
-| No expenses | Balance = $0.00, "No expenses recorded yet" |
-| Solo parent (no Parent B) | Balance = $0.00, share calculation still works |
-| 100/0 split | A pays 100%, B pays 0% |
-| Expense deleted via dispute | `resolved_deleted` — excluded from balance, `deleted_at` set |
-| Expense marked personal | `resolved_personal` — excluded from balance |
-| Amount edited during dispute | New amount replaces old, balance recalculated |
+| Scenario                     | Behavior                                                     |
+| ---------------------------- | ------------------------------------------------------------ |
+| No expenses                  | Balance = $0.00, "No expenses recorded yet"                  |
+| Solo parent (no Parent B)    | Balance = $0.00, share calculation still works               |
+| 100/0 split                  | A pays 100%, B pays 0%                                       |
+| Expense deleted via dispute  | `resolved_deleted` — excluded from balance, `deleted_at` set |
+| Expense marked personal      | `resolved_personal` — excluded from balance                  |
+| Amount edited during dispute | New amount replaces old, balance recalculated                |

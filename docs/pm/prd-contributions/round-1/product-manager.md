@@ -92,20 +92,20 @@ The Free tier must be genuinely useful, not a crippled demo. Pro features add co
 
 ### Tier Comparison
 
-| Feature | Free ($0) | Pro ($5/month) |
-|---------|-----------|----------------|
-| Two-parent shared ledger | Yes | Yes |
-| Add expenses | Unlimited | Unlimited |
-| Record payments | Unlimited | Unlimited |
-| Questioning workflow | Full 8-status flow | Full 8-status flow |
-| Audit trail | Full visibility | Full visibility |
-| Split ratio configuration | Yes | Yes |
-| Expense history | 3 months rolling | Unlimited |
-| Recurring expense templates | Max 2 active | Unlimited |
-| CSV export | No | Yes |
-| Receipt image attachments | No | Yes (v1.1) |
-| Annual summary reports | No | Yes (v1.2) |
-| Per-category split ratios | No | Yes (v1.2) |
+| Feature                     | Free ($0)          | Pro ($5/month)     |
+| --------------------------- | ------------------ | ------------------ |
+| Two-parent shared ledger    | Yes                | Yes                |
+| Add expenses                | Unlimited          | Unlimited          |
+| Record payments             | Unlimited          | Unlimited          |
+| Questioning workflow        | Full 8-status flow | Full 8-status flow |
+| Audit trail                 | Full visibility    | Full visibility    |
+| Split ratio configuration   | Yes                | Yes                |
+| Expense history             | 3 months rolling   | Unlimited          |
+| Recurring expense templates | Max 2 active       | Unlimited          |
+| CSV export                  | No                 | Yes                |
+| Receipt image attachments   | No                 | Yes (v1.1)         |
+| Annual summary reports      | No                 | Yes (v1.2)         |
+| Per-category split ratios   | No                 | Yes (v1.2)         |
 
 ### Pricing Rationale
 
@@ -145,22 +145,22 @@ Free users are most likely to convert when they:
 
 ### Primary KPIs
 
-| Metric | Definition | Target | Timeframe |
-|--------|------------|--------|-----------|
-| Weekly Active Families (WAF) | Families with at least one expense or payment logged in the past 7 days | 500 | Month 6 |
-| Monthly Active Families (MAF) | Families with at least one expense or payment logged in the past 30 days | 1,000 | Month 6 |
-| Paid Conversion Rate | % of families with at least one Pro subscription | 5% | Month 6 |
-| Monthly Recurring Revenue (MRR) | Total monthly subscription revenue | $250 | Month 6 |
+| Metric                          | Definition                                                               | Target | Timeframe |
+| ------------------------------- | ------------------------------------------------------------------------ | ------ | --------- |
+| Weekly Active Families (WAF)    | Families with at least one expense or payment logged in the past 7 days  | 500    | Month 6   |
+| Monthly Active Families (MAF)   | Families with at least one expense or payment logged in the past 30 days | 1,000  | Month 6   |
+| Paid Conversion Rate            | % of families with at least one Pro subscription                         | 5%     | Month 6   |
+| Monthly Recurring Revenue (MRR) | Total monthly subscription revenue                                       | $250   | Month 6   |
 
 ### Secondary KPIs
 
-| Metric | Definition | Target | Timeframe |
-|--------|------------|--------|-----------|
-| Onboarding Completion Rate | % of signups that create a family and invite a partner | 40% | Month 3 |
-| Partner Join Rate | % of invites that result in the other parent joining | 30% | Month 3 |
-| Questioning Resolution Rate | % of questioned expenses that reach a resolved state (not closed_unresolved) | 80% | Month 3 |
-| Time to Resolution | Median days from questioned to resolved | < 5 days | Month 3 |
-| Churn Rate (Pro) | % of Pro subscribers who cancel in a given month | < 10% | Month 6 |
+| Metric                      | Definition                                                                   | Target   | Timeframe |
+| --------------------------- | ---------------------------------------------------------------------------- | -------- | --------- |
+| Onboarding Completion Rate  | % of signups that create a family and invite a partner                       | 40%      | Month 3   |
+| Partner Join Rate           | % of invites that result in the other parent joining                         | 30%      | Month 3   |
+| Questioning Resolution Rate | % of questioned expenses that reach a resolved state (not closed_unresolved) | 80%      | Month 3   |
+| Time to Resolution          | Median days from questioned to resolved                                      | < 5 days | Month 3   |
+| Churn Rate (Pro)            | % of Pro subscribers who cancel in a given month                             | < 10%    | Month 6   |
 
 ### Leading Indicators (Weekly Tracking)
 
@@ -175,13 +175,13 @@ Free users are most likely to convert when they:
 
 The product will be discontinued if any of the following conditions are met:
 
-| Condition | Threshold | Evaluation Point |
-|-----------|-----------|------------------|
-| Total families registered | < 100 | Month 4 |
-| Monthly Active Families | < 50 | Month 6 |
-| Partner join rate | < 15% | Month 4 |
-| Paid conversion rate | < 2% | Month 8 |
-| Monthly burn rate | > $500/month net loss | Month 6 |
+| Condition                 | Threshold             | Evaluation Point |
+| ------------------------- | --------------------- | ---------------- |
+| Total families registered | < 100                 | Month 4          |
+| Monthly Active Families   | < 50                  | Month 6          |
+| Partner join rate         | < 15%                 | Month 4          |
+| Paid conversion rate      | < 2%                  | Month 8          |
+| Monthly burn rate         | > $500/month net loss | Month 6          |
 
 **Kill process:** If a kill criterion is triggered, the team has 30 days to present a pivot proposal. If no viable pivot is identified, the product enters sunset mode with 60-day user notice and data export availability.
 
@@ -191,38 +191,38 @@ The product will be discontinued if any of the following conditions are met:
 
 ### Product Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Only one parent uses the app | High | Critical | Solo mode must be valuable on its own (personal expense tracking). Remind solo users to invite partner. Consider value-add for solo users. |
-| Questioning workflow is too complex | Medium | High | Extensive user testing during beta. Provide in-app guidance. Consider simplified "accept/reject" mode for v1.1. |
-| Users abandon after setup | Medium | High | Onboarding wizard with immediate value demonstration. Email/push reminders for first expense. |
-| Emotional context makes UX hostile | Medium | Medium | Language review with divorce counselor. Neutral terminology (Design Charter). Avoid any language that implies fault. |
+| Risk                                | Likelihood | Impact   | Mitigation                                                                                                                                 |
+| ----------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Only one parent uses the app        | High       | Critical | Solo mode must be valuable on its own (personal expense tracking). Remind solo users to invite partner. Consider value-add for solo users. |
+| Questioning workflow is too complex | Medium     | High     | Extensive user testing during beta. Provide in-app guidance. Consider simplified "accept/reject" mode for v1.1.                            |
+| Users abandon after setup           | Medium     | High     | Onboarding wizard with immediate value demonstration. Email/push reminders for first expense.                                              |
+| Emotional context makes UX hostile  | Medium     | Medium   | Language review with divorce counselor. Neutral terminology (Design Charter). Avoid any language that implies fault.                       |
 
 ### Market Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Competitors launch similar product | Medium | Medium | Speed to market. Focus on workflow quality over feature quantity. Build switching costs through audit trail value. |
-| Venmo/Zelle adds expense tracking | Low | High | Differentiate on questioning workflow (they won't build dispute resolution). Emphasize neutrality (they favor the payer). |
-| Target market smaller than expected | Medium | Medium | Validate with divorce statistics. Track family creation rates. Consider adjacent markets (unmarried co-parents, grandparents). |
-| Negative association with divorce | Low | Medium | Position as "for parents who share expenses" not "for divorced parents." Emphasize conflict reduction, not divorce tooling. |
+| Risk                                | Likelihood | Impact | Mitigation                                                                                                                     |
+| ----------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Competitors launch similar product  | Medium     | Medium | Speed to market. Focus on workflow quality over feature quantity. Build switching costs through audit trail value.             |
+| Venmo/Zelle adds expense tracking   | Low        | High   | Differentiate on questioning workflow (they won't build dispute resolution). Emphasize neutrality (they favor the payer).      |
+| Target market smaller than expected | Medium     | Medium | Validate with divorce statistics. Track family creation rates. Consider adjacent markets (unmarried co-parents, grandparents). |
+| Negative association with divorce   | Low        | Medium | Position as "for parents who share expenses" not "for divorced parents." Emphasize conflict reduction, not divorce tooling.    |
 
 ### Technical Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Cloudflare D1 limitations | Low | Medium | D1 is production-ready. Monitor query patterns. Have PostgreSQL migration plan if needed. |
-| Clerk auth issues | Low | High | Clerk is well-established. Maintain minimal auth coupling. Document SSO migration path. |
-| Balance calculation bugs | Medium | Critical | Extensive unit tests for calculation module. All money as integers (cents). Automated regression testing. |
-| 7-day timeout cron reliability | Medium | Medium | Multiple fallback mechanisms. Check timeout on read, not just cron. Alert on missed transitions. |
+| Risk                           | Likelihood | Impact   | Mitigation                                                                                                |
+| ------------------------------ | ---------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| Cloudflare D1 limitations      | Low        | Medium   | D1 is production-ready. Monitor query patterns. Have PostgreSQL migration plan if needed.                 |
+| Clerk auth issues              | Low        | High     | Clerk is well-established. Maintain minimal auth coupling. Document SSO migration path.                   |
+| Balance calculation bugs       | Medium     | Critical | Extensive unit tests for calculation module. All money as integers (cents). Automated regression testing. |
+| 7-day timeout cron reliability | Medium     | Medium   | Multiple fallback mechanisms. Check timeout on read, not just cron. Alert on missed transitions.          |
 
 ### Operational Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Support burden from emotional users | High | Medium | Self-service first. FAQ covering common disputes. Clear "we don't mediate" policy. Escalation path for abuse. |
-| Legal liability from disputed expenses | Low | High | Terms of Service explicitly disclaim KE as legal record. No legal advice. Encourage professional mediators. |
-| GDPR/privacy compliance | Medium | Medium | Minimal data collection. Clear privacy policy. Data export and deletion flows. |
+| Risk                                   | Likelihood | Impact | Mitigation                                                                                                    |
+| -------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| Support burden from emotional users    | High       | Medium | Self-service first. FAQ covering common disputes. Clear "we don't mediate" policy. Escalation path for abuse. |
+| Legal liability from disputed expenses | Low        | High   | Terms of Service explicitly disclaim KE as legal record. No legal advice. Encourage professional mediators.   |
+| GDPR/privacy compliance                | Medium     | Medium | Minimal data collection. Clear privacy policy. Data export and deletion flows.                                |
 
 ---
 
@@ -235,6 +235,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How should we model users who have children with multiple ex-partners?
 
 **Options:**
+
 1. One user can belong to multiple families, switching context manually
 2. Separate accounts per family relationship
 3. "Family groups" within a single family record
@@ -250,6 +251,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How and when should we notify users about activity?
 
 **Options:**
+
 1. Email-only notifications
 2. Push notifications (requires PWA or native wrapper)
 3. In-app only (check the app)
@@ -266,6 +268,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** Where should receipt images be stored?
 
 **Options:**
+
 1. Cloudflare R2 (native to our stack)
 2. Third-party image hosting (Cloudinary, Uploadcare)
 3. Client-side compression + base64 in D1 (not recommended)
@@ -283,6 +286,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Current behavior:** Excluded from balance permanently.
 
 **Open questions:**
+
 - Can they be reopened?
 - Should they count toward any reporting?
 - How do they appear in annual summaries?
@@ -296,6 +300,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** How should professional third-party access work?
 
 **Options:**
+
 1. Read-only invite link (time-limited)
 2. Separate professional account type with different permissions
 3. PDF/export-based sharing (no live access)
@@ -311,6 +316,7 @@ The following questions require architectural decision records (ADRs) before pro
 **Question:** Should KE work offline?
 
 **Options:**
+
 1. No offline support (require connectivity)
 2. Read-only offline (cache recent data)
 3. Full offline with sync (complex)
@@ -331,24 +337,24 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Included
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Clerk authentication (email + Google) | Complete | |
-| Family creation + invite flow | Complete | |
-| Add expense (manual entry) | Complete | |
-| Expense list view | Complete | |
-| Expense detail page | Complete | |
-| Balance calculation + display | Complete | |
-| Question expense (initiate) | Complete | |
-| Resolve question (creator response) | Complete | |
-| Satisfy resolution (questioner confirms) | In Progress | |
-| 7-day timeout auto-resolution | In Progress | |
-| Payment recording | In Progress | |
-| Activity feed | Partial | |
-| Children management | Complete | |
-| Recurring expense templates | In Progress | |
-| Stripe integration (Pro tier) | Not Started | |
-| Settings (split ratio, family) | Partial | |
+| Feature                                  | Status      | Notes |
+| ---------------------------------------- | ----------- | ----- |
+| Clerk authentication (email + Google)    | Complete    |       |
+| Family creation + invite flow            | Complete    |       |
+| Add expense (manual entry)               | Complete    |       |
+| Expense list view                        | Complete    |       |
+| Expense detail page                      | Complete    |       |
+| Balance calculation + display            | Complete    |       |
+| Question expense (initiate)              | Complete    |       |
+| Resolve question (creator response)      | Complete    |       |
+| Satisfy resolution (questioner confirms) | In Progress |       |
+| 7-day timeout auto-resolution            | In Progress |       |
+| Payment recording                        | In Progress |       |
+| Activity feed                            | Partial     |       |
+| Children management                      | Complete    |       |
+| Recurring expense templates              | In Progress |       |
+| Stripe integration (Pro tier)            | Not Started |       |
+| Settings (split ratio, family)           | Partial     |       |
 
 #### Exit Criteria for Phase 1
 
@@ -369,16 +375,16 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Planned
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Email notifications for questions | P1 | Resend integration |
-| Stale question alerts (14-day warning) | P1 | Reduce closed_unresolved rate |
-| Receipt image upload | P1 | Pro feature, R2 storage |
-| Child tagging on expenses | P2 | Optional metadata |
-| Improved onboarding wizard | P1 | Increase completion rate |
-| Partner reminder emails | P2 | Nudge pending invites |
-| CSV export (Pro) | P1 | Required for Pro value |
-| Annual summary view | P2 | Pro feature, tax season |
+| Feature                                | Priority | Notes                         |
+| -------------------------------------- | -------- | ----------------------------- |
+| Email notifications for questions      | P1       | Resend integration            |
+| Stale question alerts (14-day warning) | P1       | Reduce closed_unresolved rate |
+| Receipt image upload                   | P1       | Pro feature, R2 storage       |
+| Child tagging on expenses              | P2       | Optional metadata             |
+| Improved onboarding wizard             | P1       | Increase completion rate      |
+| Partner reminder emails                | P2       | Nudge pending invites         |
+| CSV export (Pro)                       | P1       | Required for Pro value        |
+| Annual summary view                    | P2       | Pro feature, tax season       |
 
 #### Exit Criteria for Phase 2
 
@@ -397,15 +403,15 @@ The following questions require architectural decision records (ADRs) before pro
 
 #### Features Planned
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Per-category split ratios | P1 | Long-requested Pro feature |
-| Multiple families per user | P1 | ADR-001 must be resolved |
-| Annual summary reports (PDF) | P2 | Tax documentation |
-| Therapist/mediator view | P3 | ADR-005 must be resolved |
-| Court-ready export format | P3 | Legal use case |
-| Push notifications (PWA) | P2 | Mobile engagement |
-| Expense search and filtering | P2 | Quality of life |
+| Feature                      | Priority | Notes                      |
+| ---------------------------- | -------- | -------------------------- |
+| Per-category split ratios    | P1       | Long-requested Pro feature |
+| Multiple families per user   | P1       | ADR-001 must be resolved   |
+| Annual summary reports (PDF) | P2       | Tax documentation          |
+| Therapist/mediator view      | P3       | ADR-005 must be resolved   |
+| Court-ready export format    | P3       | Legal use case             |
+| Push notifications (PWA)     | P2       | Mobile engagement          |
+| Expense search and filtering | P2       | Quality of life            |
 
 #### Exit Criteria for Phase 3
 
@@ -430,4 +436,4 @@ Potential directions pending Phase 3 learnings:
 
 ---
 
-*This document represents the Product Manager's contributions to the KE PRD. It should be reviewed alongside Engineering, Design, and QA contributions before final PRD consolidation.*
+_This document represents the Product Manager's contributions to the KE PRD. It should be reviewed alongside Engineering, Design, and QA contributions before final PRD consolidation._

@@ -39,16 +39,16 @@ See: `app/src/components/ui/` for the component library.
 
 ## Status system (8 statuses)
 
-| Status | Color | Meaning |
-|--------|-------|---------|
-| `posted` | Emerald | Active, no disputes |
-| `questioned` | Amber | Under dispute by other parent |
-| `pending_satisfaction` | Indigo | Creator responded, awaiting questioner confirmation |
-| `resolved` | Indigo | Questioner confirmed satisfaction |
-| `resolved_creator_decided` | Indigo | Auto-resolved after 7-day timeout |
-| `resolved_personal` | Slate | Creator marked as personal expense |
-| `resolved_deleted` | Slate | Creator marked for deletion |
-| `closed_unresolved` | Red | Closed without resolution |
+| Status                     | Color   | Meaning                                             |
+| -------------------------- | ------- | --------------------------------------------------- |
+| `posted`                   | Emerald | Active, no disputes                                 |
+| `questioned`               | Amber   | Under dispute by other parent                       |
+| `pending_satisfaction`     | Indigo  | Creator responded, awaiting questioner confirmation |
+| `resolved`                 | Indigo  | Questioner confirmed satisfaction                   |
+| `resolved_creator_decided` | Indigo  | Auto-resolved after 7-day timeout                   |
+| `resolved_personal`        | Slate   | Creator marked as personal expense                  |
+| `resolved_deleted`         | Slate   | Creator marked for deletion                         |
+| `closed_unresolved`        | Red     | Closed without resolution                           |
 
 ### Transition rules
 
@@ -63,13 +63,13 @@ pending_satisfaction → resolved_creator_decided (7-day auto-timeout)
 
 ### Terminology (enforced)
 
-| Use | Don't use |
-|-----|-----------|
-| Record payment | Settle |
-| Questioned | Disputed |
+| Use                 | Don't use         |
+| ------------------- | ----------------- |
+| Record payment      | Settle            |
+| Questioned          | Disputed          |
 | Closed (unresolved) | Failed / Rejected |
-| Other parent | Opponent / Ex |
-| Net balance | Amount owed |
+| Other parent        | Opponent / Ex     |
+| Net balance         | Amount owed       |
 
 ## Screen priority (ranked)
 

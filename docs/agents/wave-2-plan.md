@@ -8,36 +8,36 @@
 
 ### API Engineer A (Track 1+2)
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #91 | Delete own posted expense — DELETE /expenses/:id | `feat/ke-91-delete-expense` |
-| 2 | #94 | Payment history — enhance GET endpoint, tier filtering | `feat/ke-94-payment-history` |
-| 3 | #97 | Split ratio polish — validate PATCH, activity event | `feat/ke-97-split-ratio` |
+| Order | Issue | Description                                            | Branch                       |
+| ----- | ----- | ------------------------------------------------------ | ---------------------------- |
+| 1     | #91   | Delete own posted expense — DELETE /expenses/:id       | `feat/ke-91-delete-expense`  |
+| 2     | #94   | Payment history — enhance GET endpoint, tier filtering | `feat/ke-94-payment-history` |
+| 3     | #97   | Split ratio polish — validate PATCH, activity event    | `feat/ke-97-split-ratio`     |
 
 ### API Engineer B (Track 3)
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #89 | 30-day closure — add on-read check for questioned expenses | `feat/ke-89-30day-closure` |
-| 2 | #95 | Recurring template edit/delete — verify independence | `feat/ke-95-template-management` |
+| Order | Issue | Description                                                | Branch                           |
+| ----- | ----- | ---------------------------------------------------------- | -------------------------------- |
+| 1     | #89   | 30-day closure — add on-read check for questioned expenses | `feat/ke-89-30day-closure`       |
+| 2     | #95   | Recurring template edit/delete — verify independence       | `feat/ke-95-template-management` |
 
 ### Frontend Engineer
 
-| Order | Issue | Description | Branch |
-|-------|-------|-------------|--------|
-| 1 | #91 | Delete confirmation dialog | `feat/ke-91-delete-expense` |
-| 2 | #94 | Payment history page | `feat/ke-94-payment-history` |
-| 3 | #95 | Template management UI | `feat/ke-95-template-management` |
-| 4 | #97 | Split ratio slider improvements | `feat/ke-97-split-ratio` |
+| Order | Issue | Description                     | Branch                           |
+| ----- | ----- | ------------------------------- | -------------------------------- |
+| 1     | #91   | Delete confirmation dialog      | `feat/ke-91-delete-expense`      |
+| 2     | #94   | Payment history page            | `feat/ke-94-payment-history`     |
+| 3     | #95   | Template management UI          | `feat/ke-95-template-management` |
+| 4     | #97   | Split ratio slider improvements | `feat/ke-97-split-ratio`         |
 
 ### QA Engineer
 
-| Order | Focus | Test File |
-|-------|-------|-----------|
-| 1 | #89: 30-day closure state machine | `__tests__/timeout.test.ts` (extend) |
-| 2 | #95: Template independence from generated expenses | `__tests__/recurring.test.ts` (extend) |
-| 3 | Full dispute lifecycle integration tests | `__tests__/state-machine.test.ts` (NEW) |
-| 4 | Full dispute with timeout integration test | `__tests__/state-machine.test.ts` |
+| Order | Focus                                              | Test File                               |
+| ----- | -------------------------------------------------- | --------------------------------------- |
+| 1     | #89: 30-day closure state machine                  | `__tests__/timeout.test.ts` (extend)    |
+| 2     | #95: Template independence from generated expenses | `__tests__/recurring.test.ts` (extend)  |
+| 3     | Full dispute lifecycle integration tests           | `__tests__/state-machine.test.ts` (NEW) |
+| 4     | Full dispute with timeout integration test         | `__tests__/state-machine.test.ts`       |
 
 ## Shared File Coordination
 
@@ -48,6 +48,7 @@ All endpoints for Wave 2 are extensions of existing routes.
 ### `types.ts` — Minimal additions
 
 API Eng A may add:
+
 ```typescript
 export interface DeleteExpenseResponse { ... }
 ```
@@ -55,6 +56,7 @@ export interface DeleteExpenseResponse { ... }
 ### `api.ts` (Frontend)
 
 Frontend Eng appends:
+
 ```typescript
 export async function deleteExpense(...) { ... }
 // Payment history already has getPayments()
@@ -63,10 +65,10 @@ export async function deleteExpense(...) { ... }
 
 ### Migrations
 
-| Number | File | Owner | Purpose |
-|--------|------|-------|---------|
-| 0007 | Reserved | If needed | |
-| 0008 | Reserved | Buffer | |
+| Number | File     | Owner     | Purpose |
+| ------ | -------- | --------- | ------- |
+| 0007   | Reserved | If needed |         |
+| 0008   | Reserved | Buffer    |         |
 
 ## Dependency Graph
 

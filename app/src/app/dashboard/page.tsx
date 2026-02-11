@@ -1,16 +1,12 @@
-"use client";
+'use client'
 
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type {
-  MeResponse,
-  Expense,
-  BalanceResponse,
-} from "@/lib/api";
-import { formatCurrency, formatCategory } from "@/lib/statusColors";
-import { NEEDS_ATTENTION_STATUSES } from "@/lib/expenseStatus";
+import { useUser, UserButton } from '@clerk/nextjs'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { MeResponse, Expense, BalanceResponse } from '@/lib/api'
+import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { NEEDS_ATTENTION_STATUSES } from '@/lib/expenseStatus'
 import {
   Button,
   Card,
@@ -19,30 +15,28 @@ import {
   SectionHeader,
   EmptyState,
   Alert,
-} from "@/components/ui";
+} from '@/components/ui'
 
 export default function DashboardPage() {
-  const { user, isLoaded } = useUser();
-  const api = useApi();
-  const [syncStatus, setSyncStatus] = useState<"pending" | "synced" | "error">(
-    "pending"
-  );
-  const [meData, setMeData] = useState<MeResponse | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
-  const [balance, setBalance] = useState<BalanceResponse | null>(null);
-  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-  const [attentionExpenses, setAttentionExpenses] = useState<Expense[]>([]);
+  const { user, isLoaded } = useUser()
+  const api = useApi()
+  const [syncStatus, setSyncStatus] = useState<'pending' | 'synced' | 'error'>('pending')
+  const [meData, setMeData] = useState<MeResponse | null>(null)
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [isLoadingExpenses, setIsLoadingExpenses] = useState(false)
+  const [balance, setBalance] = useState<BalanceResponse | null>(null)
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false)
+  const [attentionExpenses, setAttentionExpenses] = useState<Expense[]>([])
 
   const fetchUserData = useCallback(async () => {
-    if (!user) return;
+    if (!user) return
     try {
-      const data = await api.getMe();
-      setMeData(data);
-      const family = data.family;
+      const data = await api.getMe()
+      setMeData(data)
+      const family = data.family
       if (family) {
-        setIsLoadingExpenses(true);
-        setIsLoadingBalance(true);
+        setIsLoadingExpenses(true)
+        setIsLoadingBalance(true)
         try {
           const [expenseData, balanceData, ...attentionResults] = await Promise.all([
             api.getExpenses(family.id, { limit: 5 }),
@@ -52,82 +46,83 @@ export default function DashboardPage() {
                   api.getExpenses(family.id, { status, limit: 10 })
                 )
               : []),
-          ]);
-          setExpenses(expenseData.expenses);
-          setBalance(balanceData);
+          ])
+          setExpenses(expenseData.expenses)
+          setBalance(balanceData)
 
-          if (family.parent_b_id !== null && attentionResults.length === NEEDS_ATTENTION_STATUSES.length) {
+          if (
+            family.parent_b_id !== null &&
+            attentionResults.length === NEEDS_ATTENTION_STATUSES.length
+          ) {
             const merged = attentionResults
               .flatMap((r) => (r as { expenses: Expense[] }).expenses)
-              .sort(
-              (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-            );
-            setAttentionExpenses(merged);
+              .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            setAttentionExpenses(merged)
           }
         } catch (err) {
-          console.error("Failed to fetch data:", err);
+          console.error('Failed to fetch data:', err)
         } finally {
-          setIsLoadingExpenses(false);
-          setIsLoadingBalance(false);
+          setIsLoadingExpenses(false)
+          setIsLoadingBalance(false)
         }
       }
     } catch (error) {
-      console.error("Failed to fetch user data:", error);
+      console.error('Failed to fetch user data:', error)
     }
-  }, [user, api]);
+  }, [user, api])
 
   useEffect(() => {
     async function syncUser() {
-      if (!user) return;
+      if (!user) return
 
       try {
-        const response = await fetch("/api/sync-user", {
-          method: "POST",
+        const response = await fetch('/api/sync-user', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        });
+        })
 
         if (response.ok) {
-          setSyncStatus("synced");
-          await fetchUserData();
+          setSyncStatus('synced')
+          await fetchUserData()
         } else {
-          setSyncStatus("error");
+          setSyncStatus('error')
         }
       } catch {
-        setSyncStatus("error");
+        setSyncStatus('error')
       }
     }
 
     if (isLoaded && user) {
-      syncUser();
+      syncUser()
     }
-  }, [isLoaded, user, fetchUserData]);
+  }, [isLoaded, user, fetchUserData])
 
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
-  const hasFamily = meData?.family !== null;
-  const isParentA = meData?.role === "parent_a";
-  const hasPartner = meData?.family?.parent_b_id !== null;
+  const hasFamily = meData?.family !== null
+  const isParentA = meData?.role === 'parent_a'
+  const hasPartner = meData?.family?.parent_b_id !== null
 
   // Balance color logic
   const getBalanceColor = () => {
-    if (!balance || balance.balance_cents === 0) return "text-ke-positive";
-    if (balance.payer_id === user?.id) return "text-ke-negative";
-    return "text-ke-accent";
-  };
+    if (!balance || balance.balance_cents === 0) return 'text-ke-positive'
+    if (balance.payer_id === user?.id) return 'text-ke-negative'
+    return 'text-ke-accent'
+  }
 
   const getBalanceDirection = () => {
-    if (!balance || balance.balance_cents === 0) return null;
-    if (balance.payer_id === user?.id) return "You owe";
-    return "You are owed";
-  };
+    if (!balance || balance.balance_cents === 0) return null
+    if (balance.payer_id === user?.id) return 'You owe'
+    return 'You are owed'
+  }
 
   return (
     <div className="min-h-screen bg-ke-bg">
@@ -137,13 +132,9 @@ export default function DashboardPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ke-accent text-xs font-bold text-ke-inverse">
               KE
             </div>
-            <h1 className="text-lg font-semibold text-ke-primary">
-              Kid Expenses
-            </h1>
+            <h1 className="text-lg font-semibold text-ke-primary">Kid Expenses</h1>
             {meData?.family?.name && (
-              <span className="hidden text-sm text-ke-muted sm:inline">
-                {meData.family.name}
-              </span>
+              <span className="hidden text-sm text-ke-muted sm:inline">{meData.family.name}</span>
             )}
           </div>
           <div className="flex items-center gap-4">
@@ -157,30 +148,27 @@ export default function DashboardPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-8">
         {/* Loading/Error State */}
-        {syncStatus === "pending" && (
+        {syncStatus === 'pending' && (
           <Card>
             <CardBody>
               <p className="text-sm text-ke-muted">Loading your data...</p>
             </CardBody>
           </Card>
         )}
-        {syncStatus === "error" && (
-          <Alert variant="error">
-            Failed to load data. Please refresh the page.
-          </Alert>
+        {syncStatus === 'error' && (
+          <Alert variant="error">Failed to load data. Please refresh the page.</Alert>
         )}
 
         {/* No Family - Show Welcome and Create/Join Options */}
-        {syncStatus === "synced" && !hasFamily && (
+        {syncStatus === 'synced' && !hasFamily && (
           <>
             <Card>
               <CardBody>
                 <h2 className="mb-4 text-lg font-medium text-ke-primary">
-                  Welcome, {user?.firstName || "there"}!
+                  Welcome, {user?.firstName || 'there'}!
                 </h2>
                 <p className="text-ke-secondary">
-                  Get started by creating a family or joining one with an invite
-                  code.
+                  Get started by creating a family or joining one with an invite code.
                 </p>
               </CardBody>
             </Card>
@@ -189,9 +177,7 @@ export default function DashboardPage() {
                 href="/family/create"
                 className="rounded-lg border border-ke-border bg-ke-surface p-6 transition-colors hover:bg-ke-elevated"
               >
-                <h3 className="mb-2 text-lg font-medium text-ke-primary">
-                  Create a Family
-                </h3>
+                <h3 className="mb-2 text-lg font-medium text-ke-primary">Create a Family</h3>
                 <p className="text-sm text-ke-secondary">
                   Start tracking expenses and invite your co-parent to join
                 </p>
@@ -201,9 +187,7 @@ export default function DashboardPage() {
                 href="/family/join"
                 className="rounded-lg border border-ke-border bg-ke-surface p-6 transition-colors hover:bg-ke-elevated"
               >
-                <h3 className="mb-2 text-lg font-medium text-ke-primary">
-                  Join a Family
-                </h3>
+                <h3 className="mb-2 text-lg font-medium text-ke-primary">Join a Family</h3>
                 <p className="text-sm text-ke-secondary">
                   Have an invite code? Join your co-parent&apos;s family
                 </p>
@@ -213,7 +197,7 @@ export default function DashboardPage() {
         )}
 
         {/* Has Family - Dashboard */}
-        {syncStatus === "synced" && hasFamily && (
+        {syncStatus === 'synced' && hasFamily && (
           <>
             {/* Net Balance Card */}
             <Card>
@@ -225,12 +209,14 @@ export default function DashboardPage() {
                     <SectionHeader title="Net Balance" className="justify-center" />
                     <p className={`mt-2 text-4xl font-bold font-mono ${getBalanceColor()}`}>
                       {balance.balance_cents === 0
-                        ? "$0.00"
+                        ? '$0.00'
                         : formatCurrency(balance.balance_cents)}
                     </p>
                     <p className="mt-1 text-sm text-ke-muted">
                       {balance.balance_cents === 0
-                        ? (hasPartner ? "Settled up" : "No expenses recorded yet")
+                        ? hasPartner
+                          ? 'Settled up'
+                          : 'No expenses recorded yet'
                         : getBalanceDirection()}
                     </p>
 
@@ -251,7 +237,11 @@ export default function DashboardPage() {
                               Your Share
                             </p>
                             <p className="mt-1 text-lg font-semibold font-mono text-ke-primary">
-                              {formatCurrency(isParentA ? balance.breakdown.a_share_cents : balance.breakdown.b_share_cents)}
+                              {formatCurrency(
+                                isParentA
+                                  ? balance.breakdown.a_share_cents
+                                  : balance.breakdown.b_share_cents
+                              )}
                             </p>
                           </div>
                         </div>
@@ -261,12 +251,8 @@ export default function DashboardPage() {
                 ) : (
                   <div className="text-center">
                     <SectionHeader title="Net Balance" className="justify-center" />
-                    <p className="mt-2 text-4xl font-bold font-mono text-ke-muted">
-                      $0.00
-                    </p>
-                    <p className="mt-1 text-sm text-ke-muted">
-                      No expenses recorded yet
-                    </p>
+                    <p className="mt-2 text-4xl font-bold font-mono text-ke-muted">$0.00</p>
+                    <p className="mt-1 text-sm text-ke-muted">No expenses recorded yet</p>
                   </div>
                 )}
               </CardBody>
@@ -316,16 +302,36 @@ export default function DashboardPage() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <Link href="/expenses/add">
                 <Button fullWidth size="lg">
-                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Add Expense
                 </Button>
               </Link>
               <Link href="/payments/add">
                 <Button variant="secondary" fullWidth size="lg">
-                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   Record Payment
                 </Button>
@@ -358,10 +364,7 @@ export default function DashboardPage() {
             <Card className="mt-8">
               <div className="flex items-center justify-between px-6 py-4">
                 <SectionHeader title="Recent Activity" />
-                <Link
-                  href="/expenses"
-                  className="text-sm text-ke-secondary hover:text-ke-primary"
-                >
+                <Link href="/expenses" className="text-sm text-ke-secondary hover:text-ke-primary">
                   View All
                 </Link>
               </div>
@@ -399,12 +402,16 @@ export default function DashboardPage() {
                         </div>
                         <div className="mt-0.5 flex items-center gap-3 text-xs text-ke-muted">
                           <span>{formatCategory(expense.category)}</span>
-                          <span className="font-mono">{new Date(expense.expense_date).toLocaleDateString()}</span>
-                          <span>{expense.paid_by === user?.id ? "You paid" : "Partner paid"}</span>
+                          <span className="font-mono">
+                            {new Date(expense.expense_date).toLocaleDateString()}
+                          </span>
+                          <span>{expense.paid_by === user?.id ? 'You paid' : 'Partner paid'}</span>
                         </div>
                       </div>
-                      <p className={`ml-4 shrink-0 font-semibold font-mono ${expense.amount_cents < 0 ? "text-ke-positive" : "text-ke-primary"}`}>
-                        {expense.amount_cents < 0 ? "-" : ""}
+                      <p
+                        className={`ml-4 shrink-0 font-semibold font-mono ${expense.amount_cents < 0 ? 'text-ke-positive' : 'text-ke-primary'}`}
+                      >
+                        {expense.amount_cents < 0 ? '-' : ''}
                         {formatCurrency(Math.abs(expense.amount_cents))}
                       </p>
                     </Link>
@@ -416,5 +423,5 @@ export default function DashboardPage() {
         )}
       </main>
     </div>
-  );
+  )
 }

@@ -1,28 +1,28 @@
 // Generate 8-character alphanumeric invite code
 export function generateInviteCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars (I,O,0,1)
-  let code = '';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Removed ambiguous chars (I,O,0,1)
+  let code = ''
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
   }
-  return code;
+  return code
 }
 
 // Generate UUID for IDs
 export function generateId(): string {
-  return crypto.randomUUID();
+  return crypto.randomUUID()
 }
 
 // Get invite expiry date (7 days from now)
 export function getInviteExpiry(): string {
-  const date = new Date();
-  date.setDate(date.getDate() + 7);
-  return date.toISOString();
+  const date = new Date()
+  date.setDate(date.getDate() + 7)
+  return date.toISOString()
 }
 
 // Get today's date in ISO format (YYYY-MM-DD)
 export function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0]
 }
 
 // Send email via Resend API
@@ -36,7 +36,7 @@ export async function sendEmail(
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -45,18 +45,18 @@ export async function sendEmail(
         subject,
         html,
       }),
-    });
+    })
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('Resend API error:', error);
-      return { success: false, error: 'Failed to send email' };
+      const error = await response.text()
+      console.error('Resend API error:', error)
+      return { success: false, error: 'Failed to send email' }
     }
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    console.error('Email send error:', error);
-    return { success: false, error: String(error) };
+    console.error('Email send error:', error)
+    return { success: false, error: String(error) }
   }
 }
 
@@ -106,5 +106,5 @@ export function generateInviteEmailHtml(
   </p>
 </body>
 </html>
-  `.trim();
+  `.trim()
 }

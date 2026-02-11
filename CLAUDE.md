@@ -24,6 +24,7 @@ This creates a session in the Context Worker, downloads venture documentation, a
 ## Build Commands
 
 ### Frontend (Next.js)
+
 ```bash
 cd app
 npm install             # Install dependencies
@@ -33,6 +34,7 @@ npm run lint            # ESLint check
 ```
 
 ### API Worker
+
 ```bash
 cd workers/ke-api
 npm install             # Install dependencies
@@ -42,6 +44,7 @@ npx tsc --noEmit        # TypeScript validation
 ```
 
 ### Database Migrations
+
 ```bash
 cd workers/ke-api
 npx wrangler d1 migrations apply ke-main --local   # Local
@@ -50,13 +53,13 @@ npx wrangler d1 migrations apply ke-main --remote  # Production
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
+| Layer    | Technology                         |
+| -------- | ---------------------------------- |
 | Frontend | Next.js 16, React 19, Tailwind CSS |
-| Auth | Clerk (email + Google OAuth) |
-| Hosting | Vercel |
-| Backend | Cloudflare Workers (Hono) |
-| Database | Cloudflare D1 (ke-main) |
+| Auth     | Clerk (email + Google OAuth)       |
+| Hosting  | Vercel                             |
+| Backend  | Cloudflare Workers (Hono)          |
+| Database | Cloudflare D1 (ke-main)            |
 
 ## Key Files
 
@@ -71,7 +74,7 @@ npx wrangler d1 migrations apply ke-main --remote  # Production
 
 ```typescript
 // ❌ WRONG - floating point errors
-price = 1500.50
+price = 1500.5
 
 // ✅ CORRECT - exact integers
 priceInCents = 150050
@@ -82,6 +85,7 @@ All `amount_cents` columns are INTEGER. UI converts dollars ↔ cents.
 ## Testing Requirements
 
 ### Unit Tests
+
 ```bash
 cd workers/ke-api
 npm test           # Run all tests
@@ -99,18 +103,19 @@ Issues involving calculations, money math, or state transitions are automaticall
 
 ### What Requires Tests
 
-| Change Type | Tests Required? |
-|-------------|----------------|
-| Balance calculations | ✅ Yes |
-| Dollar/cents conversion | ✅ Yes |
-| Share splitting logic | ✅ Yes |
-| Status transitions | ✅ Yes |
-| UI styling/layout | ❌ No |
-| Documentation | ❌ No |
+| Change Type             | Tests Required? |
+| ----------------------- | --------------- |
+| Balance calculations    | ✅ Yes          |
+| Dollar/cents conversion | ✅ Yes          |
+| Share splitting logic   | ✅ Yes          |
+| Status transitions      | ✅ Yes          |
+| UI styling/layout       | ❌ No           |
+| Documentation           | ❌ No           |
 
 ### Core Calculation Module
 
 Money math logic lives in `workers/ke-api/src/calculations.ts`:
+
 - `dollarsToCents()` - Currency conversion
 - `calculateShares()` - Split expense between parents
 - `calculateBalanceFromData()` - Running balance calculation

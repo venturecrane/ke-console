@@ -1,43 +1,43 @@
-"use client";
+'use client'
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import { Button, Card, CardBody, Alert } from "@/components/ui";
+import { useUser } from '@clerk/nextjs'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import { Button, Card, CardBody, Alert } from '@/components/ui'
 
 function JoinFamilyForm() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const api = useApi();
-  const [inviteCode, setInviteCode] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded } = useUser()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const api = useApi()
+  const [inviteCode, setInviteCode] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Pre-fill invite code from URL if provided
   useEffect(() => {
-    const code = searchParams.get("code");
+    const code = searchParams.get('code')
     if (code) {
-      setInviteCode(code.toUpperCase());
+      setInviteCode(code.toUpperCase())
     }
-  }, [searchParams]);
+  }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !inviteCode.trim()) return;
+    e.preventDefault()
+    if (!user || !inviteCode.trim()) return
 
-    setIsSubmitting(true);
-    setError(null);
+    setIsSubmitting(true)
+    setError(null)
 
     try {
-      await api.joinFamily(inviteCode.trim().toUpperCase());
-      router.push("/dashboard");
+      await api.joinFamily(inviteCode.trim().toUpperCase())
+      router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join family");
+      setError(err instanceof Error ? err.message : 'Failed to join family')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -46,7 +46,7 @@ function JoinFamilyForm() {
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -55,21 +55,13 @@ function JoinFamilyForm() {
         {/* App branding */}
         <div className="mb-8 text-center">
           {/* TODO: Replace with logo when available */}
-          <h1 className="text-3xl font-bold text-ke-primary">
-            KidExpenses
-          </h1>
-          <p className="mt-1 text-sm text-ke-muted">
-            Shared expense tracking for co-parents
-          </p>
+          <h1 className="text-3xl font-bold text-ke-primary">KidExpenses</h1>
+          <p className="mt-1 text-sm text-ke-muted">Shared expense tracking for co-parents</p>
         </div>
 
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-ke-primary">
-            Join a Family
-          </h2>
-          <p className="mt-1 text-ke-secondary">
-            Enter the invite code to get started.
-          </p>
+          <h2 className="text-xl font-semibold text-ke-primary">Join a Family</h2>
+          <p className="mt-1 text-ke-secondary">Enter the invite code to get started.</p>
         </div>
 
         <Card>
@@ -102,12 +94,8 @@ function JoinFamilyForm() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                disabled={isSubmitting || inviteCode.length !== 8}
-                fullWidth
-              >
-                {isSubmitting ? "Joining..." : "Join Family"}
+              <Button type="submit" disabled={isSubmitting || inviteCode.length !== 8} fullWidth>
+                {isSubmitting ? 'Joining...' : 'Join Family'}
               </Button>
             </form>
           </CardBody>
@@ -115,19 +103,15 @@ function JoinFamilyForm() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-ke-secondary">
-            Need to create a new family instead?{" "}
-            <Link
-              href="/family/create"
-              className="font-medium text-ke-primary hover:underline"
-            >
+            Need to create a new family instead?{' '}
+            <Link href="/family/create" className="font-medium text-ke-primary hover:underline">
               Create a family
             </Link>
           </p>
         </div>
-
       </div>
     </div>
-  );
+  )
 }
 
 export default function JoinFamilyPage() {
@@ -141,5 +125,5 @@ export default function JoinFamilyPage() {
     >
       <JoinFamilyForm />
     </Suspense>
-  );
+  )
 }

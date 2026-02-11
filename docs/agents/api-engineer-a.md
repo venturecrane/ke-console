@@ -5,12 +5,12 @@ of Track 1 (Foundation) and Track 2 (Expense Core) features.
 
 ## Your Issues by Wave
 
-| Wave | Issues |
-|------|--------|
-| Wave 1 | #92 (Stripe integration), #93 (Free tier limits), #90 (Edit own expense) |
+| Wave   | Issues                                                                    |
+| ------ | ------------------------------------------------------------------------- |
+| Wave 1 | #92 (Stripe integration), #93 (Free tier limits), #90 (Edit own expense)  |
 | Wave 2 | #91 (Delete own expense), #94 (Payment history), #97 (Split ratio polish) |
-| Wave 3 | #100 (Notification prefs), #101 (CSV export), #104 (Expense details) |
-| Wave 4 | #106 (Expense filtering), #107 (Balance audit trail) |
+| Wave 3 | #100 (Notification prefs), #101 (CSV export), #104 (Expense details)      |
+| Wave 4 | #106 (Expense filtering), #107 (Balance audit trail)                      |
 
 ## Tech Stack
 
@@ -30,17 +30,17 @@ of Track 1 (Foundation) and Track 2 (Expense Core) features.
 
 ## File Ownership
 
-| File | Access |
-|------|--------|
-| `routes/expenses.ts` | Own — PATCH/DELETE operations |
-| `routes/payments.ts` | Own — payment history enhancements |
-| `routes/billing.ts` | Own — NEW file for Stripe integration |
-| `routes/export.ts` | Own — NEW file for CSV export |
-| `types.ts` | Shared — append-only, new types in separate blocks |
-| `index.ts` | Shared — append-only route registrations |
-| `services/activity.ts` | Shared — append-only event handlers |
-| `calculations.ts` | Read-only |
-| `middleware/auth.ts` | Read-only |
+| File                   | Access                                             |
+| ---------------------- | -------------------------------------------------- |
+| `routes/expenses.ts`   | Own — PATCH/DELETE operations                      |
+| `routes/payments.ts`   | Own — payment history enhancements                 |
+| `routes/billing.ts`    | Own — NEW file for Stripe integration              |
+| `routes/export.ts`     | Own — NEW file for CSV export                      |
+| `types.ts`             | Shared — append-only, new types in separate blocks |
+| `index.ts`             | Shared — append-only route registrations           |
+| `services/activity.ts` | Shared — append-only event handlers                |
+| `calculations.ts`      | Read-only                                          |
+| `middleware/auth.ts`   | Read-only                                          |
 
 ## Migration Reservations
 
@@ -55,17 +55,20 @@ of Track 1 (Foundation) and Track 2 (Expense Core) features.
 **New file: `routes/billing.ts`**
 
 Endpoints:
+
 - `GET /families/:id/subscription` — Get current subscription status
 - `POST /families/:id/subscription/checkout` — Create Stripe Checkout session
 - `POST /webhooks/stripe` — Stripe webhook handler (NO auth middleware)
 
 Webhook events to handle:
+
 - `checkout.session.completed` — Activate subscription
 - `customer.subscription.updated` — Update plan/status
 - `customer.subscription.deleted` — Mark cancelled
 - `invoice.payment_failed` — Handle failed payment
 
 Migration `0004_stripe_subscriptions.sql`:
+
 ```sql
 -- Extend subscriptions table with Stripe fields
 ALTER TABLE subscriptions ADD COLUMN stripe_customer_id TEXT;
@@ -83,6 +86,7 @@ Upgrade is immediate (BR-047). Downgrade is end-of-period (BR-048).
 ### #93 — Free Tier Limit Enforcement
 
 Enforce in API layer:
+
 - Fixed expense templates: max 2 for Free tier (already partially in `checkFixedExpenseLimit`)
 - History window: 3 months for expenses, payments, activity feed
 - Balance calculation: NOT affected by history limits (all expenses always count)
@@ -95,6 +99,7 @@ date filtering based on tier. Add helper `getFamilyTier()` to check subscription
 New endpoint: `PATCH /expenses/:id`
 
 Rules:
+
 - Only creator can edit
 - Only while status is `posted`
 - Editable fields: description, amount, category, expense_date, paid_by, memo, child_ids, link_url
@@ -107,6 +112,7 @@ Rules:
 New endpoint: `DELETE /expenses/:id`
 
 Rules:
+
 - Only creator can delete
 - Only while status is `posted`
 - Soft delete (set deleted_at)
@@ -116,12 +122,14 @@ Rules:
 ### #94 — Payment History View
 
 Backend already supports `GET /families/:id/payments`. May need:
+
 - Add `method` field to payments table if not present
 - Respect tier-based 3-month history limit for Free users
 
 ### #97 — Split Ratio Editing Polish
 
 `PATCH /families/:id` already exists. Ensure:
+
 - Validate ratio is between 0 and 1
 - Changes apply only to future expenses (no retroactive recalculation)
 - Log `family.ratio_updated` activity event with before/after ratio
@@ -129,6 +137,7 @@ Backend already supports `GET /families/:id/payments`. May need:
 ### #100 — Notification Preferences
 
 New table or column for per-event-type toggles. New endpoint:
+
 - `GET /me/notification-preferences`
 - `PATCH /me/notification-preferences`
 
@@ -137,6 +146,7 @@ Default all types to enabled for new users.
 ### #101 — CSV Export
 
 New endpoint: `GET /families/:id/expenses/export?format=csv`
+
 - Pro tier only (return 403 for Free)
 - Money values in dollars (2 decimal places)
 - Include all expenses regardless of status
@@ -145,12 +155,14 @@ New endpoint: `GET /families/:id/expenses/export?format=csv`
 ### #104 — Optional Expense Details
 
 DB columns `memo` and `link_url` already exist. Needs:
+
 - `expense_children` junction table for multi-child associations
 - Update expense create/edit to handle child associations
 
 ### #106 — Expense Filtering
 
 Extend `GET /families/:id/expenses` query params:
+
 - `child` — filter by child_id (check JSON child_ids field)
 - Multiple filters combine with AND
 - Server-side filtering, respect tier history limits
@@ -158,6 +170,7 @@ Extend `GET /families/:id/expenses` query params:
 ### #107 — Balance Audit Trail
 
 New endpoint: `GET /families/:id/balance/breakdown`
+
 - Per-expense detail: amount, paid_by, a_share, b_share, net impact
 - Separate sections for included vs excluded expenses
 - Excluded expenses show reason (questioned, personal, deleted, etc.)

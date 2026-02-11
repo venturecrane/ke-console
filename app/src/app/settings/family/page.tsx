@@ -1,80 +1,80 @@
-"use client";
+'use client'
 
-import { useUser } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type { MeResponse } from "@/lib/api";
-import { Button, Card, CardBody, Alert } from "@/components/ui";
+import { useUser } from '@clerk/nextjs'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { MeResponse } from '@/lib/api'
+import { Button, Card, CardBody, Alert } from '@/components/ui'
 
 export default function FamilySettingsPage() {
-  const { user, isLoaded } = useUser();
-  const api = useApi();
-  const [meData, setMeData] = useState<MeResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded } = useUser()
+  const api = useApi()
+  const [meData, setMeData] = useState<MeResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Split ratio state
-  const [splitMode, setSplitMode] = useState<"even" | "custom">("even");
-  const [sliderValue, setSliderValue] = useState(50);
-  const [savedRatio, setSavedRatio] = useState(50);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [splitMode, setSplitMode] = useState<'even' | 'custom'>('even')
+  const [sliderValue, setSliderValue] = useState(50)
+  const [savedRatio, setSavedRatio] = useState(50)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
+    if (!user) return
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const data = await api.getMe();
-      setMeData(data);
+      const data = await api.getMe()
+      setMeData(data)
 
       if (data.family) {
-        const ratioPercent = Math.round(data.family.parent_a_ratio * 100);
-        setSliderValue(ratioPercent);
-        setSavedRatio(ratioPercent);
-        setSplitMode(ratioPercent === 50 ? "even" : "custom");
+        const ratioPercent = Math.round(data.family.parent_a_ratio * 100)
+        setSliderValue(ratioPercent)
+        setSavedRatio(ratioPercent)
+        setSplitMode(ratioPercent === 50 ? 'even' : 'custom')
       }
     } catch (err) {
-      console.error("Failed to fetch family data:", err);
-      setError("Failed to load family settings.");
+      console.error('Failed to fetch family data:', err)
+      setError('Failed to load family settings.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [user, api]);
+  }, [user, api])
 
   useEffect(() => {
-    if (isLoaded && user) fetchData();
-  }, [isLoaded, user, fetchData]);
+    if (isLoaded && user) fetchData()
+  }, [isLoaded, user, fetchData])
 
-  const hasChanges = sliderValue !== savedRatio;
+  const hasChanges = sliderValue !== savedRatio
 
   const handleSave = async () => {
-    if (!meData?.family || !hasChanges) return;
+    if (!meData?.family || !hasChanges) return
 
-    setIsSaving(true);
-    setSaveSuccess(false);
-    setError(null);
+    setIsSaving(true)
+    setSaveSuccess(false)
+    setError(null)
 
     try {
       await api.updateFamily(meData.family.id, {
         parentARatio: sliderValue / 100,
-      });
-      setSavedRatio(sliderValue);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 4000);
+      })
+      setSavedRatio(sliderValue)
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 4000)
     } catch (err) {
-      console.error("Failed to update split ratio:", err);
-      setError("Failed to save. Please try again.");
+      console.error('Failed to update split ratio:', err)
+      setError('Failed to save. Please try again.')
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
-  const parentALabel = meData?.family?.parent_a_id === user?.id ? "You" : "Co-parent";
-  const parentBLabel = meData?.family?.parent_a_id === user?.id ? "Co-parent" : "You";
+  const parentALabel = meData?.family?.parent_a_id === user?.id ? 'You' : 'Co-parent'
+  const parentBLabel = meData?.family?.parent_a_id === user?.id ? 'Co-parent' : 'You'
 
   if (!isLoaded || isLoading) {
     return (
@@ -84,7 +84,7 @@ export default function FamilySettingsPage() {
           <div className="h-40 rounded-xl bg-ke-elevated" />
         </div>
       </div>
-    );
+    )
   }
 
   if (!meData?.family) {
@@ -95,7 +95,7 @@ export default function FamilySettingsPage() {
           Go to Onboarding
         </Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -127,34 +127,33 @@ export default function FamilySettingsPage() {
       {/* Split Ratio Card */}
       <Card className="mb-6">
         <CardBody>
-          <h2 className="mb-1 text-lg font-semibold text-ke-primary">
-            Expense Split Ratio
-          </h2>
+          <h2 className="mb-1 text-lg font-semibold text-ke-primary">Expense Split Ratio</h2>
           <p className="mb-5 text-sm text-ke-secondary">
-            How shared expenses are divided between parents. Changes apply to future expenses only — existing expenses keep their original split.
+            How shared expenses are divided between parents. Changes apply to future expenses only —
+            existing expenses keep their original split.
           </p>
 
           {/* Mode toggle */}
           <div className="mb-5 flex gap-2">
             <button
               onClick={() => {
-                setSplitMode("even");
-                setSliderValue(50);
+                setSplitMode('even')
+                setSliderValue(50)
               }}
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
-                splitMode === "even"
-                  ? "border-ke-accent bg-ke-accent/10 text-ke-accent"
-                  : "border-ke-border text-ke-secondary hover:bg-ke-elevated"
+                splitMode === 'even'
+                  ? 'border-ke-accent bg-ke-accent/10 text-ke-accent'
+                  : 'border-ke-border text-ke-secondary hover:bg-ke-elevated'
               }`}
             >
               50 / 50
             </button>
             <button
-              onClick={() => setSplitMode("custom")}
+              onClick={() => setSplitMode('custom')}
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
-                splitMode === "custom"
-                  ? "border-ke-accent bg-ke-accent/10 text-ke-accent"
-                  : "border-ke-border text-ke-secondary hover:bg-ke-elevated"
+                splitMode === 'custom'
+                  ? 'border-ke-accent bg-ke-accent/10 text-ke-accent'
+                  : 'border-ke-border text-ke-secondary hover:bg-ke-elevated'
               }`}
             >
               Custom
@@ -162,7 +161,7 @@ export default function FamilySettingsPage() {
           </div>
 
           {/* Slider */}
-          {splitMode === "custom" && (
+          {splitMode === 'custom' && (
             <div className="mb-5 space-y-3">
               <input
                 type="range"
@@ -187,9 +186,7 @@ export default function FamilySettingsPage() {
           <div className="rounded-lg border border-ke-border bg-ke-elevated/50 p-4">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-medium text-ke-primary">{parentALabel}</span>
-              <span className="font-mono text-lg font-bold text-ke-accent">
-                {sliderValue}%
-              </span>
+              <span className="font-mono text-lg font-bold text-ke-accent">{sliderValue}%</span>
             </div>
             {/* Visual bar */}
             <div className="mb-3 flex h-3 overflow-hidden rounded-full bg-ke-border">
@@ -216,10 +213,16 @@ export default function FamilySettingsPage() {
               </p>
               <div className="flex justify-between text-sm">
                 <span className="text-ke-secondary">
-                  {parentALabel}: <span className="font-mono font-semibold text-ke-primary">${(sliderValue).toFixed(2)}</span>
+                  {parentALabel}:{' '}
+                  <span className="font-mono font-semibold text-ke-primary">
+                    ${sliderValue.toFixed(2)}
+                  </span>
                 </span>
                 <span className="text-ke-secondary">
-                  {parentBLabel}: <span className="font-mono font-semibold text-ke-primary">${(100 - sliderValue).toFixed(2)}</span>
+                  {parentBLabel}:{' '}
+                  <span className="font-mono font-semibold text-ke-primary">
+                    ${(100 - sliderValue).toFixed(2)}
+                  </span>
                 </span>
               </div>
             </div>
@@ -227,16 +230,13 @@ export default function FamilySettingsPage() {
 
           {/* Save button */}
           <div className="mt-5">
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-              fullWidth
-            >
-              {isSaving ? "Saving..." : hasChanges ? "Save Changes" : "No Changes"}
+            <Button onClick={handleSave} disabled={!hasChanges || isSaving} fullWidth>
+              {isSaving ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'}
             </Button>
             {hasChanges && (
               <p className="mt-2 text-center text-xs text-ke-muted">
-                Current: {savedRatio}% / {100 - savedRatio}% → New: {sliderValue}% / {100 - sliderValue}%
+                Current: {savedRatio}% / {100 - savedRatio}% → New: {sliderValue}% /{' '}
+                {100 - sliderValue}%
               </p>
             )}
           </div>
@@ -250,7 +250,7 @@ export default function FamilySettingsPage() {
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-ke-secondary">Family Name</dt>
-              <dd className="font-medium text-ke-primary">{meData.family.name || "—"}</dd>
+              <dd className="font-medium text-ke-primary">{meData.family.name || '—'}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-ke-secondary">Family ID</dt>
@@ -259,6 +259,18 @@ export default function FamilySettingsPage() {
           </dl>
         </CardBody>
       </Card>
+
+      {/* Leave Family */}
+      <div className="mt-8 border-t border-ke-border pt-6">
+        <Link href="/settings/family/leave">
+          <Button variant="danger" fullWidth>
+            Leave Family
+          </Button>
+        </Link>
+        <p className="mt-2 text-center text-xs text-ke-muted">
+          This will remove you from the shared expense ledger.
+        </p>
+      </div>
     </div>
-  );
+  )
 }

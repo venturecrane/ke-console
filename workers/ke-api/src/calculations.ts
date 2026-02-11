@@ -10,27 +10,27 @@
 // ============================================================================
 
 export interface Expense {
-  id: string;
-  amount_cents: number;
-  paid_by: string;
-  status: string;
+  id: string
+  amount_cents: number
+  paid_by: string
+  status: string
 }
 
 export interface Payment {
-  id: string;
-  amount_cents: number;
-  paid_by: string;
+  id: string
+  amount_cents: number
+  paid_by: string
 }
 
 export interface BalanceCalculation {
-  balance: number;
-  totalExpensesCents: number;
-  aShareCents: number;
-  bShareCents: number;
-  aPaidCents: number;
-  bPaidCents: number;
-  paymentsAToBCents: number;
-  paymentsBToACents: number;
+  balance: number
+  totalExpensesCents: number
+  aShareCents: number
+  bShareCents: number
+  aPaidCents: number
+  bPaidCents: number
+  paymentsAToBCents: number
+  paymentsBToACents: number
 }
 
 // ============================================================================
@@ -45,7 +45,7 @@ export interface BalanceCalculation {
  * @returns Amount in cents (e.g., 1250)
  */
 export function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
+  return Math.round(dollars * 100)
 }
 
 /**
@@ -55,7 +55,7 @@ export function dollarsToCents(dollars: number): number {
  * @returns Amount in dollars (e.g., 12.50)
  */
 export function centsToDollars(cents: number): number {
-  return cents / 100;
+  return cents / 100
 }
 
 // ============================================================================
@@ -75,9 +75,9 @@ export function calculateShares(
   amountCents: number,
   parentARatio: number
 ): { aShare: number; bShare: number } {
-  const aShare = Math.floor(amountCents * parentARatio);
-  const bShare = amountCents - aShare;
-  return { aShare, bShare };
+  const aShare = Math.floor(amountCents * parentARatio)
+  const bShare = amountCents - aShare
+  return { aShare, bShare }
 }
 
 // ============================================================================
@@ -106,45 +106,45 @@ export function calculateBalanceFromData(
   parentBId: string | null,
   parentARatio: number
 ): BalanceCalculation {
-  let balance = 0;
-  let totalExpensesCents = 0;
-  let aShareCents = 0;
-  let bShareCents = 0;
-  let aPaidCents = 0;
-  let bPaidCents = 0;
+  let balance = 0
+  let totalExpensesCents = 0
+  let aShareCents = 0
+  let bShareCents = 0
+  let aPaidCents = 0
+  let bPaidCents = 0
 
   for (const expense of expenses) {
-    totalExpensesCents += expense.amount_cents;
-    const { aShare, bShare } = calculateShares(expense.amount_cents, parentARatio);
-    aShareCents += aShare;
-    bShareCents += bShare;
+    totalExpensesCents += expense.amount_cents
+    const { aShare, bShare } = calculateShares(expense.amount_cents, parentARatio)
+    aShareCents += aShare
+    bShareCents += bShare
 
     if (expense.paid_by === parentAId) {
-      aPaidCents += expense.amount_cents;
+      aPaidCents += expense.amount_cents
       // Parent A paid the full amount but only owes aShare
       // So they overpaid by (amount - aShare), meaning B owes them
       // balance += aShare - expense.amount_cents (negative, B owes A)
-      balance += (aShare - expense.amount_cents);
+      balance += aShare - expense.amount_cents
     } else if (expense.paid_by === parentBId) {
-      bPaidCents += expense.amount_cents;
+      bPaidCents += expense.amount_cents
       // Parent B paid, but A still owes their share
       // So balance increases by A's share (positive, A owes B)
-      balance += aShare;
+      balance += aShare
     }
   }
 
-  let paymentsAToBCents = 0;
-  let paymentsBToACents = 0;
+  let paymentsAToBCents = 0
+  let paymentsBToACents = 0
 
   for (const payment of payments) {
     if (payment.paid_by === parentAId) {
       // A paid B directly, reducing A's debt
-      paymentsAToBCents += payment.amount_cents;
-      balance -= payment.amount_cents;
+      paymentsAToBCents += payment.amount_cents
+      balance -= payment.amount_cents
     } else if (payment.paid_by === parentBId) {
       // B paid A directly, increasing A's debt (or reducing B's debt)
-      paymentsBToACents += payment.amount_cents;
-      balance += payment.amount_cents;
+      paymentsBToACents += payment.amount_cents
+      balance += payment.amount_cents
     }
   }
 
@@ -157,7 +157,7 @@ export function calculateBalanceFromData(
     bPaidCents,
     paymentsAToBCents,
     paymentsBToACents,
-  };
+  }
 }
 
 // ============================================================================
@@ -171,7 +171,7 @@ export function calculateBalanceFromData(
  * @returns true if valid (0 <= ratio <= 1)
  */
 export function isValidRatio(ratio: number): boolean {
-  return ratio >= 0 && ratio <= 1;
+  return ratio >= 0 && ratio <= 1
 }
 
 /**
@@ -181,5 +181,5 @@ export function isValidRatio(ratio: number): boolean {
  * @returns true if valid (cents > 0)
  */
 export function isValidAmount(cents: number): boolean {
-  return Number.isInteger(cents) && cents > 0;
+  return Number.isInteger(cents) && cents > 0
 }

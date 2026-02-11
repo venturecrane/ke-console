@@ -1,14 +1,14 @@
-import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui";
+import Link from 'next/link'
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { Button } from '@/components/ui'
 
 export default async function Home() {
-  const { userId } = await auth();
+  const { userId } = await auth()
 
   // Redirect authenticated users to dashboard
   if (userId) {
-    redirect("/dashboard");
+    redirect('/dashboard')
   }
 
   return (
@@ -38,9 +38,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="border-l-2 border-ke-accent/60 pl-4 py-2">
-            <p className="text-sm text-ke-secondary">
-              Running balance calculated to the cent
-            </p>
+            <p className="text-sm text-ke-secondary">Running balance calculated to the cent</p>
           </div>
         </div>
 
@@ -63,5 +61,5 @@ export default async function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }

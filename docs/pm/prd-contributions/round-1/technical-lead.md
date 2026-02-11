@@ -131,13 +131,13 @@ REQUEST FLOW: Create Expense
 
 ### 1.3 Deployment Topology
 
-| Component | Platform | Region | CDN |
-|-----------|----------|--------|-----|
-| Frontend (Next.js) | Vercel | Edge (auto) | Vercel Edge Network |
-| API (Workers) | Cloudflare | Global (100+ PoPs) | Cloudflare Edge |
-| Database (D1) | Cloudflare | Primary + Replicas | N/A (direct binding) |
-| Auth (Clerk) | Clerk Cloud | US (primary) | Global edge caching |
-| Email (Resend) | Resend Cloud | US | N/A |
+| Component          | Platform     | Region             | CDN                  |
+| ------------------ | ------------ | ------------------ | -------------------- |
+| Frontend (Next.js) | Vercel       | Edge (auto)        | Vercel Edge Network  |
+| API (Workers)      | Cloudflare   | Global (100+ PoPs) | Cloudflare Edge      |
+| Database (D1)      | Cloudflare   | Primary + Replicas | N/A (direct binding) |
+| Auth (Clerk)       | Clerk Cloud  | US (primary)       | Global edge caching  |
+| Email (Resend)     | Resend Cloud | US                 | N/A                  |
 
 ### 1.4 Key Architectural Decisions
 
@@ -148,34 +148,40 @@ REQUEST FLOW: Create Expense
 **Decision:** Implement timeout check on-read rather than via scheduled cron job.
 
 **Implementation:**
+
 ```typescript
 // workers/ke-api/src/services/activity.ts
 export async function checkAndApplyTimeout(db: D1Database, expense: Expense): Promise<Expense> {
-  if (expense.status !== 'pending_satisfaction') return expense;
+  if (expense.status !== 'pending_satisfaction') return expense
 
-  const resolvedAt = new Date(expense.resolved_at!);
-  const now = new Date();
-  const daysDiff = (now.getTime() - resolvedAt.getTime()) / (1000 * 60 * 60 * 24);
+  const resolvedAt = new Date(expense.resolved_at!)
+  const now = new Date()
+  const daysDiff = (now.getTime() - resolvedAt.getTime()) / (1000 * 60 * 60 * 24)
 
   if (daysDiff >= 7) {
-    await db.prepare(
-      `UPDATE expenses SET status = 'resolved_creator_decided', updated_at = datetime('now') WHERE id = ?`
-    ).bind(expense.id).run();
+    await db
+      .prepare(
+        `UPDATE expenses SET status = 'resolved_creator_decided', updated_at = datetime('now') WHERE id = ?`
+      )
+      .bind(expense.id)
+      .run()
 
-    return { ...expense, status: 'resolved_creator_decided' };
+    return { ...expense, status: 'resolved_creator_decided' }
   }
 
-  return expense;
+  return expense
 }
 ```
 
 **Rationale:**
+
 - Avoids scheduled triggers (Workers crons have cold-start latency)
 - No need for batch processing infrastructure
 - Timeout applies exactly when relevant (user viewing expense)
 - Simpler operational model (no separate cron monitoring)
 
 **Tradeoffs:**
+
 - Expense won't appear as `resolved_creator_decided` until next read
 - Activity feed may show slightly stale status until accessed
 
@@ -188,23 +194,25 @@ export async function checkAndApplyTimeout(db: D1Database, expense: Expense): Pr
 **Decision:** Store all monetary values as INTEGER cents in D1. Convert at API boundary.
 
 **Implementation:**
+
 ```typescript
 // workers/ke-api/src/calculations.ts
 export function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
+  return Math.round(dollars * 100)
 }
 
 export function calculateShares(
   amountCents: number,
   parentARatio: number
 ): { aShare: number; bShare: number } {
-  const aShare = Math.floor(amountCents * parentARatio);
-  const bShare = amountCents - aShare;  // Remainder to B
-  return { aShare, bShare };
+  const aShare = Math.floor(amountCents * parentARatio)
+  const bShare = amountCents - aShare // Remainder to B
+  return { aShare, bShare }
 }
 ```
 
 **Rationale:**
+
 - Exact integer arithmetic (no floating-point errors)
 - D1 INTEGER type has no precision limits for typical expense amounts
 - Floor for A's share ensures exact split (B gets remainder)
@@ -219,6 +227,7 @@ export function calculateShares(
 **Decision:** All deletable entities use `deleted_at TEXT` column. Query filters exclude deleted records by default.
 
 **Implementation:**
+
 ```sql
 -- Query pattern
 SELECT * FROM expenses WHERE family_id = ? AND deleted_at IS NULL
@@ -230,6 +239,7 @@ UPDATE expenses SET deleted_at = datetime('now') WHERE id = ?
 **Affected Tables:** children, expenses, fixed_expenses, payments
 
 **Rationale:**
+
 - Preserves audit trail for compliance
 - Enables "undo" functionality
 - Historical balance calculations remain accurate
@@ -244,6 +254,7 @@ UPDATE expenses SET deleted_at = datetime('now') WHERE id = ?
 **Decision:** Log every mutation with before/after snapshots in `activity_events` table.
 
 **Implementation:**
+
 ```typescript
 export async function createActivityEvent(
   db: D1Database,
@@ -256,19 +267,28 @@ export async function createActivityEvent(
   afterSnapshot: unknown | null,
   metadata?: unknown
 ): Promise<void> {
-  const id = generateId();
-  await db.prepare(
-    `INSERT INTO activity_events (...) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
-  ).bind(
-    id, familyId, userId, eventType, targetType, targetId,
-    beforeSnapshot ? JSON.stringify(beforeSnapshot) : null,
-    afterSnapshot ? JSON.stringify(afterSnapshot) : null,
-    metadata ? JSON.stringify(metadata) : null
-  ).run();
+  const id = generateId()
+  await db
+    .prepare(
+      `INSERT INTO activity_events (...) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+    )
+    .bind(
+      id,
+      familyId,
+      userId,
+      eventType,
+      targetType,
+      targetId,
+      beforeSnapshot ? JSON.stringify(beforeSnapshot) : null,
+      afterSnapshot ? JSON.stringify(afterSnapshot) : null,
+      metadata ? JSON.stringify(metadata) : null
+    )
+    .run()
 }
 ```
 
 **Event Types:**
+
 - `expense.created`, `expense.questioned`, `expense.resolved`, `expense.satisfied`, `expense.generated`
 - `payment.created`
 - `child.created`, `child.deleted`
@@ -276,6 +296,7 @@ export async function createActivityEvent(
 - `family.ratio_updated`
 
 **Rationale:**
+
 - Complete audit trail for dispute resolution
 - Powers activity feed feature
 - Enables future "undo" or "diff view" features
@@ -290,21 +311,27 @@ export async function createActivityEvent(
 **Decision:** Implement custom JWT verification with in-memory JWKS cache (1-hour TTL).
 
 **Implementation:**
+
 ```typescript
 // workers/ke-api/src/middleware/auth.ts
-let jwksCache: Map<string, CryptoKey> = new Map();
-let jwksCacheExpiry = 0;
-const JWKS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+let jwksCache: Map<string, CryptoKey> = new Map()
+let jwksCacheExpiry = 0
+const JWKS_CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour
 
-async function getVerificationKey(kid: string, clerkDomain: string, forceRefresh = false): Promise<CryptoKey | null> {
+async function getVerificationKey(
+  kid: string,
+  clerkDomain: string,
+  forceRefresh = false
+): Promise<CryptoKey | null> {
   if (forceRefresh || Date.now() > jwksCacheExpiry || jwksCache.size === 0) {
-    await fetchJWKS(clerkDomain);
+    await fetchJWKS(clerkDomain)
   }
-  return jwksCache.get(kid) || null;
+  return jwksCache.get(kid) || null
 }
 ```
 
 **Rationale:**
+
 - Avoids network round-trip to Clerk on every request
 - Handles key rotation gracefully (force refresh on signature failure)
 - Workers have no persistent memory, but cache survives within isolate lifecycle
@@ -412,37 +439,41 @@ async function getVerificationKey(kid: string, clerkDomain: string, forceRefresh
 ### 2.2 Table Specifications
 
 #### users
+
 Cache of Clerk user data for local joins.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | Clerk user ID (e.g., `user_2abc...`) |
-| email | TEXT | NOT NULL, UNIQUE | User's email address |
-| name | TEXT | | Display name |
-| created_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp |
-| updated_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp |
+| Column     | Type | Constraints           | Description                          |
+| ---------- | ---- | --------------------- | ------------------------------------ |
+| id         | TEXT | PRIMARY KEY           | Clerk user ID (e.g., `user_2abc...`) |
+| email      | TEXT | NOT NULL, UNIQUE      | User's email address                 |
+| name       | TEXT |                       | Display name                         |
+| created_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp                   |
+| updated_at | TEXT | NOT NULL, DEFAULT now | ISO 8601 timestamp                   |
 
 **Indexes:**
+
 - `idx_users_email` UNIQUE on (email)
 
 ---
 
 #### families
+
 Parent pair with expense split configuration.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| name | TEXT | | Optional family name |
-| parent_a_id | TEXT | NOT NULL, FK users(id) | First parent (creator) |
-| parent_b_id | TEXT | FK users(id) | Second parent (joiner) |
-| parent_a_ratio | REAL | NOT NULL, DEFAULT 0.5, CHECK (0-1) | Parent A's share (e.g., 0.6 = 60%) |
-| invite_code | TEXT | | 6-char uppercase code |
-| invite_expires_at | TEXT | | ISO 8601 expiry |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
+| Column            | Type | Constraints                        | Description                        |
+| ----------------- | ---- | ---------------------------------- | ---------------------------------- |
+| id                | TEXT | PRIMARY KEY                        | CUID-style ID                      |
+| name              | TEXT |                                    | Optional family name               |
+| parent_a_id       | TEXT | NOT NULL, FK users(id)             | First parent (creator)             |
+| parent_b_id       | TEXT | FK users(id)                       | Second parent (joiner)             |
+| parent_a_ratio    | REAL | NOT NULL, DEFAULT 0.5, CHECK (0-1) | Parent A's share (e.g., 0.6 = 60%) |
+| invite_code       | TEXT |                                    | 6-char uppercase code              |
+| invite_expires_at | TEXT |                                    | ISO 8601 expiry                    |
+| created_at        | TEXT | NOT NULL, DEFAULT now              |                                    |
+| updated_at        | TEXT | NOT NULL, DEFAULT now              |                                    |
 
 **Indexes:**
+
 - `idx_families_invite` UNIQUE on (invite_code) WHERE invite_code IS NOT NULL
 - `idx_families_parent_a` on (parent_a_id)
 - `idx_families_parent_b` on (parent_b_id)
@@ -450,53 +481,57 @@ Parent pair with expense split configuration.
 ---
 
 #### children
+
 Children associated with a family for expense attribution.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| name | TEXT | NOT NULL | Child's name (1-100 chars) |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column     | Type | Constraints               | Description                |
+| ---------- | ---- | ------------------------- | -------------------------- |
+| id         | TEXT | PRIMARY KEY               | CUID-style ID              |
+| family_id  | TEXT | NOT NULL, FK families(id) | Parent family              |
+| name       | TEXT | NOT NULL                  | Child's name (1-100 chars) |
+| created_at | TEXT | NOT NULL, DEFAULT now     |                            |
+| deleted_at | TEXT |                           | Soft delete timestamp      |
 
 **Indexes:**
+
 - `idx_children_family` on (family_id)
 
 ---
 
 #### expenses
+
 Individual expense records with 8-status state machine.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| created_by | TEXT | NOT NULL, FK users(id) | User who created |
-| paid_by | TEXT | NOT NULL, FK users(id) | User who paid |
-| fixed_expense_id | TEXT | FK fixed_expenses(id) | Source template (if generated) |
-| description | TEXT | NOT NULL, CHECK (1-200 chars) | Expense description |
-| amount_cents | INTEGER | NOT NULL | Amount in cents |
-| category | TEXT | NOT NULL, CHECK enum | school/medical/activities/childcare/other |
-| expense_date | TEXT | NOT NULL | YYYY-MM-DD |
-| child_ids | TEXT | | JSON array of child IDs |
-| link_url | TEXT | | Optional receipt/reference URL |
-| memo | TEXT | CHECK (<=500 chars) | Additional notes |
-| status | TEXT | NOT NULL, DEFAULT 'posted', CHECK enum | See state machine |
-| questioned_by | TEXT | FK users(id) | Who questioned |
-| questioned_at | TEXT | | When questioned |
-| question_reason | TEXT | CHECK enum | wrong_amount/not_child_related/duplicate/split_dispute/other |
-| question_note | TEXT | | Question details |
-| resolved_at | TEXT | | When resolved |
-| resolution_action | TEXT | | keep/edit/personal/delete |
-| satisfied_at | TEXT | | When questioner accepted |
-| closed_unresolved_at | TEXT | | When closed without resolution |
-| closed_unresolved_by | TEXT | FK users(id) | Who closed |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column               | Type    | Constraints                            | Description                                                  |
+| -------------------- | ------- | -------------------------------------- | ------------------------------------------------------------ |
+| id                   | TEXT    | PRIMARY KEY                            | CUID-style ID                                                |
+| family_id            | TEXT    | NOT NULL, FK families(id)              | Parent family                                                |
+| created_by           | TEXT    | NOT NULL, FK users(id)                 | User who created                                             |
+| paid_by              | TEXT    | NOT NULL, FK users(id)                 | User who paid                                                |
+| fixed_expense_id     | TEXT    | FK fixed_expenses(id)                  | Source template (if generated)                               |
+| description          | TEXT    | NOT NULL, CHECK (1-200 chars)          | Expense description                                          |
+| amount_cents         | INTEGER | NOT NULL                               | Amount in cents                                              |
+| category             | TEXT    | NOT NULL, CHECK enum                   | school/medical/activities/childcare/other                    |
+| expense_date         | TEXT    | NOT NULL                               | YYYY-MM-DD                                                   |
+| child_ids            | TEXT    |                                        | JSON array of child IDs                                      |
+| link_url             | TEXT    |                                        | Optional receipt/reference URL                               |
+| memo                 | TEXT    | CHECK (<=500 chars)                    | Additional notes                                             |
+| status               | TEXT    | NOT NULL, DEFAULT 'posted', CHECK enum | See state machine                                            |
+| questioned_by        | TEXT    | FK users(id)                           | Who questioned                                               |
+| questioned_at        | TEXT    |                                        | When questioned                                              |
+| question_reason      | TEXT    | CHECK enum                             | wrong_amount/not_child_related/duplicate/split_dispute/other |
+| question_note        | TEXT    |                                        | Question details                                             |
+| resolved_at          | TEXT    |                                        | When resolved                                                |
+| resolution_action    | TEXT    |                                        | keep/edit/personal/delete                                    |
+| satisfied_at         | TEXT    |                                        | When questioner accepted                                     |
+| closed_unresolved_at | TEXT    |                                        | When closed without resolution                               |
+| closed_unresolved_by | TEXT    | FK users(id)                           | Who closed                                                   |
+| created_at           | TEXT    | NOT NULL, DEFAULT now                  |                                                              |
+| updated_at           | TEXT    | NOT NULL, DEFAULT now                  |                                                              |
+| deleted_at           | TEXT    |                                        | Soft delete timestamp                                        |
 
 **Indexes:**
+
 - `idx_expenses_family` on (family_id)
 - `idx_expenses_date` on (family_id, expense_date)
 - `idx_expenses_status` on (family_id, status)
@@ -505,110 +540,120 @@ Individual expense records with 8-status state machine.
 ---
 
 #### fixed_expenses
+
 Recurring expense templates.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| created_by | TEXT | NOT NULL, FK users(id) | Template creator |
-| description | TEXT | NOT NULL, CHECK (1-200 chars) | Expense description |
-| amount_cents | INTEGER | NOT NULL, CHECK (>0) | Amount in cents |
-| category | TEXT | NOT NULL, CHECK enum | Category |
-| frequency | TEXT | NOT NULL, DEFAULT 'monthly', CHECK enum | weekly/biweekly/monthly/quarterly/annually |
-| child_ids | TEXT | | JSON array of child IDs |
-| link_url | TEXT | | Reference URL |
-| memo | TEXT | CHECK (<=500 chars) | Notes |
-| effective_from | TEXT | NOT NULL | Start date (YYYY-MM-DD) |
-| effective_until | TEXT | | End date (null = ongoing) |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column          | Type    | Constraints                             | Description                                |
+| --------------- | ------- | --------------------------------------- | ------------------------------------------ |
+| id              | TEXT    | PRIMARY KEY                             | CUID-style ID                              |
+| family_id       | TEXT    | NOT NULL, FK families(id)               | Parent family                              |
+| created_by      | TEXT    | NOT NULL, FK users(id)                  | Template creator                           |
+| description     | TEXT    | NOT NULL, CHECK (1-200 chars)           | Expense description                        |
+| amount_cents    | INTEGER | NOT NULL, CHECK (>0)                    | Amount in cents                            |
+| category        | TEXT    | NOT NULL, CHECK enum                    | Category                                   |
+| frequency       | TEXT    | NOT NULL, DEFAULT 'monthly', CHECK enum | weekly/biweekly/monthly/quarterly/annually |
+| child_ids       | TEXT    |                                         | JSON array of child IDs                    |
+| link_url        | TEXT    |                                         | Reference URL                              |
+| memo            | TEXT    | CHECK (<=500 chars)                     | Notes                                      |
+| effective_from  | TEXT    | NOT NULL                                | Start date (YYYY-MM-DD)                    |
+| effective_until | TEXT    |                                         | End date (null = ongoing)                  |
+| created_at      | TEXT    | NOT NULL, DEFAULT now                   |                                            |
+| updated_at      | TEXT    | NOT NULL, DEFAULT now                   |                                            |
+| deleted_at      | TEXT    |                                         | Soft delete timestamp                      |
 
 **Indexes:**
+
 - `idx_fixed_family` on (family_id)
 - `idx_fixed_effective` on (effective_from, effective_until)
 
 ---
 
 #### payments
+
 Direct payments between parents to settle balance.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| paid_by | TEXT | NOT NULL, FK users(id) | Payer |
-| amount_cents | INTEGER | NOT NULL, CHECK (>0) | Amount in cents |
-| payment_date | TEXT | NOT NULL | YYYY-MM-DD |
-| notes | TEXT | | Optional notes |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| deleted_at | TEXT | | Soft delete timestamp |
+| Column       | Type    | Constraints               | Description           |
+| ------------ | ------- | ------------------------- | --------------------- |
+| id           | TEXT    | PRIMARY KEY               | CUID-style ID         |
+| family_id    | TEXT    | NOT NULL, FK families(id) | Parent family         |
+| paid_by      | TEXT    | NOT NULL, FK users(id)    | Payer                 |
+| amount_cents | INTEGER | NOT NULL, CHECK (>0)      | Amount in cents       |
+| payment_date | TEXT    | NOT NULL                  | YYYY-MM-DD            |
+| notes        | TEXT    |                           | Optional notes        |
+| created_at   | TEXT    | NOT NULL, DEFAULT now     |                       |
+| deleted_at   | TEXT    |                           | Soft delete timestamp |
 
 **Indexes:**
+
 - `idx_payments_family` on (family_id)
 - `idx_payments_date` on (family_id, payment_date)
 
 ---
 
 #### activity_events
+
 Audit trail and activity feed.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| user_id | TEXT | NOT NULL, FK users(id) | Acting user |
-| event_type | TEXT | NOT NULL | e.g., expense.created |
-| target_type | TEXT | NOT NULL | expense/payment/child/fixed_expense/family |
-| target_id | TEXT | NOT NULL | ID of affected entity |
-| before_snapshot | TEXT | | JSON of state before change |
-| after_snapshot | TEXT | | JSON of state after change |
-| metadata | TEXT | | Additional JSON context |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column          | Type | Constraints               | Description                                |
+| --------------- | ---- | ------------------------- | ------------------------------------------ |
+| id              | TEXT | PRIMARY KEY               | CUID-style ID                              |
+| family_id       | TEXT | NOT NULL, FK families(id) | Parent family                              |
+| user_id         | TEXT | NOT NULL, FK users(id)    | Acting user                                |
+| event_type      | TEXT | NOT NULL                  | e.g., expense.created                      |
+| target_type     | TEXT | NOT NULL                  | expense/payment/child/fixed_expense/family |
+| target_id       | TEXT | NOT NULL                  | ID of affected entity                      |
+| before_snapshot | TEXT |                           | JSON of state before change                |
+| after_snapshot  | TEXT |                           | JSON of state after change                 |
+| metadata        | TEXT |                           | Additional JSON context                    |
+| created_at      | TEXT | NOT NULL, DEFAULT now     |                                            |
 
 **Indexes:**
+
 - `idx_activity_family` on (family_id, created_at DESC)
 - `idx_activity_target` on (target_type, target_id)
 
 ---
 
 #### subscriptions
+
 Pro tier subscription tracking.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Parent family |
-| status | TEXT | NOT NULL, DEFAULT 'active', CHECK enum | active/cancelled/expired |
-| started_at | TEXT | NOT NULL | Subscription start |
-| expires_at | TEXT | | Subscription end |
-| stripe_subscription_id | TEXT | | Stripe sub ID |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
-| updated_at | TEXT | NOT NULL, DEFAULT now | |
+| Column                 | Type | Constraints                            | Description              |
+| ---------------------- | ---- | -------------------------------------- | ------------------------ |
+| id                     | TEXT | PRIMARY KEY                            | CUID-style ID            |
+| family_id              | TEXT | NOT NULL, FK families(id)              | Parent family            |
+| status                 | TEXT | NOT NULL, DEFAULT 'active', CHECK enum | active/cancelled/expired |
+| started_at             | TEXT | NOT NULL                               | Subscription start       |
+| expires_at             | TEXT |                                        | Subscription end         |
+| stripe_subscription_id | TEXT |                                        | Stripe sub ID            |
+| created_at             | TEXT | NOT NULL, DEFAULT now                  |                          |
+| updated_at             | TEXT | NOT NULL, DEFAULT now                  |                          |
 
 **Indexes:**
+
 - `idx_subscriptions_family` UNIQUE on (family_id)
 
 ---
 
 #### pending_invites
+
 Email-based invite tracking.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| family_id | TEXT | NOT NULL, FK families(id) | Target family |
-| invited_by | TEXT | NOT NULL, FK users(id) | Inviter |
-| invited_email | TEXT | NOT NULL | Invitee email |
-| invite_code | TEXT | NOT NULL | 6-char code |
-| status | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/expired/cancelled |
-| sent_at | TEXT | NOT NULL, DEFAULT now | |
-| expires_at | TEXT | NOT NULL | Expiry timestamp |
-| accepted_at | TEXT | | Acceptance timestamp |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column        | Type | Constraints                             | Description                        |
+| ------------- | ---- | --------------------------------------- | ---------------------------------- |
+| id            | TEXT | PRIMARY KEY                             | CUID-style ID                      |
+| family_id     | TEXT | NOT NULL, FK families(id)               | Target family                      |
+| invited_by    | TEXT | NOT NULL, FK users(id)                  | Inviter                            |
+| invited_email | TEXT | NOT NULL                                | Invitee email                      |
+| invite_code   | TEXT | NOT NULL                                | 6-char code                        |
+| status        | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/expired/cancelled |
+| sent_at       | TEXT | NOT NULL, DEFAULT now                   |                                    |
+| expires_at    | TEXT | NOT NULL                                | Expiry timestamp                   |
+| accepted_at   | TEXT |                                         | Acceptance timestamp               |
+| created_at    | TEXT | NOT NULL, DEFAULT now                   |                                    |
 
 **Indexes:**
+
 - `idx_pending_invites_family` on (family_id)
 - `idx_pending_invites_email` on (invited_email)
 - `idx_pending_invites_code` on (invite_code)
@@ -616,20 +661,22 @@ Email-based invite tracking.
 ---
 
 #### fixed_expense_suggestions
+
 Linking ad-hoc expenses to recurring templates (future feature).
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | TEXT | PRIMARY KEY | CUID-style ID |
-| fixed_expense_id | TEXT | NOT NULL, FK fixed_expenses(id) | Target template |
-| expense_id | TEXT | NOT NULL, FK expenses(id) | Source expense |
-| suggested_by | TEXT | NOT NULL, FK users(id) | User who suggested |
-| suggestion_note | TEXT | | Explanation |
-| status | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/rejected/ignored |
-| resolved_at | TEXT | | Resolution timestamp |
-| created_at | TEXT | NOT NULL, DEFAULT now | |
+| Column           | Type | Constraints                             | Description                       |
+| ---------------- | ---- | --------------------------------------- | --------------------------------- |
+| id               | TEXT | PRIMARY KEY                             | CUID-style ID                     |
+| fixed_expense_id | TEXT | NOT NULL, FK fixed_expenses(id)         | Target template                   |
+| expense_id       | TEXT | NOT NULL, FK expenses(id)               | Source expense                    |
+| suggested_by     | TEXT | NOT NULL, FK users(id)                  | User who suggested                |
+| suggestion_note  | TEXT |                                         | Explanation                       |
+| status           | TEXT | NOT NULL, DEFAULT 'pending', CHECK enum | pending/accepted/rejected/ignored |
+| resolved_at      | TEXT |                                         | Resolution timestamp              |
+| created_at       | TEXT | NOT NULL, DEFAULT now                   |                                   |
 
 **Indexes:**
+
 - `idx_suggestions_fixed` on (fixed_expense_id)
 
 ---
@@ -690,28 +737,28 @@ Linking ad-hoc expenses to recurring templates (future feature).
 
 #### Status Definitions
 
-| Status | Description | Included in Balance? |
-|--------|-------------|---------------------|
-| `posted` | Initial state, expense visible to both parents | Yes |
-| `questioned` | Other parent has raised a question | No |
-| `pending_satisfaction` | Creator responded, awaiting questioner acceptance | No |
-| `resolved` | Questioner accepted creator's response | Yes |
-| `resolved_creator_decided` | 7-day timeout expired, auto-resolved | Yes |
-| `resolved_personal` | Creator marked as personal (not shared) | No |
-| `resolved_deleted` | Creator deleted the expense | No |
-| `closed_unresolved` | Escalated or abandoned dispute | No |
+| Status                     | Description                                       | Included in Balance? |
+| -------------------------- | ------------------------------------------------- | -------------------- |
+| `posted`                   | Initial state, expense visible to both parents    | Yes                  |
+| `questioned`               | Other parent has raised a question                | No                   |
+| `pending_satisfaction`     | Creator responded, awaiting questioner acceptance | No                   |
+| `resolved`                 | Questioner accepted creator's response            | Yes                  |
+| `resolved_creator_decided` | 7-day timeout expired, auto-resolved              | Yes                  |
+| `resolved_personal`        | Creator marked as personal (not shared)           | No                   |
+| `resolved_deleted`         | Creator deleted the expense                       | No                   |
+| `closed_unresolved`        | Escalated or abandoned dispute                    | No                   |
 
 #### State Transitions
 
-| From | To | Trigger | Actor |
-|------|----|---------|-------|
-| posted | questioned | POST /expenses/:id/question | Other parent |
-| questioned | pending_satisfaction | POST /expenses/:id/resolve (keep/edit) | Creator |
-| questioned | resolved_personal | POST /expenses/:id/resolve (personal) | Creator |
-| questioned | resolved_deleted | POST /expenses/:id/resolve (delete) | Creator |
-| pending_satisfaction | resolved | POST /expenses/:id/satisfy | Questioner |
-| pending_satisfaction | resolved_creator_decided | 7-day timeout (on-read) | System |
-| * | closed_unresolved | POST /expenses/:id/close-unresolved | Either parent |
+| From                 | To                       | Trigger                                | Actor         |
+| -------------------- | ------------------------ | -------------------------------------- | ------------- |
+| posted               | questioned               | POST /expenses/:id/question            | Other parent  |
+| questioned           | pending_satisfaction     | POST /expenses/:id/resolve (keep/edit) | Creator       |
+| questioned           | resolved_personal        | POST /expenses/:id/resolve (personal)  | Creator       |
+| questioned           | resolved_deleted         | POST /expenses/:id/resolve (delete)    | Creator       |
+| pending_satisfaction | resolved                 | POST /expenses/:id/satisfy             | Questioner    |
+| pending_satisfaction | resolved_creator_decided | 7-day timeout (on-read)                | System        |
+| \*                   | closed_unresolved        | POST /expenses/:id/close-unresolved    | Either parent |
 
 ---
 
@@ -734,6 +781,7 @@ X-User-Id: user_2abc123...
 ```
 
 JWT verification:
+
 1. Parse Authorization header
 2. Decode JWT, extract `kid` from header
 3. Fetch JWKS from Clerk (cached 1 hour)
@@ -743,62 +791,68 @@ JWT verification:
 
 ### 3.3 Common Response Codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Validation error |
-| 401 | Authentication required |
-| 403 | Authorization denied |
-| 404 | Resource not found |
-| 500 | Server error |
+| Code | Meaning                 |
+| ---- | ----------------------- |
+| 200  | Success                 |
+| 201  | Created                 |
+| 400  | Validation error        |
+| 401  | Authentication required |
+| 403  | Authorization denied    |
+| 404  | Resource not found      |
+| 500  | Server error            |
 
 ### 3.4 Endpoint Reference
 
 ---
 
 #### GET /health
+
 Health check endpoint.
 
 **Auth:** None
 
 **Response:**
+
 ```typescript
 {
-  status: "ok" | "error";
-  db: "connected" | "disconnected" | "error";
+  status: 'ok' | 'error'
+  db: 'connected' | 'disconnected' | 'error'
 }
 ```
 
 ---
 
 #### GET /me
+
 Get current user info with family context.
 
 **Auth:** Required
 
 **Response:**
+
 ```typescript
 {
   user: {
-    id: string;
-    email: string;
-    name: string | null;
-    created_at: string;
-  };
-  family: Family | null;
-  role: "parent_a" | "parent_b" | null;
+    id: string
+    email: string
+    name: string | null
+    created_at: string
+  }
+  family: Family | null
+  role: 'parent_a' | 'parent_b' | null
 }
 ```
 
 ---
 
 #### POST /users/sync
+
 Sync user from Clerk (called by webhook or frontend).
 
 **Auth:** None (trusted source only)
 
 **Request:**
+
 ```typescript
 {
   id: string;      // Clerk user ID
@@ -808,18 +862,24 @@ Sync user from Clerk (called by webhook or frontend).
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; user: User }
+{
+  success: true
+  user: User
+}
 ```
 
 ---
 
 #### POST /families
+
 Create a new family.
 
 **Auth:** Required
 
 **Request:**
+
 ```typescript
 {
   name?: string;  // Optional family name
@@ -827,38 +887,47 @@ Create a new family.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: User already belongs to a family
 - 404: User not found
 
 ---
 
 #### GET /families/:id
+
 Get family details with parent info.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  family: Family;
-  parentA: User;
-  parentB: User | null;
+  family: Family
+  parentA: User
+  parentB: User | null
 }
 ```
 
 ---
 
 #### PATCH /families/:id
+
 Update family settings.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   parentARatio?: number;  // 0.0 - 1.0
@@ -867,114 +936,140 @@ Update family settings.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: parentARatio out of range
 
 ---
 
 #### POST /families/:id/invite
+
 Generate invite code.
 
 **Auth:** Required (must be parent_a)
 
 **Response:**
+
 ```typescript
 {
-  success: true;
-  inviteCode: string;   // 6-char uppercase
-  expiresAt: string;    // ISO 8601
+  success: true
+  inviteCode: string // 6-char uppercase
+  expiresAt: string // ISO 8601
 }
 ```
 
 **Errors:**
+
 - 400: Family already has two parents
 - 403: Only family creator can generate codes
 
 ---
 
 #### POST /families/:id/invite/email
+
 Send email invite.
 
 **Auth:** Required (must be parent_a)
 
 **Request:**
+
 ```typescript
 {
-  email: string;
+  email: string
 }
 ```
 
 **Response:**
+
 ```typescript
 {
-  success: true;
-  inviteCode: string;
-  inviteLink: string;
-  expiresAt: string;
-  emailSent: boolean;
+  success: true
+  inviteCode: string
+  inviteLink: string
+  expiresAt: string
+  emailSent: boolean
 }
 ```
 
 ---
 
 #### GET /families/:id/invites
+
 List pending invites.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  invites: Array<PendingInvite & { is_expired: boolean }>;
+  invites: Array<PendingInvite & { is_expired: boolean }>
 }
 ```
 
 ---
 
 #### DELETE /families/:id/invites/:inviteId
+
 Cancel a pending invite.
 
 **Auth:** Required (must be parent_a)
 
 **Response:**
+
 ```typescript
-{ success: true }
+{
+  success: true
+}
 ```
 
 ---
 
 #### POST /families/join
+
 Join a family with invite code.
 
 **Auth:** Required
 
 **Request:**
+
 ```typescript
 {
-  inviteCode: string;
+  inviteCode: string
 }
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; family: Family }
+{
+  success: true
+  family: Family
+}
 ```
 
 **Errors:**
+
 - 400: Invalid/expired code, already in family, or family full
 
 ---
 
 #### POST /families/:id/expenses
+
 Create an expense.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description: string;        // 1-200 chars
@@ -989,13 +1084,18 @@ Create an expense.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 ---
 
 #### GET /families/:id/expenses
+
 List expenses with filtering.
 
 **Auth:** Required (must be family member)
@@ -1011,6 +1111,7 @@ List expenses with filtering.
 | offset | number | Default 0 |
 
 **Response:**
+
 ```typescript
 {
   expenses: Expense[];
@@ -1025,69 +1126,77 @@ List expenses with filtering.
 ---
 
 #### GET /families/:id/balance
+
 Get current balance with breakdown.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
 {
-  balance_cents: number;           // Absolute value
-  payer_id: string | null;         // Who owes
-  payee_id: string | null;         // Who is owed
-  parent_a_id: string;
-  parent_b_id: string | null;
+  balance_cents: number // Absolute value
+  payer_id: string | null // Who owes
+  payee_id: string | null // Who is owed
+  parent_a_id: string
+  parent_b_id: string | null
   breakdown: {
-    total_expenses_cents: number;
-    included_expenses_count: number;
-    a_share_cents: number;
-    b_share_cents: number;
-    a_paid_cents: number;
-    b_paid_cents: number;
-    payments_a_to_b_cents: number;
-    payments_b_to_a_cents: number;
-    questioned_total_cents: number;
-    questioned_count: number;
-  };
+    total_expenses_cents: number
+    included_expenses_count: number
+    a_share_cents: number
+    b_share_cents: number
+    a_paid_cents: number
+    b_paid_cents: number
+    payments_a_to_b_cents: number
+    payments_b_to_a_cents: number
+    questioned_total_cents: number
+    questioned_count: number
+  }
   period: {
-    start: string;
-    end: string;
-    label: string;
-  };
+    start: string
+    end: string
+    label: string
+  }
   current_period: {
-    a_expenses_cents: number;
-    a_payments_cents: number;
-    b_expenses_cents: number;
-    b_payments_cents: number;
-  };
+    a_expenses_cents: number
+    a_payments_cents: number
+    b_expenses_cents: number
+    b_payments_cents: number
+  }
   prior_balance: {
-    balance_cents: number;
-    payer_id: string | null;
-    payee_id: string | null;
-  };
+    balance_cents: number
+    payer_id: string | null
+    payee_id: string | null
+  }
 }
 ```
 
 ---
 
 #### GET /expenses/:id
+
 Get single expense (with timeout check).
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ expense: Expense }
+{
+  expense: Expense
+}
 ```
 
 ---
 
 #### POST /expenses/:id/question
+
 Question an expense.
 
 **Auth:** Required (must be other parent, not creator)
 
 **Request:**
+
 ```typescript
 {
   reason: "wrong_amount" | "not_child_related" | "duplicate" | "split_dispute" | "other";
@@ -1096,21 +1205,28 @@ Question an expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Cannot question own expense, or not in `posted` status
 
 ---
 
 #### POST /expenses/:id/resolve
+
 Resolve a questioned expense.
 
 **Auth:** Required (must be expense creator)
 
 **Request:**
+
 ```typescript
 {
   action: "keep" | "edit" | "personal" | "delete";
@@ -1119,36 +1235,49 @@ Resolve a questioned expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Not in `questioned` status
 
 ---
 
 #### POST /expenses/:id/satisfy
+
 Accept expense resolution.
 
 **Auth:** Required (must be original questioner)
 
 **Response:**
+
 ```typescript
-{ success: true; expense: Expense }
+{
+  success: true
+  expense: Expense
+}
 ```
 
 **Errors:**
+
 - 400: Not in `pending_satisfaction` status
 
 ---
 
 #### POST /families/:id/payments
+
 Record a payment.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   amount: number;           // dollars
@@ -1158,13 +1287,18 @@ Record a payment.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; payment: Payment }
+{
+  success: true
+  payment: Payment
+}
 ```
 
 ---
 
 #### GET /families/:id/payments
+
 List payments.
 
 **Auth:** Required (must be family member)
@@ -1176,6 +1310,7 @@ List payments.
 | offset | number | Default 0 |
 
 **Response:**
+
 ```typescript
 {
   payments: Payment[];
@@ -1186,18 +1321,21 @@ List payments.
 ---
 
 #### POST /families/:id/children
+
 Add a child.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
-  name: string;  // 1-100 chars
+  name: string // 1-100 chars
 }
 ```
 
 **Response (201):**
+
 ```typescript
 Child
 ```
@@ -1205,6 +1343,7 @@ Child
 ---
 
 #### GET /families/:id/children
+
 List children.
 
 **Auth:** Required (must be family member)
@@ -1215,6 +1354,7 @@ List children.
 | include_deleted | boolean | Include soft-deleted |
 
 **Response:**
+
 ```typescript
 {
   children: Child[];
@@ -1225,23 +1365,30 @@ List children.
 ---
 
 #### DELETE /families/:id/children/:childId
+
 Soft-delete a child.
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ id: string; deleted_at: string }
+{
+  id: string
+  deleted_at: string
+}
 ```
 
 ---
 
 #### POST /families/:id/fixed-expenses
+
 Create fixed expense template.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description: string;
@@ -1256,16 +1403,22 @@ Create fixed expense template.
 ```
 
 **Response (201):**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 **Errors:**
+
 - 403: Tier limit reached (Free tier: 2 max)
 
 ---
 
 #### GET /families/:id/fixed-expenses
+
 List fixed expenses.
 
 **Auth:** Required (must be family member)
@@ -1276,6 +1429,7 @@ List fixed expenses.
 | includeEnded | boolean | Include past-effective templates |
 
 **Response:**
+
 ```typescript
 {
   fixedExpenses: FixedExpense[];
@@ -1291,11 +1445,13 @@ List fixed expenses.
 ---
 
 #### PATCH /families/:id/fixed-expenses/:fixedExpenseId
+
 Update fixed expense.
 
 **Auth:** Required (must be family member)
 
 **Request:**
+
 ```typescript
 {
   description?: string;
@@ -1309,25 +1465,35 @@ Update fixed expense.
 ```
 
 **Response:**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 ---
 
 #### DELETE /families/:id/fixed-expenses/:fixedExpenseId
+
 End a fixed expense (sets effective_until to today).
 
 **Auth:** Required (must be family member)
 
 **Response:**
+
 ```typescript
-{ success: true; fixedExpense: FixedExpense }
+{
+  success: true
+  fixedExpense: FixedExpense
+}
 ```
 
 ---
 
 #### GET /families/:id/activity
+
 Get activity feed.
 
 **Auth:** Required (must be family member)
@@ -1344,6 +1510,7 @@ Get activity feed.
 | expense_id | string | Scope to single expense |
 
 **Response:**
+
 ```typescript
 {
   events: ActivityEvent[];
@@ -1358,11 +1525,12 @@ Get activity feed.
 Currently no rate limiting implemented. Future strategy:
 
 | Tier | Requests/min | Burst |
-|------|--------------|-------|
-| Free | 60 | 10 |
-| Pro | 300 | 50 |
+| ---- | ------------ | ----- |
+| Free | 60           | 10    |
+| Pro  | 300          | 50    |
 
 Implementation approach:
+
 - Use Cloudflare Rate Limiting rules (at edge)
 - Or implement token bucket in KV/D1
 - Key by user ID (from JWT sub claim)
@@ -1373,56 +1541,57 @@ Implementation approach:
 
 ### 4.1 Performance Targets
 
-| Metric | Target | Current Baseline |
-|--------|--------|------------------|
-| API p50 latency | <50ms | ~30ms (Workers cold) |
-| API p95 latency | <200ms | ~100ms |
-| API p99 latency | <500ms | ~250ms |
-| D1 query time | <20ms | ~10-15ms |
-| TTFB (frontend) | <100ms | ~60ms (Vercel Edge) |
-| LCP | <2.5s | Varies by page |
-| FID | <100ms | <50ms |
-| CLS | <0.1 | <0.05 |
+| Metric          | Target | Current Baseline     |
+| --------------- | ------ | -------------------- |
+| API p50 latency | <50ms  | ~30ms (Workers cold) |
+| API p95 latency | <200ms | ~100ms               |
+| API p99 latency | <500ms | ~250ms               |
+| D1 query time   | <20ms  | ~10-15ms             |
+| TTFB (frontend) | <100ms | ~60ms (Vercel Edge)  |
+| LCP             | <2.5s  | Varies by page       |
+| FID             | <100ms | <50ms                |
+| CLS             | <0.1   | <0.05                |
 
 ### 4.2 Availability
 
-| Requirement | Target |
-|-------------|--------|
-| Uptime SLA | 99.9% (Cloudflare Workers) |
-| RTO (Recovery Time Objective) | <15 minutes |
-| RPO (Recovery Point Objective) | <1 hour |
-| Maintenance windows | None (zero-downtime deploys) |
+| Requirement                    | Target                       |
+| ------------------------------ | ---------------------------- |
+| Uptime SLA                     | 99.9% (Cloudflare Workers)   |
+| RTO (Recovery Time Objective)  | <15 minutes                  |
+| RPO (Recovery Point Objective) | <1 hour                      |
+| Maintenance windows            | None (zero-downtime deploys) |
 
 ### 4.3 Scalability
 
-| Dimension | Capacity |
-|-----------|----------|
-| Concurrent users | 10,000+ (Workers auto-scale) |
-| Requests/second | 100,000+ (Workers limit) |
-| D1 database size | 10GB (current limit) |
-| D1 rows | Unlimited within size |
-| Families per deployment | 100,000+ |
+| Dimension               | Capacity                     |
+| ----------------------- | ---------------------------- |
+| Concurrent users        | 10,000+ (Workers auto-scale) |
+| Requests/second         | 100,000+ (Workers limit)     |
+| D1 database size        | 10GB (current limit)         |
+| D1 rows                 | Unlimited within size        |
+| Families per deployment | 100,000+                     |
 
 ### 4.4 Data Retention
 
-| Data Type | Retention | Rationale |
-|-----------|-----------|-----------|
-| Active expenses | Indefinite | Historical reference |
-| Soft-deleted records | 90 days | Recovery period |
-| Activity events | 2 years | Audit compliance |
-| Session tokens | Until expiry | Security |
-| Invite codes | 7 days after expiry | Cleanup |
+| Data Type            | Retention           | Rationale            |
+| -------------------- | ------------------- | -------------------- |
+| Active expenses      | Indefinite          | Historical reference |
+| Soft-deleted records | 90 days             | Recovery period      |
+| Activity events      | 2 years             | Audit compliance     |
+| Session tokens       | Until expiry        | Security             |
+| Invite codes         | 7 days after expiry | Cleanup              |
 
 ### 4.5 Backup Strategy
 
-| Component | Strategy | Frequency | Retention |
-|-----------|----------|-----------|-----------|
-| D1 Database | Cloudflare automatic | Point-in-time | 30 days |
-| D1 Manual backup | Export via API | Weekly | 90 days |
-| Configuration | Git (wrangler.toml) | Every deploy | Forever |
-| Secrets | Cloudflare dashboard | Manual | N/A |
+| Component        | Strategy             | Frequency     | Retention |
+| ---------------- | -------------------- | ------------- | --------- |
+| D1 Database      | Cloudflare automatic | Point-in-time | 30 days   |
+| D1 Manual backup | Export via API       | Weekly        | 90 days   |
+| Configuration    | Git (wrangler.toml)  | Every deploy  | Forever   |
+| Secrets          | Cloudflare dashboard | Manual        | N/A       |
 
 **D1 Backup Commands:**
+
 ```bash
 # Export database
 wrangler d1 export ke-main --remote --output backup.sql
@@ -1434,6 +1603,7 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 ### 4.6 Security Requirements
 
 #### Authentication & Authorization
+
 - [x] Clerk JWT verification with RS256
 - [x] JWKS caching with 1-hour TTL
 - [x] Family membership verification on all routes
@@ -1441,6 +1611,7 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 - [ ] Rate limiting (planned)
 
 #### Data Protection
+
 - [x] All traffic over HTTPS (Cloudflare enforced)
 - [x] Parameterized queries (SQL injection prevention)
 - [x] Input validation on all endpoints
@@ -1448,18 +1619,20 @@ wrangler d1 time-travel ke-main --timestamp "2024-01-15T10:00:00Z"
 - [ ] Encryption at rest (D1 roadmap)
 
 #### Secrets Management
+
 - [x] Environment variables via `wrangler secret`
 - [x] No secrets in codebase
 - [x] Separate secrets per environment
 
 #### Headers
+
 ```typescript
 // CORS configuration
 cors({
   origin: (origin) => {
-    const allowed = ['https://ke-console.vercel.app', 'http://localhost:3000'];
-    if (origin?.endsWith('.vercel.app')) return origin;  // Preview deploys
-    return allowed.includes(origin ?? '') ? origin! : null;
+    const allowed = ['https://ke-console.vercel.app', 'http://localhost:3000']
+    if (origin?.endsWith('.vercel.app')) return origin // Preview deploys
+    return allowed.includes(origin ?? '') ? origin! : null
   },
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
@@ -1468,13 +1641,13 @@ cors({
 
 ### 4.7 Compliance Considerations
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| GDPR (if EU users) | Partial | Need data export/delete flows |
-| CCPA (if CA users) | Partial | Need privacy policy updates |
-| SOC 2 | N/A | Inherited from Cloudflare/Vercel |
-| PCI DSS | N/A | No card data stored (Stripe handles) |
-| COPPA | Review needed | App involves child data |
+| Requirement        | Status        | Notes                                |
+| ------------------ | ------------- | ------------------------------------ |
+| GDPR (if EU users) | Partial       | Need data export/delete flows        |
+| CCPA (if CA users) | Partial       | Need privacy policy updates          |
+| SOC 2              | N/A           | Inherited from Cloudflare/Vercel     |
+| PCI DSS            | N/A           | No card data stored (Stripe handles) |
+| COPPA              | Review needed | App involves child data              |
 
 ---
 
@@ -1482,15 +1655,16 @@ cors({
 
 ### 5.1 D1 Limitations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| **Database size limit (10GB)** | High - could block growth | Monitor size; implement archival strategy for old activity_events |
-| **No transactions** | Medium - data consistency | Use D1 `batch()` for atomic multi-statement ops |
-| **SQLite feature set** | Low - missing features | Design around limitations; no CTEs with recursive, limited window functions |
-| **Read replica lag** | Low - stale reads | Accept eventual consistency for non-critical reads |
-| **No full-text search** | Medium - search functionality | Use LIKE queries; consider external search service later |
+| Risk                           | Impact                        | Mitigation                                                                  |
+| ------------------------------ | ----------------------------- | --------------------------------------------------------------------------- |
+| **Database size limit (10GB)** | High - could block growth     | Monitor size; implement archival strategy for old activity_events           |
+| **No transactions**            | Medium - data consistency     | Use D1 `batch()` for atomic multi-statement ops                             |
+| **SQLite feature set**         | Low - missing features        | Design around limitations; no CTEs with recursive, limited window functions |
+| **Read replica lag**           | Low - stale reads             | Accept eventual consistency for non-critical reads                          |
+| **No full-text search**        | Medium - search functionality | Use LIKE queries; consider external search service later                    |
 
 **D1 batch() pattern for atomicity:**
+
 ```typescript
 await db.batch([
   db.prepare('INSERT INTO expenses ...').bind(...),
@@ -1500,40 +1674,40 @@ await db.batch([
 
 ### 5.2 Workers Constraints
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| **CPU time limit (50ms)** | Medium - complex operations | Offload heavy work; keep handlers simple |
-| **Memory limit (128MB)** | Low - unlikely to hit | Stream large responses; avoid buffering |
-| **No persistent state** | Medium - caching | Use in-memory cache within request; accept cold starts |
-| **Cold start latency** | Low - ~5-20ms | Acceptable for API; use `UNENV` for smaller bundles |
-| **Global variables** | Low - isolate reuse | JWKS cache works because isolates are reused |
+| Risk                      | Impact                      | Mitigation                                             |
+| ------------------------- | --------------------------- | ------------------------------------------------------ |
+| **CPU time limit (50ms)** | Medium - complex operations | Offload heavy work; keep handlers simple               |
+| **Memory limit (128MB)**  | Low - unlikely to hit       | Stream large responses; avoid buffering                |
+| **No persistent state**   | Medium - caching            | Use in-memory cache within request; accept cold starts |
+| **Cold start latency**    | Low - ~5-20ms               | Acceptable for API; use `UNENV` for smaller bundles    |
+| **Global variables**      | Low - isolate reuse         | JWKS cache works because isolates are reused           |
 
 ### 5.3 Clerk Dependency
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| **Clerk outage** | High - auth fails | JWKS cache provides 1-hour buffer; X-User-Id fallback for migration |
-| **Token expiry** | Medium - user friction | Frontend handles refresh; reasonable expiry times |
-| **Pricing changes** | Low - cost increase | 10k MAU free tier covers launch; evaluate at scale |
-| **Vendor lock-in** | Medium - migration effort | Abstract auth behind middleware; store user cache locally |
+| Risk                | Impact                    | Mitigation                                                          |
+| ------------------- | ------------------------- | ------------------------------------------------------------------- |
+| **Clerk outage**    | High - auth fails         | JWKS cache provides 1-hour buffer; X-User-Id fallback for migration |
+| **Token expiry**    | Medium - user friction    | Frontend handles refresh; reasonable expiry times                   |
+| **Pricing changes** | Low - cost increase       | 10k MAU free tier covers launch; evaluate at scale                  |
+| **Vendor lock-in**  | Medium - migration effort | Abstract auth behind middleware; store user cache locally           |
 
 ### 5.4 Data Consistency Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
+| Risk                                  | Impact                       | Mitigation                                                       |
+| ------------------------------------- | ---------------------------- | ---------------------------------------------------------------- |
 | **Race conditions on expense status** | Medium - invalid transitions | Check current status before update; D1 serializes within request |
-| **Balance calculation drift** | High - financial accuracy | Pure functions with tests; recalculate on every read |
-| **Activity event missing** | Medium - incomplete audit | Activity logging in same batch as mutation |
-| **Soft delete orphans** | Low - stale references | child_ids is JSON string, not FK; handle missing children in UI |
+| **Balance calculation drift**         | High - financial accuracy    | Pure functions with tests; recalculate on every read             |
+| **Activity event missing**            | Medium - incomplete audit    | Activity logging in same batch as mutation                       |
+| **Soft delete orphans**               | Low - stale references       | child_ids is JSON string, not FK; handle missing children in UI  |
 
 ### 5.5 Security Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| **JWT key compromise** | Critical - auth bypass | JWKS rotation by Clerk; short token expiry |
-| **X-User-Id header abuse** | High - impersonation | Remove fallback after migration; only used for dev |
-| **SQL injection** | Critical - data breach | All queries use `.bind()`; no string concatenation |
-| **XSS via memo/description** | High - script injection | React auto-escapes; no dangerouslySetInnerHTML |
+| Risk                         | Impact                  | Mitigation                                         |
+| ---------------------------- | ----------------------- | -------------------------------------------------- |
+| **JWT key compromise**       | Critical - auth bypass  | JWKS rotation by Clerk; short token expiry         |
+| **X-User-Id header abuse**   | High - impersonation    | Remove fallback after migration; only used for dev |
+| **SQL injection**            | Critical - data breach  | All queries use `.bind()`; no string concatenation |
+| **XSS via memo/description** | High - script injection | React auto-escapes; no dangerouslySetInnerHTML     |
 
 ---
 
@@ -1542,6 +1716,7 @@ await db.batch([
 ### 6.1 Vercel Configuration
 
 **Project Settings:**
+
 - Framework: Next.js
 - Root Directory: `app/`
 - Build Command: `npm run build`
@@ -1549,6 +1724,7 @@ await db.batch([
 - Node.js Version: 18.x
 
 **Environment Variables:**
+
 ```
 NEXT_PUBLIC_API_URL=https://ke-api.<account>.workers.dev
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
@@ -1556,6 +1732,7 @@ CLERK_SECRET_KEY=sk_live_...
 ```
 
 **Preview Deploys:**
+
 - Automatic on PR creation
 - Unique URL per branch
 - CORS allows `*.vercel.app`
@@ -1563,6 +1740,7 @@ CLERK_SECRET_KEY=sk_live_...
 ### 6.2 Workers Configuration
 
 **wrangler.toml:**
+
 ```toml
 name = "ke-api"
 main = "src/index.ts"
@@ -1578,12 +1756,14 @@ APP_URL = "https://ke-console.vercel.app"
 ```
 
 **Secrets (via `wrangler secret put`):**
+
 - `RESEND_API_KEY` - Email service
 - `CLERK_DOMAIN` - JWT verification
 
 ### 6.3 D1 Migrations Strategy
 
 **Migration Files:**
+
 ```
 workers/ke-api/migrations/
 ├── 0001_initial_schema.sql
@@ -1592,6 +1772,7 @@ workers/ke-api/migrations/
 ```
 
 **Commands:**
+
 ```bash
 # Create new migration
 wrangler d1 migrations create ke-main "description"
@@ -1607,6 +1788,7 @@ wrangler d1 migrations list ke-main --remote
 ```
 
 **Best Practices:**
+
 - Migrations are append-only (never modify existing)
 - Always test locally first
 - Include rollback SQL in comments
@@ -1629,6 +1811,7 @@ wrangler d1 migrations list ke-main --remote
 ```
 
 **GitHub Actions (Workers):**
+
 ```yaml
 # .github/workflows/deploy-worker.yml
 name: Deploy Worker
@@ -1651,6 +1834,7 @@ jobs:
 ```
 
 **Vercel (Frontend):**
+
 - Automatic on push to `main`
 - Preview deploys on PRs
 - No manual configuration needed
@@ -1658,25 +1842,28 @@ jobs:
 ### 6.5 Monitoring & Observability
 
 #### Current State
+
 - **Workers:** Cloudflare dashboard (requests, errors, CPU time)
 - **D1:** Query analytics in dashboard
 - **Vercel:** Built-in analytics, Web Vitals
 - **Application logs:** `console.log/error` -> Workers logs
 
 #### Logging Pattern
+
 ```typescript
 // Error with context
 app.onError((err, c) => {
-  console.error('Unhandled error:', err);
-  return c.json({ error: 'Internal server error' }, 500);
-});
+  console.error('Unhandled error:', err)
+  return c.json({ error: 'Internal server error' }, 500)
+})
 
 // Route-level logging
-console.log('Auth: JWT verified for user', payload.sub);
-console.error('Create expense error:', error);
+console.log('Auth: JWT verified for user', payload.sub)
+console.error('Create expense error:', error)
 ```
 
 #### Future Improvements
+
 - [ ] Structured logging (JSON format)
 - [ ] Request ID propagation
 - [ ] External logging service (Axiom, Datadog)
@@ -1686,6 +1873,7 @@ console.error('Create expense error:', error);
 ### 6.6 Disaster Recovery
 
 **Scenario: D1 Data Corruption**
+
 1. Identify last known good state (Cloudflare activity log)
 2. Use D1 time-travel to query historical data
 3. Export good data: `wrangler d1 export`
@@ -1694,12 +1882,14 @@ console.error('Create expense error:', error);
 6. Deploy worker with new database ID
 
 **Scenario: Accidental Deletion**
+
 1. D1 soft deletes: restore by clearing `deleted_at`
 2. Hard deletes: use time-travel within 30 days
 3. Export affected tables at prior timestamp
 4. Manually re-insert records
 
 **Scenario: Worker Outage**
+
 1. Cloudflare handles failover automatically
 2. If code bug: revert via Git + redeploy
 3. Rollback: `wrangler rollback`
@@ -1712,63 +1902,63 @@ console.error('Create expense error:', error);
 // Core entity interfaces from workers/ke-api/src/types.ts
 
 export interface Env {
-  DB: D1Database;
-  RESEND_API_KEY?: string;
-  APP_URL?: string;
-  CLERK_DOMAIN?: string;
+  DB: D1Database
+  RESEND_API_KEY?: string
+  APP_URL?: string
+  CLERK_DOMAIN?: string
 }
 
 export interface Expense {
-  id: string;
-  family_id: string;
-  created_by: string;
-  paid_by: string;
-  fixed_expense_id: string | null;
-  description: string;
-  amount_cents: number;
-  category: string;
-  expense_date: string;
-  child_ids: string | null;
-  link_url: string | null;
-  memo: string | null;
-  status: string;
-  questioned_by: string | null;
-  questioned_at: string | null;
-  question_reason: string | null;
-  question_note: string | null;
-  resolved_at: string | null;
-  resolution_action: string | null;
-  satisfied_at: string | null;
-  closed_unresolved_at: string | null;
-  closed_unresolved_by: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
+  id: string
+  family_id: string
+  created_by: string
+  paid_by: string
+  fixed_expense_id: string | null
+  description: string
+  amount_cents: number
+  category: string
+  expense_date: string
+  child_ids: string | null
+  link_url: string | null
+  memo: string | null
+  status: string
+  questioned_by: string | null
+  questioned_at: string | null
+  question_reason: string | null
+  question_note: string | null
+  resolved_at: string | null
+  resolution_action: string | null
+  satisfied_at: string | null
+  closed_unresolved_at: string | null
+  closed_unresolved_by: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
 }
 
 export interface Family {
-  id: string;
-  name: string | null;
-  parent_a_id: string;
-  parent_b_id: string | null;
-  parent_a_ratio: number;
-  invite_code: string | null;
-  invite_expires_at: string | null;
-  created_at: string;
-  updated_at: string;
+  id: string
+  name: string | null
+  parent_a_id: string
+  parent_b_id: string | null
+  parent_a_ratio: number
+  invite_code: string | null
+  invite_expires_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface BalanceBreakdown {
-  total_expenses_cents: number;
-  included_expenses_count: number;
-  a_share_cents: number;
-  b_share_cents: number;
-  a_paid_cents: number;
-  b_paid_cents: number;
-  payments_a_to_b_cents: number;
-  payments_b_to_a_cents: number;
-  questioned_total_cents: number;
-  questioned_count: number;
+  total_expenses_cents: number
+  included_expenses_count: number
+  a_share_cents: number
+  b_share_cents: number
+  a_paid_cents: number
+  b_paid_cents: number
+  payments_a_to_b_cents: number
+  payments_b_to_a_cents: number
+  questioned_total_cents: number
+  questioned_count: number
 }
 
 export type QuestionReason =
@@ -1776,14 +1966,9 @@ export type QuestionReason =
   | 'not_child_related'
   | 'duplicate'
   | 'split_dispute'
-  | 'other';
+  | 'other'
 
-export type RecurringFrequency =
-  | 'weekly'
-  | 'biweekly'
-  | 'monthly'
-  | 'quarterly'
-  | 'annually';
+export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually'
 ```
 
 ---
@@ -1827,6 +2012,6 @@ WHERE family_id = ?
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2026-02-06*
-*Author: Technical Lead (Claude)*
+_Document Version: 1.0_
+_Last Updated: 2026-02-06_
+_Author: Technical Lead (Claude)_

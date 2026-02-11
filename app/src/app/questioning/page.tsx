@@ -1,113 +1,106 @@
-"use client";
+'use client'
 
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type { Expense } from "@/lib/api";
-import { formatCurrency } from "@/lib/statusColors";
-import { Card, CardBody, StatusBadge, EmptyState } from "@/components/ui";
+import { useUser, UserButton } from '@clerk/nextjs'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { Expense } from '@/lib/api'
+import { formatCurrency } from '@/lib/statusColors'
+import { Card, CardBody, StatusBadge, EmptyState } from '@/components/ui'
 
-const QUESTION_DEADLINE_DAYS = 30;
-const SATISFACTION_DEADLINE_DAYS = 7;
+const QUESTION_DEADLINE_DAYS = 30
+const SATISFACTION_DEADLINE_DAYS = 7
 
 function daysRemaining(fromDate: string | null, totalDays: number): number | null {
-  if (!fromDate) return null;
-  const start = new Date(fromDate).getTime();
-  const deadlineMs = start + totalDays * 24 * 60 * 60 * 1000;
-  const remaining = Math.ceil((deadlineMs - Date.now()) / (24 * 60 * 60 * 1000));
-  return Math.max(0, remaining);
+  if (!fromDate) return null
+  const start = new Date(fromDate).getTime()
+  const deadlineMs = start + totalDays * 24 * 60 * 60 * 1000
+  const remaining = Math.ceil((deadlineMs - Date.now()) / (24 * 60 * 60 * 1000))
+  return Math.max(0, remaining)
 }
 
 function CountdownBadge({ days, total }: { days: number | null; total: number }) {
-  if (days === null) return null;
+  if (days === null) return null
 
-  const isUrgent = days <= 3;
-  const urgentClass = "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
-  const normalClass = "bg-ke-elevated text-ke-muted";
+  const isUrgent = days <= 3
+  const urgentClass = 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+  const normalClass = 'bg-ke-elevated text-ke-muted'
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isUrgent ? urgentClass : normalClass}`}
     >
       {days} of {total} days left
     </span>
-  );
+  )
 }
 
 export default function QuestioningDashboardPage() {
-  const { user, isLoaded } = useUser();
-  const api = useApi();
+  const { user, isLoaded } = useUser()
+  const api = useApi()
 
-  const [awaitingResolution, setAwaitingResolution] = useState<Expense[]>([]);
-  const [awaitingSatisfaction, setAwaitingSatisfaction] = useState<Expense[]>([]);
-  const [recentlyResolved, setRecentlyResolved] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [awaitingResolution, setAwaitingResolution] = useState<Expense[]>([])
+  const [awaitingSatisfaction, setAwaitingSatisfaction] = useState<Expense[]>([])
+  const [recentlyResolved, setRecentlyResolved] = useState<Expense[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
+    if (!user) return
+    setIsLoading(true)
 
     try {
-      const me = await api.getMe();
+      const me = await api.getMe()
 
-      if (!me.family) return;
+      if (!me.family) return
 
-      const familyId = me.family.id;
-      const userId = user.id;
+      const familyId = me.family.id
+      const userId = user.id
 
-      const [questionedData, pendingSatData, resolvedData, resolvedCreatorData] =
-        await Promise.all([
-          api.getExpenses(familyId, { status: "questioned", limit: 50 }),
-          api.getExpenses(familyId, { status: "pending_satisfaction", limit: 50 }),
-          api.getExpenses(familyId, { status: "resolved", limit: 50 }),
-          api.getExpenses(familyId, { status: "resolved_creator_decided", limit: 50 }),
-        ]);
+      const [questionedData, pendingSatData, resolvedData, resolvedCreatorData] = await Promise.all(
+        [
+          api.getExpenses(familyId, { status: 'questioned', limit: 50 }),
+          api.getExpenses(familyId, { status: 'pending_satisfaction', limit: 50 }),
+          api.getExpenses(familyId, { status: 'resolved', limit: 50 }),
+          api.getExpenses(familyId, { status: 'resolved_creator_decided', limit: 50 }),
+        ]
+      )
 
       // Awaiting Your Resolution: questioned expenses where current user is the creator
-      setAwaitingResolution(
-        questionedData.expenses.filter((e) => e.created_by === userId)
-      );
+      setAwaitingResolution(questionedData.expenses.filter((e) => e.created_by === userId))
 
       // Awaiting Satisfaction: pending_satisfaction where current user is the questioner
-      setAwaitingSatisfaction(
-        pendingSatData.expenses.filter((e) => e.questioned_by === userId)
-      );
+      setAwaitingSatisfaction(pendingSatData.expenses.filter((e) => e.questioned_by === userId))
 
       // Recently Resolved: resolved or resolved_creator_decided from last 7 days
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const allResolved = [
-        ...resolvedData.expenses,
-        ...resolvedCreatorData.expenses,
-      ].filter(
-        (e) =>
-          e.resolved_at && new Date(e.resolved_at).getTime() >= sevenDaysAgo.getTime()
-      );
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const allResolved = [...resolvedData.expenses, ...resolvedCreatorData.expenses].filter(
+        (e) => e.resolved_at && new Date(e.resolved_at).getTime() >= sevenDaysAgo.getTime()
+      )
       allResolved.sort(
         (a, b) =>
           new Date(b.resolved_at || b.updated_at).getTime() -
           new Date(a.resolved_at || a.updated_at).getTime()
-      );
-      setRecentlyResolved(allResolved);
+      )
+      setRecentlyResolved(allResolved)
     } catch (err) {
-      console.error("Failed to load questioning data:", err);
+      console.error('Failed to load questioning data:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [user, api]);
+  }, [user, api])
 
   useEffect(() => {
     if (isLoaded && user) {
-      fetchData();
+      fetchData()
     }
-  }, [isLoaded, user, fetchData]);
+  }, [isLoaded, user, fetchData])
 
   if (!isLoaded || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-ke-bg">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -117,7 +110,12 @@ export default function QuestioningDashboardPage() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <h1 className="text-xl font-semibold text-ke-primary">Questions</h1>
@@ -267,5 +265,5 @@ export default function QuestioningDashboardPage() {
         </section>
       </main>
     </div>
-  );
+  )
 }

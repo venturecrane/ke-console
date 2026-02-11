@@ -5,12 +5,12 @@ of Track 3 (Disputes & Extensions) features.
 
 ## Your Issues by Wave
 
-| Wave | Issues |
-|------|--------|
-| Wave 1 | #87 (Satisfy resolution), #88 (7-day timeout), #96 (Auto-generate recurring) |
-| Wave 2 | #89 (30-day closure), #95 (Recurring template edit/delete) |
+| Wave   | Issues                                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Wave 1 | #87 (Satisfy resolution), #88 (7-day timeout), #96 (Auto-generate recurring)                                              |
+| Wave 2 | #89 (30-day closure), #95 (Recurring template edit/delete)                                                                |
 | Wave 3 | #98 (Email notifications), #99 (Generated expense email), #102 (Questioning dashboard query), #103 (Activity event types) |
-| Wave 4 | #108 (Leave family) |
+| Wave 4 | #108 (Leave family)                                                                                                       |
 
 ## Tech Stack
 
@@ -30,17 +30,17 @@ of Track 3 (Disputes & Extensions) features.
 
 ## File Ownership
 
-| File | Access |
-|------|--------|
+| File                        | Access                                         |
+| --------------------------- | ---------------------------------------------- |
 | `routes/expense-actions.ts` | Own — question/resolve/satisfy + timeout logic |
-| `routes/fixed-expenses.ts` | Own — templates + generation |
-| `routes/notifications.ts` | Own — NEW file for email dispatch |
-| `services/notifications.ts` | Own — NEW file for email sending logic |
-| `types.ts` | Shared — append-only |
-| `index.ts` | Shared — append-only route registrations |
-| `services/activity.ts` | Shared — append-only |
-| `calculations.ts` | Read-only |
-| `middleware/auth.ts` | Read-only |
+| `routes/fixed-expenses.ts`  | Own — templates + generation                   |
+| `routes/notifications.ts`   | Own — NEW file for email dispatch              |
+| `services/notifications.ts` | Own — NEW file for email sending logic         |
+| `types.ts`                  | Shared — append-only                           |
+| `index.ts`                  | Shared — append-only route registrations       |
+| `services/activity.ts`      | Shared — append-only                           |
+| `calculations.ts`           | Read-only                                      |
+| `middleware/auth.ts`        | Read-only                                      |
 
 ## Migration Reservations
 
@@ -55,6 +55,7 @@ of Track 3 (Disputes & Extensions) features.
 **Already implemented** in `routes/expense-actions.ts` (POST /:id/satisfy).
 
 Verify the existing implementation covers all acceptance criteria:
+
 - Only questioner can satisfy (not the creator) — **already enforced**
 - Must be in `pending_satisfaction` status — **already enforced**
 - Sets `satisfied_at` timestamp — **already done**
@@ -69,19 +70,31 @@ Verify the existing implementation covers all acceptance criteria:
 **Already implemented** in `services/activity.ts` (`checkAndApplyTimeout` function).
 
 Current implementation:
+
 - Checks `pending_satisfaction` expenses on-read
 - Computes days since `resolved_at`
 - If >= 7 days, transitions to `resolved_creator_decided`
 
 **Missing pieces to verify:**
+
 - Activity event logging for system timeout (currently NOT logged — needs fix)
 - Timeout check in list endpoints (currently only in GET /:id single expense)
 - Apply timeout check in `GET /families/:id/expenses` list endpoint too
 
 **Fix needed:** Add `system_timeout` activity event when timeout triggers:
+
 ```typescript
-await createActivityEvent(db, expense.family_id, 'system', 'expense.timeout',
-  'expense', expense.id, expense, updatedExpense, { timeout_days: 7 });
+await createActivityEvent(
+  db,
+  expense.family_id,
+  'system',
+  'expense.timeout',
+  'expense',
+  expense.id,
+  expense,
+  updatedExpense,
+  { timeout_days: 7 }
+)
 ```
 
 ### #96 — Auto-Generate Recurring Expenses (Cron)
@@ -89,25 +102,28 @@ await createActivityEvent(db, expense.family_id, 'system', 'expense.timeout',
 **Already partially implemented** in `services/activity.ts` (`generateMonthlyExpenses`).
 
 Missing pieces:
+
 - Cron trigger configuration in `wrangler.toml`
 - Cron handler in `index.ts` (scheduled event export)
 - Currently only generates for a single family — needs to iterate all families
 - Frequency filtering (weekly, biweekly, monthly, quarterly, annually)
 
 Add to `wrangler.toml`:
+
 ```toml
 [triggers]
 crons = ["0 6 1 * *"]  # 6am UTC on 1st of each month
 ```
 
 Add scheduled handler to `index.ts`:
+
 ```typescript
 export default {
   fetch: app.fetch,
   scheduled: async (event, env, ctx) => {
     // Get all families, generate monthly expenses for each
-  }
-};
+  },
+}
 ```
 
 **Idempotency:** Already ensured by checking `(fixed_expense_id, strftime('%Y-%m', expense_date))`.
@@ -116,6 +132,7 @@ export default {
 ### #89 — 30-Day Closure for Unresolved Questions
 
 Add to `checkAndApplyTimeout` (or create parallel function):
+
 - Check `questioned` expenses where `questioned_at` is 30+ days ago
 - Transition to `closed_unresolved`
 - Set `closed_unresolved_at` and `closed_unresolved_by = 'system'`
@@ -127,6 +144,7 @@ Add to `checkAndApplyTimeout` (or create parallel function):
 **Already partially implemented** in `routes/fixed-expenses.ts` (PATCH and DELETE).
 
 Verify:
+
 - Edit changes apply only to future generated expenses (not past)
 - Delete (end template) stops future generation but preserves past expenses
 - Only the creator can edit/delete templates
@@ -137,12 +155,14 @@ Verify:
 **New file: `services/notifications.ts`**
 
 Notification events:
+
 - `expense_created` — notify co-parent
 - `expense_questioned` — notify expense creator
 - `question_resolved` — notify questioner
 - `payment_recorded` — notify co-parent
 
 Rules:
+
 - Use Resend API (already in `utils.ts` for invites)
 - Fire-and-forget: never block mutations on email delivery (BR-056)
 - Check user preferences before sending (BR-054)
@@ -153,6 +173,7 @@ Rules:
 ### #99 — Generated Expense Email
 
 After cron generates monthly expenses:
+
 - Send summary email to both parents listing all generated expenses
 - Single email per parent (not one per expense)
 - Respect notification preferences
@@ -164,17 +185,20 @@ After cron generates monthly expenses:
 New endpoint: `GET /families/:id/questioning-dashboard`
 
 Returns three sections:
+
 - `awaiting_resolution` — questioned expenses where user is creator
 - `awaiting_satisfaction` — pending_satisfaction where user is questioner
 - `recently_resolved` — resolved within last 30 days
 
 Include countdown indicators:
+
 - Days until 30-day closure (for questioned expenses)
 - Days until 7-day timeout (for pending_satisfaction)
 
 ### #103 — Activity Event Types + Detail View
 
 Ensure ALL mutation types log activity events:
+
 - expense.created, expense.edited, expense.deleted
 - expense.questioned, expense.resolved, expense.satisfied
 - expense.timeout, expense.closure (system events)
@@ -185,6 +209,7 @@ Ensure ALL mutation types log activity events:
 - family.ratio_updated, family.member_left
 
 Add detail endpoint: `GET /families/:id/activity/:eventId`
+
 - Returns full before/after snapshots
 - System events use reserved actor ID
 
@@ -193,6 +218,7 @@ Add detail endpoint: `GET /families/:id/activity/:eventId`
 New endpoint: `POST /families/:id/leave` or `DELETE /families/:id/members/me`
 
 Rules:
+
 - Sets user's family_id link to null (keep user in DB)
 - If both parents leave, archive family (set inactive flag)
 - Notify co-parent via email

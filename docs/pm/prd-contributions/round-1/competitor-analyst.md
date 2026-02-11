@@ -30,134 +30,141 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Competitive Categories
 
-| Category | Players | Focus |
-|----------|---------|-------|
-| **Full-Suite Co-Parenting** | OurFamilyWizard, TalkingParents, AppClose, 2Houses | Calendar + Messaging + Expenses |
-| **Expense-Focused** | DComply, SupportPay, Onward (defunct) | Payments and expense tracking |
-| **Communication-Focused** | TalkingParents, BestInterest | Documented messaging, conflict reduction |
-| **Free/Freemium** | Cent, BestInterest (free tier) | Market entry, upsell |
-| **DIY/Spreadsheets** | Splitwise, Google Sheets | Low-conflict, cost-conscious |
+| Category                    | Players                                            | Focus                                    |
+| --------------------------- | -------------------------------------------------- | ---------------------------------------- |
+| **Full-Suite Co-Parenting** | OurFamilyWizard, TalkingParents, AppClose, 2Houses | Calendar + Messaging + Expenses          |
+| **Expense-Focused**         | DComply, SupportPay, Onward (defunct)              | Payments and expense tracking            |
+| **Communication-Focused**   | TalkingParents, BestInterest                       | Documented messaging, conflict reduction |
+| **Free/Freemium**           | Cent, BestInterest (free tier)                     | Market entry, upsell                     |
+| **DIY/Spreadsheets**        | Splitwise, Google Sheets                           | Low-conflict, cost-conscious             |
 
 ---
 
 ## 2. Competitor Profiles
 
 ### OurFamilyWizard
+
 **The Incumbent Leader**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "The Best Co-Parenting App for Child Custody" - Court-recognized standard |
-| **Target Market** | High-conflict divorced parents, court-ordered users |
-| **Key Features** | Shared calendar, messaging with ToneMeter AI, expense log with OFWpay, document storage, journal, visitation tracker |
-| **Pricing** | Essentials: $12.50/mo, Premium: $18/mo, Max: $24.99/mo (per parent) |
-| **Expense Dispute** | Binary approve/refuse system; refused expenses excluded from totals |
-| **Split Options** | 50/50 or 80/20 or 100% - limited flexibility |
-| **Strengths** | Court recognition in all 50 states, longest track record, comprehensive feature set, professional network (lawyers, mediators) |
-| **Weaknesses** | Expensive ($216-600/year for family), mixed reviews (1.5 stars SiteJabber, 2.1 stars Google), rigid split options, both parents must pay |
-| **User Complaints** | Drafts don't save, search function unreliable, calendar "viewed" status gameable, Face ID issues, expense splits limited |
+| Attribute           | Details                                                                                                                                  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "The Best Co-Parenting App for Child Custody" - Court-recognized standard                                                                |
+| **Target Market**   | High-conflict divorced parents, court-ordered users                                                                                      |
+| **Key Features**    | Shared calendar, messaging with ToneMeter AI, expense log with OFWpay, document storage, journal, visitation tracker                     |
+| **Pricing**         | Essentials: $12.50/mo, Premium: $18/mo, Max: $24.99/mo (per parent)                                                                      |
+| **Expense Dispute** | Binary approve/refuse system; refused expenses excluded from totals                                                                      |
+| **Split Options**   | 50/50 or 80/20 or 100% - limited flexibility                                                                                             |
+| **Strengths**       | Court recognition in all 50 states, longest track record, comprehensive feature set, professional network (lawyers, mediators)           |
+| **Weaknesses**      | Expensive ($216-600/year for family), mixed reviews (1.5 stars SiteJabber, 2.1 stars Google), rigid split options, both parents must pay |
+| **User Complaints** | Drafts don't save, search function unreliable, calendar "viewed" status gameable, Face ID issues, expense splits limited                 |
 
 **Key Insight:** OFW owns the "court-ordered" segment but has significant UX debt and pricing that creates barriers for amicable co-parents.
 
 ---
 
 ### TalkingParents
+
 **The Budget-Friendly Alternative**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "Best Co-Parenting Tools for Child Custody" - Documentation focus |
-| **Target Market** | Parents needing documented communication, moderate-conflict situations |
-| **Key Features** | Secure messaging (uneditable, timestamped), call/video recording with transcription, shared calendar, accountable payments |
-| **Pricing** | Free (web only), Essentials: $6/mo, Standard: $10/mo, Premium: $25/mo |
-| **Strengths** | Lower price point, strong documentation features, 4.4-star App Store rating (17K reviews), automatic call transcription |
-| **Weaknesses** | Premium features require both parents to pay ($50/mo total), expense tracking less robust than OFW |
-| **User Complaints** | Video call recording requires paid subscription from both parents |
+| Attribute           | Details                                                                                                                    |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "Best Co-Parenting Tools for Child Custody" - Documentation focus                                                          |
+| **Target Market**   | Parents needing documented communication, moderate-conflict situations                                                     |
+| **Key Features**    | Secure messaging (uneditable, timestamped), call/video recording with transcription, shared calendar, accountable payments |
+| **Pricing**         | Free (web only), Essentials: $6/mo, Standard: $10/mo, Premium: $25/mo                                                      |
+| **Strengths**       | Lower price point, strong documentation features, 4.4-star App Store rating (17K reviews), automatic call transcription    |
+| **Weaknesses**      | Premium features require both parents to pay ($50/mo total), expense tracking less robust than OFW                         |
+| **User Complaints** | Video call recording requires paid subscription from both parents                                                          |
 
 **Key Insight:** TalkingParents competes on price and documentation, but expense management is not their core strength.
 
 ---
 
 ### DComply
+
 **The Payment Specialist**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "Venmo for Co-Parents" - Payment and expense focus |
-| **Target Market** | Parents who need efficient expense reimbursement without full co-parenting suite |
-| **Key Features** | Receipt scanning, bill sending, recurring bills, child support autopay, multi-item bills, dispute management, transaction reports |
-| **Pricing** | Basic: $2.99/mo (tracking only), Premium: $5.99/mo (full payment system) |
-| **Strengths** | Lowest price point, focused UX, direct bank reimbursement, recurring expense automation |
-| **Weaknesses** | No calendar, no messaging, limited to expenses only |
-| **User Complaints** | Limited scope - need secondary app for communication |
+| Attribute           | Details                                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "Venmo for Co-Parents" - Payment and expense focus                                                                                |
+| **Target Market**   | Parents who need efficient expense reimbursement without full co-parenting suite                                                  |
+| **Key Features**    | Receipt scanning, bill sending, recurring bills, child support autopay, multi-item bills, dispute management, transaction reports |
+| **Pricing**         | Basic: $2.99/mo (tracking only), Premium: $5.99/mo (full payment system)                                                          |
+| **Strengths**       | Lowest price point, focused UX, direct bank reimbursement, recurring expense automation                                           |
+| **Weaknesses**      | No calendar, no messaging, limited to expenses only                                                                               |
+| **User Complaints** | Limited scope - need secondary app for communication                                                                              |
 
 **Key Insight:** DComply proves there's a market for expense-only solutions at lower price points. KE's closest analog in terms of focus.
 
 ---
 
 ### AppClose
+
 **The All-Inclusive Contender**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "The Best Co-Parenting App" - Full-suite with simplified pricing |
-| **Target Market** | Parents wanting comprehensive features without tier complexity |
-| **Key Features** | Unalterable messaging, audio/video calls with recording, calendar, expense tracking with ipayou payments, parenting-time tracker, Certified Electronic Business Records (court-admissible), pet management |
-| **Pricing** | $8.99/mo all-inclusive (starting Jan 2026), 60-day free trial, fee waiver available |
-| **Strengths** | Simple pricing (no tiers), 60-day trial, certified court records, includes third-party access (attorneys, mediators), parenting-time tracking |
-| **Weaknesses** | Newer entrant, less court recognition than OFW |
-| **User Complaints** | Calendar UX issues, notification problems, occasional message delivery failures |
+| Attribute           | Details                                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "The Best Co-Parenting App" - Full-suite with simplified pricing                                                                                                                                           |
+| **Target Market**   | Parents wanting comprehensive features without tier complexity                                                                                                                                             |
+| **Key Features**    | Unalterable messaging, audio/video calls with recording, calendar, expense tracking with ipayou payments, parenting-time tracker, Certified Electronic Business Records (court-admissible), pet management |
+| **Pricing**         | $8.99/mo all-inclusive (starting Jan 2026), 60-day free trial, fee waiver available                                                                                                                        |
+| **Strengths**       | Simple pricing (no tiers), 60-day trial, certified court records, includes third-party access (attorneys, mediators), parenting-time tracking                                                              |
+| **Weaknesses**      | Newer entrant, less court recognition than OFW                                                                                                                                                             |
+| **User Complaints** | Calendar UX issues, notification problems, occasional message delivery failures                                                                                                                            |
 
 **Key Insight:** AppClose is aggressively repositioning with simplified pricing and court-admissible records - a potential threat.
 
 ---
 
 ### 2Houses
+
 **The International Player**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "Better Co-Parenting App" - European origin, balanced feature set |
-| **Target Market** | Cooperative co-parents, international users |
-| **Key Features** | Interactive shared calendar, expense tracking with balance display, messaging, information bank (clothing sizes, SSNs, documents) |
-| **Pricing** | $14.17/mo total (both parents), $7/mo per parent, 14-day trial |
-| **Strengths** | Single subscription covers both parents, graphical expense reports, CSV/PDF export, information bank |
-| **Weaknesses** | Less US court integration, smaller US market presence |
-| **User Complaints** | Limited US-specific features |
+| Attribute           | Details                                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "Better Co-Parenting App" - European origin, balanced feature set                                                                 |
+| **Target Market**   | Cooperative co-parents, international users                                                                                       |
+| **Key Features**    | Interactive shared calendar, expense tracking with balance display, messaging, information bank (clothing sizes, SSNs, documents) |
+| **Pricing**         | $14.17/mo total (both parents), $7/mo per parent, 14-day trial                                                                    |
+| **Strengths**       | Single subscription covers both parents, graphical expense reports, CSV/PDF export, information bank                              |
+| **Weaknesses**      | Less US court integration, smaller US market presence                                                                             |
+| **User Complaints** | Limited US-specific features                                                                                                      |
 
 **Key Insight:** 2Houses demonstrates the "both parents included" pricing model works - reduces friction of convincing co-parent to pay.
 
 ---
 
 ### BestInterest
+
 **The AI-Native Newcomer**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "Best Co-Parenting App for Shared Custody" - AI-powered conflict reduction |
-| **Target Market** | High-conflict parents seeking communication coaching |
-| **Key Features** | Message Shield (filters toxic messages), Tone Guardian coaching, secure phone calls, co-parent journal, court-ready records, daily AI coaching |
-| **Pricing** | Free tier available, Monthly: $14.99, Annual: $119.99, Family (includes co-parent): $189.99/yr |
-| **Strengths** | AI differentiation, free tier, fills gap left by Onward shutdown (Jan 2026), modern tech stack |
-| **Weaknesses** | Very new (launched late 2024), expense features less developed, unproven at scale |
-| **User Complaints** | Too new for substantial complaint data |
+| Attribute           | Details                                                                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "Best Co-Parenting App for Shared Custody" - AI-powered conflict reduction                                                                     |
+| **Target Market**   | High-conflict parents seeking communication coaching                                                                                           |
+| **Key Features**    | Message Shield (filters toxic messages), Tone Guardian coaching, secure phone calls, co-parent journal, court-ready records, daily AI coaching |
+| **Pricing**         | Free tier available, Monthly: $14.99, Annual: $119.99, Family (includes co-parent): $189.99/yr                                                 |
+| **Strengths**       | AI differentiation, free tier, fills gap left by Onward shutdown (Jan 2026), modern tech stack                                                 |
+| **Weaknesses**      | Very new (launched late 2024), expense features less developed, unproven at scale                                                              |
+| **User Complaints** | Too new for substantial complaint data                                                                                                         |
 
 **Key Insight:** BestInterest represents the "next generation" approach with AI, but is communication-focused rather than expense-focused.
 
 ---
 
 ### Cent
+
 **The Free Option**
 
-| Attribute | Details |
-|-----------|---------|
-| **Positioning** | "#1 Recommended by Divorce Financial Advisors" - Free co-parenting |
-| **Target Market** | Cost-conscious parents, amicable co-parents |
-| **Key Features** | Custody schedules, expense tracking with invoicing, recurring expense billing, multi-child assignment, expense reports (CSV) |
-| **Pricing** | Free |
-| **Strengths** | No cost, endorsed by professionals, immediate invoicing, blended family support |
-| **Weaknesses** | Limited documentation on dispute handling, may have monetization pressure |
-| **User Complaints** | Limited data available |
+| Attribute           | Details                                                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Positioning**     | "#1 Recommended by Divorce Financial Advisors" - Free co-parenting                                                           |
+| **Target Market**   | Cost-conscious parents, amicable co-parents                                                                                  |
+| **Key Features**    | Custody schedules, expense tracking with invoicing, recurring expense billing, multi-child assignment, expense reports (CSV) |
+| **Pricing**         | Free                                                                                                                         |
+| **Strengths**       | No cost, endorsed by professionals, immediate invoicing, blended family support                                              |
+| **Weaknesses**      | Limited documentation on dispute handling, may have monetization pressure                                                    |
+| **User Complaints** | Limited data available                                                                                                       |
 
 **Key Insight:** Cent proves free can work but raises sustainability questions. KE's free tier must compete here.
 
@@ -165,22 +172,22 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ## 3. Feature Comparison Matrix
 
-| Feature | KE | OurFamily Wizard | Talking Parents | DComply | AppClose | 2Houses |
-|---------|----|--------------------|-----------------|---------|----------|---------|
-| **Shared Expense Ledger** | Yes | Yes | Limited | Yes | Yes | Yes |
-| **Expense Dispute Workflow** | 8 statuses | Binary (approve/refuse) | Basic | Yes | Basic | Basic |
-| **Configurable Split Ratio** | 0-100% | 50/50, 80/20, 100% | N/A | Yes | Unknown | Yes |
-| **Rolling Balance** | Yes, real-time | Yes | No | Yes | Unknown | Yes |
-| **Balance-Excluded Questioning** | Yes | No (refused = excluded) | N/A | Unknown | Unknown | Unknown |
-| **Full Audit Trail** | Yes (before/after) | Partial | Yes (messages) | Unknown | Yes | Unknown |
-| **Receipt Attachments** | Roadmap | Yes | No | Yes | Yes | Yes |
-| **Shared Calendar** | No | Yes | Yes | No | Yes | Yes |
-| **Messaging** | No | Yes | Yes | No | Yes | Yes |
-| **In-App Payments** | No (external) | Yes (OFWpay) | Yes | Yes | Yes (ipayou) | No |
-| **Court-Ready Export** | Roadmap | Yes | Yes | Yes | Yes (certified) | Yes |
-| **Mobile Web** | Yes | Native apps | Native + web | Native apps | Native apps | Native + web |
-| **Free Tier** | Yes (3mo history) | No | Yes (web only) | 7 transactions | 60-day trial | 14-day trial |
-| **Per-Parent Pricing** | $5/mo | $12.50-25/mo | $6-25/mo | $3-6/mo | $8.99/mo | $7/mo |
+| Feature                          | KE                 | OurFamily Wizard        | Talking Parents | DComply        | AppClose        | 2Houses      |
+| -------------------------------- | ------------------ | ----------------------- | --------------- | -------------- | --------------- | ------------ |
+| **Shared Expense Ledger**        | Yes                | Yes                     | Limited         | Yes            | Yes             | Yes          |
+| **Expense Dispute Workflow**     | 8 statuses         | Binary (approve/refuse) | Basic           | Yes            | Basic           | Basic        |
+| **Configurable Split Ratio**     | 0-100%             | 50/50, 80/20, 100%      | N/A             | Yes            | Unknown         | Yes          |
+| **Rolling Balance**              | Yes, real-time     | Yes                     | No              | Yes            | Unknown         | Yes          |
+| **Balance-Excluded Questioning** | Yes                | No (refused = excluded) | N/A             | Unknown        | Unknown         | Unknown      |
+| **Full Audit Trail**             | Yes (before/after) | Partial                 | Yes (messages)  | Unknown        | Yes             | Unknown      |
+| **Receipt Attachments**          | Roadmap            | Yes                     | No              | Yes            | Yes             | Yes          |
+| **Shared Calendar**              | No                 | Yes                     | Yes             | No             | Yes             | Yes          |
+| **Messaging**                    | No                 | Yes                     | Yes             | No             | Yes             | Yes          |
+| **In-App Payments**              | No (external)      | Yes (OFWpay)            | Yes             | Yes            | Yes (ipayou)    | No           |
+| **Court-Ready Export**           | Roadmap            | Yes                     | Yes             | Yes            | Yes (certified) | Yes          |
+| **Mobile Web**                   | Yes                | Native apps             | Native + web    | Native apps    | Native apps     | Native + web |
+| **Free Tier**                    | Yes (3mo history)  | No                      | Yes (web only)  | 7 transactions | 60-day trial    | 14-day trial |
+| **Per-Parent Pricing**           | $5/mo              | $12.50-25/mo            | $6-25/mo        | $3-6/mo        | $8.99/mo        | $7/mo        |
 
 ---
 
@@ -188,16 +195,16 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Monthly Per-Parent Costs (2026)
 
-| App | Free Tier | Entry Paid | Mid Tier | Premium |
-|-----|-----------|------------|----------|---------|
-| **KE** | Yes (limited) | $5/mo | - | - |
-| **OurFamilyWizard** | No | $12.50/mo | $18/mo | $24.99/mo |
-| **TalkingParents** | Yes (web) | $6/mo | $10/mo | $25/mo |
-| **DComply** | Trial only | $2.99/mo | $5.99/mo | - |
-| **AppClose** | 60-day trial | $8.99/mo | - | - |
-| **2Houses** | 14-day trial | $7/mo | - | - |
-| **BestInterest** | Yes | $14.99/mo | - | $15.83/mo (family) |
-| **Cent** | Yes (full) | - | - | - |
+| App                 | Free Tier     | Entry Paid | Mid Tier | Premium            |
+| ------------------- | ------------- | ---------- | -------- | ------------------ |
+| **KE**              | Yes (limited) | $5/mo      | -        | -                  |
+| **OurFamilyWizard** | No            | $12.50/mo  | $18/mo   | $24.99/mo          |
+| **TalkingParents**  | Yes (web)     | $6/mo      | $10/mo   | $25/mo             |
+| **DComply**         | Trial only    | $2.99/mo   | $5.99/mo | -                  |
+| **AppClose**        | 60-day trial  | $8.99/mo   | -        | -                  |
+| **2Houses**         | 14-day trial  | $7/mo      | -        | -                  |
+| **BestInterest**    | Yes           | $14.99/mo  | -        | $15.83/mo (family) |
+| **Cent**            | Yes (full)    | -          | -        | -                  |
 
 ### Pricing Analysis
 
@@ -225,14 +232,14 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### KE's Genuine Differentiators
 
-| Differentiator | Why It Matters | Competitor Gap |
-|----------------|----------------|----------------|
-| **8-Status Dispute Workflow** | Real disputes have nuance beyond "approved/refused." Questioning, escalation, timeout, and resolution states model real-world back-and-forth | OFW only has binary approve/refuse; others even less |
-| **Balance-Excluded Questioning** | Disputed items shouldn't count toward who owes whom until resolved. This prevents one parent gaming the balance | No competitor explicitly offers this |
-| **Rolling Balance with Carry Forward** | Monthly resets lose context; rolling balance shows true picture | Some have balance, but carry-forward behavior unclear |
-| **Full Audit Trail (Before/After)** | Every change logged with what was changed, by whom. True accountability | OFW has "unalterable" messages but expense audit trail less clear |
-| **Mobile-Web-First** | No app store friction. Works on any device immediately | Most competitors require native app downloads |
-| **Simple, Focused UX** | Expenses only, not a full co-parenting suite | Competitors bundle everything, creating complexity |
+| Differentiator                         | Why It Matters                                                                                                                               | Competitor Gap                                                    |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **8-Status Dispute Workflow**          | Real disputes have nuance beyond "approved/refused." Questioning, escalation, timeout, and resolution states model real-world back-and-forth | OFW only has binary approve/refuse; others even less              |
+| **Balance-Excluded Questioning**       | Disputed items shouldn't count toward who owes whom until resolved. This prevents one parent gaming the balance                              | No competitor explicitly offers this                              |
+| **Rolling Balance with Carry Forward** | Monthly resets lose context; rolling balance shows true picture                                                                              | Some have balance, but carry-forward behavior unclear             |
+| **Full Audit Trail (Before/After)**    | Every change logged with what was changed, by whom. True accountability                                                                      | OFW has "unalterable" messages but expense audit trail less clear |
+| **Mobile-Web-First**                   | No app store friction. Works on any device immediately                                                                                       | Most competitors require native app downloads                     |
+| **Simple, Focused UX**                 | Expenses only, not a full co-parenting suite                                                                                                 | Competitors bundle everything, creating complexity                |
 
 ### Table Stakes (Must Have)
 
@@ -324,12 +331,12 @@ The co-parenting app market is experiencing significant growth, valued at **$440
 
 ### Positioning by Audience
 
-| Audience | Message |
-|----------|---------|
-| **Amicable co-parents** | "Finally, a simple way to split kid costs without the spreadsheet headaches" |
-| **High-conflict co-parents** | "When expenses get questioned, KE has the workflow and audit trail to resolve them fairly" |
-| **Family lawyers/mediators** | "Court-ready expense documentation with full audit trail and dispute history" |
-| **Divorce financial advisors** | "Help your clients establish clean expense-sharing from day one" |
+| Audience                       | Message                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| **Amicable co-parents**        | "Finally, a simple way to split kid costs without the spreadsheet headaches"               |
+| **High-conflict co-parents**   | "When expenses get questioned, KE has the workflow and audit trail to resolve them fairly" |
+| **Family lawyers/mediators**   | "Court-ready expense documentation with full audit trail and dispute history"              |
+| **Divorce financial advisors** | "Help your clients establish clean expense-sharing from day one"                           |
 
 ---
 

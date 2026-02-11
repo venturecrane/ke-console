@@ -1,131 +1,117 @@
-"use client";
+'use client'
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useApi } from "@/hooks/use-api";
-import type {
-  MeResponse,
-  ExpenseCategory,
-  Child,
-} from "@/lib/api";
-import {
-  Button,
-  Card,
-  CardBody,
-  Alert,
-  Input,
-  Select,
-  Textarea,
-} from "@/components/ui";
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useApi } from '@/hooks/use-api'
+import type { MeResponse, ExpenseCategory, Child } from '@/lib/api'
+import { Button, Card, CardBody, Alert, Input, Select, Textarea } from '@/components/ui'
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
-  { value: "school", label: "School" },
-  { value: "medical", label: "Medical" },
-  { value: "activities", label: "Activities" },
-  { value: "childcare", label: "Childcare" },
-  { value: "other", label: "Other" },
-];
+  { value: 'school', label: 'School' },
+  { value: 'medical', label: 'Medical' },
+  { value: 'activities', label: 'Activities' },
+  { value: 'childcare', label: 'Childcare' },
+  { value: 'other', label: 'Other' },
+]
 
 export default function AddExpensePage() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-  const api = useApi();
-  const [meData, setMeData] = useState<MeResponse | null>(null);
-  const [children, setChildren] = useState<Child[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded } = useUser()
+  const router = useRouter()
+  const api = useApi()
+  const [meData, setMeData] = useState<MeResponse | null>(null)
+  const [children, setChildren] = useState<Child[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Form state
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<ExpenseCategory>("other");
-  const [expenseDate, setExpenseDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [linkUrl, setLinkUrl] = useState("");
-  const [memo, setMemo] = useState("");
-  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
-  const [allChildrenSelected, setAllChildrenSelected] = useState(false);
-  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
-  const [linkUrlError, setLinkUrlError] = useState<string | null>(null);
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState<ExpenseCategory>('other')
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0])
+  const [linkUrl, setLinkUrl] = useState('')
+  const [memo, setMemo] = useState('')
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([])
+  const [allChildrenSelected, setAllChildrenSelected] = useState(false)
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false)
+  const [linkUrlError, setLinkUrlError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadUserData() {
-      if (!user) return;
+      if (!user) return
       try {
-        const data = await api.getMe();
-        setMeData(data);
+        const data = await api.getMe()
+        setMeData(data)
         if (!data.family) {
-          router.push("/dashboard");
-          return;
+          router.push('/dashboard')
+          return
         }
         // Fetch children for the family
-        const childrenData = await api.getChildren(data.family.id);
-        setChildren(childrenData.children);
+        const childrenData = await api.getChildren(data.family.id)
+        setChildren(childrenData.children)
       } catch (err) {
-        console.error("Failed to load user data:", err);
-        setError("Failed to load user data");
+        console.error('Failed to load user data:', err)
+        setError('Failed to load user data')
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
     if (isLoaded && user) {
-      loadUserData();
+      loadUserData()
     } else if (isLoaded && !user) {
-      router.push("/sign-in");
+      router.push('/sign-in')
     }
-  }, [isLoaded, user, router, api]);
+  }, [isLoaded, user, router, api])
 
   // Handle "All Children" toggle
   function handleAllChildrenChange(checked: boolean) {
-    setAllChildrenSelected(checked);
+    setAllChildrenSelected(checked)
     if (checked) {
-      setSelectedChildIds(children.map((c) => c.id));
+      setSelectedChildIds(children.map((c) => c.id))
     } else {
-      setSelectedChildIds([]);
+      setSelectedChildIds([])
     }
   }
 
   // Handle individual child selection
   function handleChildToggle(childId: string, checked: boolean) {
     if (checked) {
-      const newSelected = [...selectedChildIds, childId];
-      setSelectedChildIds(newSelected);
+      const newSelected = [...selectedChildIds, childId]
+      setSelectedChildIds(newSelected)
       // Check if all children are now selected
       if (newSelected.length === children.length) {
-        setAllChildrenSelected(true);
+        setAllChildrenSelected(true)
       }
     } else {
-      setSelectedChildIds(selectedChildIds.filter((id) => id !== childId));
-      setAllChildrenSelected(false);
+      setSelectedChildIds(selectedChildIds.filter((id) => id !== childId))
+      setAllChildrenSelected(false)
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !meData?.family) return;
+    e.preventDefault()
+    if (!user || !meData?.family) return
 
-    setIsSubmitting(true);
-    setError(null);
+    setIsSubmitting(true)
+    setError(null)
 
     // Validate URL if provided
-    const trimmedLink = linkUrl.trim();
-    if (trimmedLink && !trimmedLink.startsWith("http://") && !trimmedLink.startsWith("https://")) {
-      setError("Receipt link must start with http:// or https://");
-      setIsSubmitting(false);
-      return;
+    const trimmedLink = linkUrl.trim()
+    if (trimmedLink && !trimmedLink.startsWith('http://') && !trimmedLink.startsWith('https://')) {
+      setError('Receipt link must start with http:// or https://')
+      setIsSubmitting(false)
+      return
     }
 
     // Parse amount (allow negative for refunds)
-    const amountNum = parseFloat(amount);
+    const amountNum = parseFloat(amount)
     if (isNaN(amountNum)) {
-      setError("Please enter a valid amount");
-      setIsSubmitting(false);
-      return;
+      setError('Please enter a valid amount')
+      setIsSubmitting(false)
+      return
     }
 
     try {
@@ -137,13 +123,13 @@ export default function AddExpensePage() {
         linkUrl: linkUrl.trim() || undefined,
         memo: memo.trim() || undefined,
         childIds: selectedChildIds.length > 0 ? selectedChildIds : undefined,
-      });
-      router.refresh();
-      router.push("/dashboard");
+      })
+      router.refresh()
+      router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add expense");
+      setError(err instanceof Error ? err.message : 'Failed to add expense')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -152,11 +138,11 @@ export default function AddExpensePage() {
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-ke-muted">Loading...</p>
       </div>
-    );
+    )
   }
 
   if (!meData?.family) {
-    return null; // Will redirect
+    return null // Will redirect
   }
 
   return (
@@ -166,16 +152,17 @@ export default function AddExpensePage() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-ke-primary">
-              Add Expense
-            </h1>
+            <h1 className="text-2xl font-semibold text-ke-primary">Add Expense</h1>
           </div>
-          <p className="mt-2 text-ke-secondary">
-            Log a kid-related expense
-          </p>
+          <p className="mt-2 text-ke-secondary">Log a kid-related expense</p>
         </div>
 
         <Card>
@@ -184,7 +171,11 @@ export default function AddExpensePage() {
               {/* Description */}
               <div className="mb-4">
                 <Input
-                  label={<>Description <span className="text-ke-negative">*</span></>}
+                  label={
+                    <>
+                      Description <span className="text-ke-negative">*</span>
+                    </>
+                  }
                   id="description"
                   type="text"
                   value={description}
@@ -199,7 +190,11 @@ export default function AddExpensePage() {
               {/* Amount */}
               <div className="mb-4">
                 <Input
-                  label={<>Amount ($) <span className="text-ke-negative">*</span></>}
+                  label={
+                    <>
+                      Amount ($) <span className="text-ke-negative">*</span>
+                    </>
+                  }
                   id="amount"
                   type="number"
                   value={amount}
@@ -214,7 +209,11 @@ export default function AddExpensePage() {
               {/* Category */}
               <div className="mb-4">
                 <Select
-                  label={<>Category <span className="text-ke-negative">*</span></>}
+                  label={
+                    <>
+                      Category <span className="text-ke-negative">*</span>
+                    </>
+                  }
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
@@ -231,7 +230,11 @@ export default function AddExpensePage() {
               {/* Date */}
               <div className="mb-4">
                 <Input
-                  label={<>Date <span className="text-ke-negative">*</span></>}
+                  label={
+                    <>
+                      Date <span className="text-ke-negative">*</span>
+                    </>
+                  }
                   id="expenseDate"
                   type="date"
                   value={expenseDate}
@@ -249,12 +252,17 @@ export default function AddExpensePage() {
                 >
                   <span>Additional Details</span>
                   <svg
-                    className={`h-4 w-4 transition-transform ${showAdditionalDetails ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 transition-transform ${showAdditionalDetails ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -263,7 +271,11 @@ export default function AddExpensePage() {
                     {/* Memo (optional) */}
                     <div>
                       <Textarea
-                        label={<>Memo <span className="text-ke-muted">(optional)</span></>}
+                        label={
+                          <>
+                            Memo <span className="text-ke-muted">(optional)</span>
+                          </>
+                        }
                         id="memo"
                         value={memo}
                         onChange={(e) => setMemo(e.target.value)}
@@ -277,17 +289,21 @@ export default function AddExpensePage() {
                     {/* Receipt Link (optional) */}
                     <div>
                       <Input
-                        label={<>Receipt Link <span className="text-ke-muted">(optional)</span></>}
+                        label={
+                          <>
+                            Receipt Link <span className="text-ke-muted">(optional)</span>
+                          </>
+                        }
                         id="linkUrl"
                         type="url"
                         value={linkUrl}
                         onChange={(e) => {
-                          setLinkUrl(e.target.value);
-                          const val = e.target.value.trim();
-                          if (val && !val.startsWith("http://") && !val.startsWith("https://")) {
-                            setLinkUrlError("Must start with http:// or https://");
+                          setLinkUrl(e.target.value)
+                          const val = e.target.value.trim()
+                          if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
+                            setLinkUrlError('Must start with http:// or https://')
                           } else {
-                            setLinkUrlError(null);
+                            setLinkUrlError(null)
                           }
                         }}
                         placeholder="https://..."
@@ -310,9 +326,7 @@ export default function AddExpensePage() {
                               onChange={(e) => handleAllChildrenChange(e.target.checked)}
                               className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
                             />
-                            <span className="font-medium text-ke-primary">
-                              All Kids
-                            </span>
+                            <span className="font-medium text-ke-primary">All Kids</span>
                           </label>
                           {/* Individual children */}
                           <div className="mt-2 space-y-2">
@@ -324,14 +338,10 @@ export default function AddExpensePage() {
                                 <input
                                   type="checkbox"
                                   checked={selectedChildIds.includes(child.id)}
-                                  onChange={(e) =>
-                                    handleChildToggle(child.id, e.target.checked)
-                                  }
+                                  onChange={(e) => handleChildToggle(child.id, e.target.checked)}
                                   className="h-4 w-4 rounded border-ke-border text-ke-accent focus:ring-ke-focus"
                                 />
-                                <span className="text-ke-secondary">
-                                  {child.name}
-                                </span>
+                                <span className="text-ke-secondary">{child.name}</span>
                               </label>
                             ))}
                           </div>
@@ -356,13 +366,12 @@ export default function AddExpensePage() {
                 fullWidth
                 disabled={isSubmitting || !description.trim() || !amount}
               >
-                {isSubmitting ? "Adding..." : "Add Expense"}
+                {isSubmitting ? 'Adding...' : 'Add Expense'}
               </Button>
             </form>
           </CardBody>
         </Card>
-
       </div>
     </div>
-  );
+  )
 }
