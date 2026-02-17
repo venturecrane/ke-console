@@ -11,6 +11,7 @@ database_id = "8a876b33-faf8-4267-bd08-770b76786dcb"
 # RESEND_API_KEY - API key for Resend email service
 # APP_URL - Base URL for the app (e.g., https://ke-console.vercel.app)
 # CLERK_DOMAIN - Clerk instance domain for JWT verification (e.g., clerk.example.com)
+# CLERK_ISSUER_URL - Expected JWT issuer URL (e.g., https://clerk.example.com). If not set, derived from CLERK_DOMAIN.
 # STRIPE_SECRET_KEY - Stripe API secret key for billing
 # STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
 
