@@ -884,11 +884,11 @@ async function apiBlobRequest(path: string, token?: string): Promise<Blob> {
 }
 
 export async function exportExpensesCsv(userId: string, familyId: string): Promise<Blob> {
-  return apiBlobRequest(`/families/${familyId}/expenses/export`, userId)
+  return apiBlobRequest(`/families/${familyId}/expenses/export/csv`, userId)
 }
 
 export async function exportPaymentsCsv(userId: string, familyId: string): Promise<Blob> {
-  return apiBlobRequest(`/families/${familyId}/payments/export`, userId)
+  return apiBlobRequest(`/families/${familyId}/payments/export/csv`, userId)
 }
 
 // ============================================

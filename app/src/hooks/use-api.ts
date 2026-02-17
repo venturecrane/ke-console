@@ -370,10 +370,10 @@ export function useApi() {
 
     // CSV Export (#101)
     exportExpensesCsv: (familyId: string): Promise<Blob> =>
-      apiBlobRequest(`/families/${familyId}/expenses/export`),
+      apiBlobRequest(`/families/${familyId}/expenses/export/csv`),
 
     exportPaymentsCsv: (familyId: string): Promise<Blob> =>
-      apiBlobRequest(`/families/${familyId}/payments/export`),
+      apiBlobRequest(`/families/${familyId}/payments/export/csv`),
 
     // Balance Breakdown (#107)
     getBalanceBreakdown: (familyId: string): Promise<BalanceBreakdownResponse> =>
