@@ -1,12 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Hono } from 'hono'
 import type { AppType } from '../types'
-import {
-  authMiddleware,
-  _base64urlDecode,
-  _verifyJWT,
-  _resetJWKSCache,
-} from '../middleware/auth'
+import { authMiddleware, _base64urlDecode, _verifyJWT, _resetJWKSCache } from '../middleware/auth'
 
 // ============================================================================
 // Helpers: RSA key generation and JWT construction
@@ -117,10 +112,14 @@ function makeRequest(
   }
 ) {
   const headers = options?.headers ?? {}
-  return app.request(path, { headers }, {
-    DB: {} as D1Database,
-    CLERK_DOMAIN: options?.clerkDomain,
-  })
+  return app.request(
+    path,
+    { headers },
+    {
+      DB: {} as D1Database,
+      CLERK_DOMAIN: options?.clerkDomain,
+    }
+  )
 }
 
 // ============================================================================
@@ -175,9 +174,7 @@ describe('verifyJWT', () => {
     // Mock global fetch to return a fresh JWKS response each time
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockImplementation(() =>
-        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
     )
   })
 
@@ -219,7 +216,9 @@ describe('verifyJWT', () => {
     const payloadB64 = encodeJWTPart(payload)
     const fakeToken = `${headerB64}.${payloadB64}.fakesignature`
 
-    await expect(_verifyJWT(fakeToken, CLERK_DOMAIN)).rejects.toThrow('Unsupported algorithm: HS256')
+    await expect(_verifyJWT(fakeToken, CLERK_DOMAIN)).rejects.toThrow(
+      'Unsupported algorithm: HS256'
+    )
   })
 
   it('rejects tokens with missing kid in header', async () => {
@@ -312,9 +311,7 @@ describe('verifyJWT', () => {
     // Need fresh Response per call since fetchJWKS reads the body
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockImplementation(() =>
-        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
     )
 
     await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Invalid JWT signature')
@@ -334,14 +331,10 @@ describe('verifyJWT', () => {
     // Need fresh Response per call since kid miss triggers a refetch
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockImplementation(() =>
-        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
     )
 
-    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow(
-      'Signing key not found in JWKS'
-    )
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Signing key not found in JWKS')
   })
 })
 
@@ -363,9 +356,7 @@ describe('JWKS fetching and caching', () => {
   })
 
   it('fetches JWKS on first JWT verification', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+    const fetchMock = vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
     vi.stubGlobal('fetch', fetchMock)
 
     const now = Math.floor(Date.now() / 1000)
@@ -378,15 +369,11 @@ describe('JWKS fetching and caching', () => {
     await _verifyJWT(token, CLERK_DOMAIN)
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock).toHaveBeenCalledWith(
-      `https://${CLERK_DOMAIN}/.well-known/jwks.json`
-    )
+    expect(fetchMock).toHaveBeenCalledWith(`https://${CLERK_DOMAIN}/.well-known/jwks.json`)
   })
 
   it('uses cached JWKS for subsequent verifications', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+    const fetchMock = vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
     vi.stubGlobal('fetch', fetchMock)
 
     const now = Math.floor(Date.now() / 1000)
@@ -411,10 +398,7 @@ describe('JWKS fetching and caching', () => {
   })
 
   it('throws when JWKS endpoint returns non-OK status', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(new Response('Not Found', { status: 404 }))
-    )
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('Not Found', { status: 404 })))
 
     const now = Math.floor(Date.now() / 1000)
     const token = await createSignedJWT(
@@ -443,9 +427,11 @@ describe('JWKS fetching and caching', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        createJWKSResponse([ecKey as JsonWebKey & { kid: string }, keySet.publicJWK])
-      )
+      vi
+        .fn()
+        .mockResolvedValue(
+          createJWKSResponse([ecKey as JsonWebKey & { kid: string }, keySet.publicJWK])
+        )
     )
 
     const now = Math.floor(Date.now() / 1000)
@@ -490,9 +476,7 @@ describe('Key rotation handling', () => {
           return Promise.resolve(createJWKSResponse([oldKeySet.publicJWK]))
         }
         // Second call: new key added (rotation)
-        return Promise.resolve(
-          createJWKSResponse([oldKeySet.publicJWK, newKeySet.publicJWK])
-        )
+        return Promise.resolve(createJWKSResponse([oldKeySet.publicJWK, newKeySet.publicJWK]))
       })
     )
 
@@ -561,9 +545,7 @@ describe('Key rotation handling', () => {
 
     const fetchMock = vi
       .fn()
-      .mockImplementation(() =>
-        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
-      )
+      .mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
     vi.stubGlobal('fetch', fetchMock)
 
     const now = Math.floor(Date.now() / 1000)
@@ -612,10 +594,7 @@ describe('authMiddleware', () => {
   describe('JWT authentication path', () => {
     it('authenticates with a valid Bearer token and sets userId', async () => {
       const keySet = await generateRSAKeyPair('key-1')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const now = Math.floor(Date.now() / 1000)
       const token = await createSignedJWT(
@@ -638,10 +617,7 @@ describe('authMiddleware', () => {
 
     it('returns 401 for an invalid Bearer token', async () => {
       const keySet = await generateRSAKeyPair('key-1')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const app = createTestApp()
       const res = await makeRequest(app, '/protected/resource', {
@@ -656,10 +632,7 @@ describe('authMiddleware', () => {
 
     it('returns 401 for an expired Bearer token', async () => {
       const keySet = await generateRSAKeyPair('key-1')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const now = Math.floor(Date.now() / 1000)
       const token = await createSignedJWT(
@@ -755,10 +728,7 @@ describe('authMiddleware', () => {
   describe('JWT takes priority over X-User-Id', () => {
     it('uses JWT sub when both Authorization and X-User-Id are present', async () => {
       const keySet = await generateRSAKeyPair('key-1')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const now = Math.floor(Date.now() / 1000)
       const token = await createSignedJWT(
@@ -783,10 +753,7 @@ describe('authMiddleware', () => {
 
     it('falls back to X-User-Id when JWT verification fails', async () => {
       const keySet = await generateRSAKeyPair('key-1')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
-      )
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const app = createTestApp()
       // Invalid JWT but valid X-User-Id — should NOT fall back, should return 401
