@@ -35,7 +35,7 @@ app.use(
       return null as unknown as string
     },
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
+    allowHeaders: ['Content-Type', 'Authorization'],
   })
 )
 

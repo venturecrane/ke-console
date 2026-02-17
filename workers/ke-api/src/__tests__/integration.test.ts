@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import { app } from '../index'
+import { _resetJWKSCache } from '../middleware/auth'
 
 // ============================================================================
 // Integration Tests for Route Handlers
@@ -10,6 +11,119 @@ import { app } from '../index'
 // ============================================================================
 
 // ---------------------------------------------------------------------------
+// JWT Helpers (mirrors auth.test.ts for generating valid Bearer tokens)
+// ---------------------------------------------------------------------------
+
+const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+function base64urlEncode(data: Uint8Array | ArrayBuffer): string {
+  const bytes = data instanceof ArrayBuffer ? new Uint8Array(data) : data
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function encodeJWTPart(obj: Record<string, unknown>): string {
+  const json = JSON.stringify(obj)
+  const bytes = new TextEncoder().encode(json)
+  return base64urlEncode(bytes)
+}
+
+interface RSAKeySet {
+  privateKey: CryptoKey
+  publicKey: CryptoKey
+  publicJWK: JsonWebKey & { kid: string }
+}
+
+async function generateRSAKeyPair(kid: string): Promise<RSAKeySet> {
+  const keyPair = (await crypto.subtle.generateKey(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: 'SHA-256',
+    },
+    true,
+    ['sign', 'verify']
+  )) as CryptoKeyPair
+
+  const publicJWK = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  return {
+    privateKey: keyPair.privateKey,
+    publicKey: keyPair.publicKey,
+    publicJWK: {
+      ...publicJWK,
+      kid,
+      alg: 'RS256',
+      kty: 'RSA',
+      use: 'sig',
+    },
+  }
+}
+
+async function createSignedJWT(
+  payload: Record<string, unknown>,
+  privateKey: CryptoKey,
+  kid: string
+): Promise<string> {
+  const header = { alg: 'RS256', typ: 'JWT', kid }
+
+  const headerB64 = encodeJWTPart(header)
+  const payloadB64 = encodeJWTPart(payload)
+
+  const signingInput = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, signingInput)
+
+  return `${headerB64}.${payloadB64}.${base64urlEncode(signature)}`
+}
+
+function createJWKSResponse(keys: Array<JsonWebKey & { kid: string }>): Response {
+  return new Response(JSON.stringify({ keys }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+// Module-level key set and token cache for fast test execution
+let keySet: RSAKeySet
+const tokenCache = new Map<string, string>()
+
+// Generate key pair once before all tests
+beforeAll(async () => {
+  keySet = await generateRSAKeyPair('integration-key-1')
+})
+
+beforeEach(() => {
+  _resetJWKSCache()
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
+  )
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+/** Create a valid JWT for the given userId. Caches tokens per userId for performance. */
+async function getToken(userId: string): Promise<string> {
+  const cached = tokenCache.get(userId)
+  if (cached) return cached
+
+  const now = Math.floor(Date.now() / 1000)
+  const token = await createSignedJWT(
+    { sub: userId, exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+    keySet.privateKey,
+    'integration-key-1'
+  )
+  tokenCache.set(userId, token)
+  return token
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -17,27 +131,30 @@ import { app } from '../index'
 function makeRequest(path: string, mockDb: unknown, options?: RequestInit) {
   return app.request(path, options, {
     DB: mockDb as D1Database,
+    CLERK_DOMAIN,
   })
 }
 
-/** Make an authenticated request using the X-User-Id header fallback. */
-function makeAuthRequest(
+/** Make an authenticated request using a JWT Bearer token. */
+async function makeAuthRequest(
   path: string,
   mockDb: unknown,
   userId: string = 'user-001',
   options?: RequestInit
 ) {
+  const token = await getToken(userId)
   return app.request(
     path,
     {
       ...options,
       headers: {
-        'X-User-Id': userId,
+        Authorization: `Bearer ${token}`,
         ...(options?.headers || {}),
       },
     },
     {
       DB: mockDb as D1Database,
+      CLERK_DOMAIN,
     }
   )
 }
@@ -166,7 +283,23 @@ describe('Auth enforcement (integration)', () => {
     expect(body.error).toBe('Invalid or expired token')
   })
 
-  it('X-User-Id header grants access to protected routes', async () => {
+  it('X-User-Id header alone returns 401 (no fallback)', async () => {
+    const res = await app.request(
+      '/me',
+      {
+        headers: { 'X-User-Id': 'user-001' },
+      },
+      {
+        DB: emptyMockDb() as unknown as D1Database,
+        CLERK_DOMAIN,
+      }
+    )
+    expect(res.status).toBe(401)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toBe('Missing authentication')
+  })
+
+  it('Bearer token with valid JWT grants access to protected routes', async () => {
     // Build a mock that returns a user for /me
     const mockDb = {
       prepare: vi.fn().mockReturnValue({
@@ -184,7 +317,7 @@ describe('Auth enforcement (integration)', () => {
     }
 
     const res = await makeAuthRequest('/me', mockDb, 'user-001')
-    // Should NOT be 401 — auth passes
+    // Should NOT be 401 — auth passes via JWT
     expect(res.status).not.toBe(401)
   })
 })
