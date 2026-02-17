@@ -1,5 +1,5 @@
 import { generateId } from '../utils'
-import type { Expense, Family, FixedExpense } from '../types'
+import type { Expense, FixedExpense } from '../types'
 
 // Generated expense detail (for email notifications)
 export interface GeneratedExpenseDetail {

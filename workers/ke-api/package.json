@@ -8,11 +8,15 @@
     "tail": "wrangler tail",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240117.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.0",
     "vitest": "^3.0.0",
     "wrangler": "^3.24.0"
   },

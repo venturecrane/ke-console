@@ -3,8 +3,6 @@ import {
   dollarsToCents,
   calculateBalanceFromData,
   calculateShares,
-  type Expense as CalcExpense,
-  type Payment as CalcPayment,
 } from '../calculations'
 import type {
   AppType,
