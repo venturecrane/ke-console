@@ -1,5 +1,3 @@
-import type { Hono } from 'hono'
-
 export interface Env {
   DB: D1Database
   RESEND_API_KEY?: string

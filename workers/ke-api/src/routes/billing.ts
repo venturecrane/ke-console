@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import type { AppType, Family, Subscription, CreateCheckoutRequest } from '../types'
 import { authMiddleware } from '../middleware/auth'
-import { generateId } from '../utils'
 import { createActivityEvent } from '../services/activity'
 
 const app = new Hono<AppType>()

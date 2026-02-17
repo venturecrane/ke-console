@@ -419,12 +419,6 @@ describe('JWKS fetching and caching', () => {
       x: 'fake',
       y: 'fake',
     }
-    const rsaKeyNoAlg = {
-      ...keySet.publicJWK,
-      kid: 'rsa-no-alg',
-      alg: undefined,
-    }
-
     vi.stubGlobal(
       'fetch',
       vi
