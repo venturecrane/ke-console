@@ -51,7 +51,7 @@ app.get('/:id/subscription', async (c) => {
     })
   } catch (error) {
     console.error('Get subscription error:', error)
-    return c.json({ error: 'Failed to get subscription', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get subscription' }, 500)
   }
 })
 
@@ -141,7 +141,7 @@ app.post('/:id/subscription/checkout', async (c) => {
     return c.json({ checkoutUrl: session.url, sessionId: session.id })
   } catch (error) {
     console.error('Create checkout error:', error)
-    return c.json({ error: 'Failed to create checkout session', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create checkout session' }, 500)
   }
 })
 
@@ -218,7 +218,7 @@ app.post('/:id/subscription/cancel', async (c) => {
     return c.json({ success: true, message: 'Subscription will cancel at end of billing period' })
   } catch (error) {
     console.error('Cancel subscription error:', error)
-    return c.json({ error: 'Failed to cancel subscription', details: String(error) }, 500)
+    return c.json({ error: 'Failed to cancel subscription' }, 500)
   }
 })
 

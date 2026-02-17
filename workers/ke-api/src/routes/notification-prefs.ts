@@ -75,7 +75,7 @@ app.get('/notification-preferences', async (c) => {
     })
   } catch (error) {
     console.error('Get notification preferences error:', error)
-    return c.json({ error: 'Failed to get notification preferences', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get notification preferences' }, 500)
   }
 })
 
@@ -182,7 +182,7 @@ app.patch('/notification-preferences', async (c) => {
   } catch (error) {
     console.error('Update notification preferences error:', error)
     return c.json(
-      { error: 'Failed to update notification preferences', details: String(error) },
+      { error: 'Failed to update notification preferences' },
       500
     )
   }

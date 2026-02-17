@@ -63,7 +63,7 @@ app.post('/:id/children', async (c) => {
     return c.json(child, 201)
   } catch (error) {
     console.error('Create child error:', error)
-    return c.json({ error: 'Failed to create child', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create child' }, 500)
   }
 })
 
@@ -103,7 +103,7 @@ app.get('/:id/children', async (c) => {
     })
   } catch (error) {
     console.error('Get children error:', error)
-    return c.json({ error: 'Failed to get children', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get children' }, 500)
   }
 })
 
@@ -180,7 +180,7 @@ app.patch('/:id/children/:childId', async (c) => {
     return c.json(updatedChild)
   } catch (error) {
     console.error('Update child error:', error)
-    return c.json({ error: 'Failed to update child', details: String(error) }, 500)
+    return c.json({ error: 'Failed to update child' }, 500)
   }
 })
 
@@ -243,7 +243,7 @@ app.delete('/:id/children/:childId', async (c) => {
     return c.json(updatedChild)
   } catch (error) {
     console.error('Delete child error:', error)
-    return c.json({ error: 'Failed to delete child', details: String(error) }, 500)
+    return c.json({ error: 'Failed to delete child' }, 500)
   }
 })
 

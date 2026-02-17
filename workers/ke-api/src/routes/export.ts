@@ -78,7 +78,7 @@ app.get('/:id/expenses/export/csv', async (c) => {
     })
   } catch (error) {
     console.error('Export expenses CSV error:', error)
-    return c.json({ error: 'Failed to export expenses', details: String(error) }, 500)
+    return c.json({ error: 'Failed to export expenses' }, 500)
   }
 })
 
@@ -144,7 +144,7 @@ app.get('/:id/payments/export/csv', async (c) => {
     })
   } catch (error) {
     console.error('Export payments CSV error:', error)
-    return c.json({ error: 'Failed to export payments', details: String(error) }, 500)
+    return c.json({ error: 'Failed to export payments' }, 500)
   }
 })
 

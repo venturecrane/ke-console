@@ -187,7 +187,7 @@ app.get('/:id/activity', async (c) => {
     })
   } catch (error) {
     console.error('Get activity error:', error)
-    return c.json({ error: 'Failed to get activity', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get activity' }, 500)
   }
 })
 

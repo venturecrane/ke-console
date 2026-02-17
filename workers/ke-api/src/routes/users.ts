@@ -37,7 +37,7 @@ app.post('/sync', async (c) => {
     }
   } catch (error) {
     console.error('User sync error:', error)
-    return c.json({ error: 'Failed to sync user', details: String(error) }, 500)
+    return c.json({ error: 'Failed to sync user' }, 500)
   }
 })
 

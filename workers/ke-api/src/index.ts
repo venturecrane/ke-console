@@ -45,7 +45,8 @@ app.get('/health', async (c) => {
     const result = await c.env.DB.prepare('SELECT 1 as ok').first()
     return c.json({ status: 'ok', db: result?.ok === 1 ? 'connected' : 'error' })
   } catch (error) {
-    return c.json({ status: 'error', db: 'disconnected', error: String(error) }, 500)
+    console.error('Health check error:', error)
+    return c.json({ status: 'error', db: 'disconnected' }, 500)
   }
 })
 

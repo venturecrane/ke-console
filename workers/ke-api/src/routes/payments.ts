@@ -82,7 +82,7 @@ app.post('/:id/payments', async (c) => {
     return c.json({ success: true, payment }, 201)
   } catch (error) {
     console.error('Create payment error:', error)
-    return c.json({ error: 'Failed to create payment', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create payment' }, 500)
   }
 })
 
@@ -151,7 +151,7 @@ app.get('/:id/payments', async (c) => {
     })
   } catch (error) {
     console.error('List payments error:', error)
-    return c.json({ error: 'Failed to list payments', details: String(error) }, 500)
+    return c.json({ error: 'Failed to list payments' }, 500)
   }
 })
 
