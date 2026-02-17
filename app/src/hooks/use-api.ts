@@ -354,16 +354,16 @@ export function useApi() {
       apiRequest(`/families/${familyId}/subscription`, { method: 'DELETE' }),
 
     // Notification Preferences (#100)
-    getNotificationPreferences: (familyId: string): Promise<NotificationPreferences> =>
-      apiRequest<NotificationPreferences>(`/families/${familyId}/notification-preferences`, {
+    getNotificationPreferences: (_familyId: string): Promise<NotificationPreferences> =>
+      apiRequest<NotificationPreferences>(`/me/notification-preferences`, {
         method: 'GET',
       }),
 
     updateNotificationPreferences: (
-      familyId: string,
+      _familyId: string,
       updates: UpdateNotificationPreferencesRequest
     ): Promise<NotificationPreferences> =>
-      apiRequest<NotificationPreferences>(`/families/${familyId}/notification-preferences`, {
+      apiRequest<NotificationPreferences>(`/me/notification-preferences`, {
         method: 'PATCH',
         body: JSON.stringify(updates),
       }),
