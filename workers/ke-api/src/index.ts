@@ -26,10 +26,13 @@ app.use(
   '*',
   cors({
     origin: (origin) => {
+      if (!origin) return null as unknown as string
+      // Exact-match production and localhost
       const allowed = ['https://ke-console.vercel.app', 'http://localhost:3000']
-      // Allow all Vercel preview deploys
-      if (origin?.endsWith('.vercel.app')) return origin
-      return allowed.includes(origin ?? '') ? origin! : (null as unknown as string)
+      if (allowed.includes(origin)) return origin
+      // Allow only KE preview deploys (ke-console-*.vercel.app)
+      if (/^https:\/\/ke-console-[a-z0-9-]+\.vercel\.app$/.test(origin)) return origin
+      return null as unknown as string
     },
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
