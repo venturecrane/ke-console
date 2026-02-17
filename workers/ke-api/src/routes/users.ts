@@ -1,39 +1,43 @@
 import { Hono } from 'hono'
 import type { AppType, UserSyncRequest } from '../types'
+import { authMiddleware } from '../middleware/auth'
 
 const app = new Hono<AppType>()
 
-// User sync endpoint - creates or updates user from Clerk (no auth middleware)
+app.use('*', authMiddleware)
+
+// User sync endpoint - creates or updates authenticated user's record
 app.post('/sync', async (c) => {
   try {
+    const userId = c.get('userId')
     const body = await c.req.json<UserSyncRequest>()
-    const { id, email, name } = body
+    const { email, name } = body
 
-    if (!id || !email) {
-      return c.json({ error: 'Missing required fields: id and email' }, 400)
+    if (!email) {
+      return c.json({ error: 'Missing required field: email' }, 400)
     }
 
     const existingUser = await c.env.DB.prepare('SELECT id FROM users WHERE id = ?')
-      .bind(id)
+      .bind(userId)
       .first()
 
     if (existingUser) {
       await c.env.DB.prepare(
         `UPDATE users SET email = ?, name = ?, updated_at = datetime('now') WHERE id = ?`
       )
-        .bind(email, name || null, id)
+        .bind(email, name || null, userId)
         .run()
 
-      return c.json({ success: true, action: 'updated', userId: id })
+      return c.json({ success: true, action: 'updated', userId })
     } else {
       await c.env.DB.prepare(
         `INSERT INTO users (id, email, name, created_at, updated_at)
          VALUES (?, ?, ?, datetime('now'), datetime('now'))`
       )
-        .bind(id, email, name || null)
+        .bind(userId, email, name || null)
         .run()
 
-      return c.json({ success: true, action: 'created', userId: id })
+      return c.json({ success: true, action: 'created', userId })
     }
   } catch (error) {
     console.error('User sync error:', error)

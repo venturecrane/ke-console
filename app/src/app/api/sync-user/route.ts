@@ -5,7 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function POST() {
   try {
-    const { userId } = await auth()
+    const { userId, getToken } = await auth()
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,14 +17,16 @@ export async function POST() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    const token = await getToken()
+
     // Sync user to backend API (ke-api worker)
     const response = await fetch(`${API_URL}/users/sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
-        id: user.id,
         email: user.primaryEmailAddress?.emailAddress,
         name:
           user.firstName && user.lastName
