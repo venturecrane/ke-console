@@ -129,6 +129,20 @@ async function verifyJWT(token: string, clerkDomain: string): Promise<JWTPayload
   return payload
 }
 
+// Exported for testing only — not part of the public API
+export {
+  base64urlDecode as _base64urlDecode,
+  verifyJWT as _verifyJWT,
+  getVerificationKey as _getVerificationKey,
+  fetchJWKS as _fetchJWKS,
+}
+
+// Reset JWKS cache — used by tests to ensure clean state between runs
+export function _resetJWKSCache(): void {
+  jwksCache = new Map()
+  jwksCacheExpiry = 0
+}
+
 export const authMiddleware = createMiddleware<AppType>(async (c, next) => {
   const authHeader = c.req.header('Authorization')
   const clerkDomain = c.env.CLERK_DOMAIN

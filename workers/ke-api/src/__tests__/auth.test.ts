@@ -1,0 +1,819 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { Hono } from 'hono'
+import type { AppType } from '../types'
+import {
+  authMiddleware,
+  _base64urlDecode,
+  _verifyJWT,
+  _resetJWKSCache,
+} from '../middleware/auth'
+
+// ============================================================================
+// Helpers: RSA key generation and JWT construction
+// ============================================================================
+
+function base64urlEncode(data: Uint8Array | ArrayBuffer): string {
+  const bytes = data instanceof ArrayBuffer ? new Uint8Array(data) : data
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function encodeJWTPart(obj: Record<string, unknown>): string {
+  const json = JSON.stringify(obj)
+  const bytes = new TextEncoder().encode(json)
+  return base64urlEncode(bytes)
+}
+
+interface RSAKeySet {
+  privateKey: CryptoKey
+  publicKey: CryptoKey
+  publicJWK: JsonWebKey & { kid: string }
+}
+
+async function generateRSAKeyPair(kid: string): Promise<RSAKeySet> {
+  const keyPair = (await crypto.subtle.generateKey(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: 'SHA-256',
+    },
+    true,
+    ['sign', 'verify']
+  )) as CryptoKeyPair
+
+  const publicJWK = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  return {
+    privateKey: keyPair.privateKey,
+    publicKey: keyPair.publicKey,
+    publicJWK: {
+      ...publicJWK,
+      kid,
+      alg: 'RS256',
+      kty: 'RSA',
+      use: 'sig',
+    },
+  }
+}
+
+async function createSignedJWT(
+  payload: Record<string, unknown>,
+  privateKey: CryptoKey,
+  kid: string,
+  headerOverrides?: Record<string, unknown>
+): Promise<string> {
+  const header = { alg: 'RS256', typ: 'JWT', kid, ...headerOverrides }
+
+  const headerB64 = encodeJWTPart(header)
+  const payloadB64 = encodeJWTPart(payload)
+
+  const signingInput = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, signingInput)
+
+  return `${headerB64}.${payloadB64}.${base64urlEncode(signature)}`
+}
+
+// ============================================================================
+// Mock fetch for JWKS endpoint
+// ============================================================================
+
+function createJWKSResponse(keys: Array<JsonWebKey & { kid: string }>): Response {
+  return new Response(JSON.stringify({ keys }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+// ============================================================================
+// Test app: minimal Hono app with authMiddleware
+// ============================================================================
+
+function createTestApp() {
+  const app = new Hono<AppType>()
+
+  app.use('/protected/*', authMiddleware)
+
+  app.get('/protected/resource', (c) => {
+    return c.json({ userId: c.get('userId'), ok: true })
+  })
+
+  app.get('/public', (c) => {
+    return c.json({ ok: true })
+  })
+
+  return app
+}
+
+function makeRequest(
+  app: ReturnType<typeof createTestApp>,
+  path: string,
+  options?: {
+    headers?: Record<string, string>
+    clerkDomain?: string
+  }
+) {
+  const headers = options?.headers ?? {}
+  return app.request(path, { headers }, {
+    DB: {} as D1Database,
+    CLERK_DOMAIN: options?.clerkDomain,
+  })
+}
+
+// ============================================================================
+// base64urlDecode
+// ============================================================================
+
+describe('base64urlDecode', () => {
+  it('decodes standard base64url strings', () => {
+    // "hello" in base64url is "aGVsbG8"
+    const result = _base64urlDecode('aGVsbG8')
+    const text = new TextDecoder().decode(result)
+    expect(text).toBe('hello')
+  })
+
+  it('handles base64url characters (- and _)', () => {
+    // base64url uses - instead of + and _ instead of /
+    // "?>" in standard base64 is "Pz4=" which in base64url is "Pz4"
+    const result = _base64urlDecode('Pz4')
+    const text = new TextDecoder().decode(result)
+    expect(text).toBe('?>')
+  })
+
+  it('handles strings that need padding', () => {
+    // "a" -> base64 "YQ==" -> base64url "YQ"
+    const result = _base64urlDecode('YQ')
+    const text = new TextDecoder().decode(result)
+    expect(text).toBe('a')
+  })
+
+  it('decodes JSON payloads correctly', () => {
+    const original = { sub: 'user_123', exp: 9999999999 }
+    const json = JSON.stringify(original)
+    const encoded = base64urlEncode(new TextEncoder().encode(json))
+    const decoded = _base64urlDecode(encoded)
+    const parsed = JSON.parse(new TextDecoder().decode(decoded))
+    expect(parsed).toEqual(original)
+  })
+})
+
+// ============================================================================
+// verifyJWT
+// ============================================================================
+
+describe('verifyJWT', () => {
+  let keySet: RSAKeySet
+  const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+  beforeEach(async () => {
+    _resetJWKSCache()
+    keySet = await generateRSAKeyPair('key-1')
+
+    // Mock global fetch to return a fresh JWKS response each time
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
+      )
+    )
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('verifies a valid JWT and returns the payload', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN)
+
+    expect(result.sub).toBe('user_abc123')
+    expect(result.iss).toBe(`https://${CLERK_DOMAIN}`)
+    expect(result.exp).toBe(now + 3600)
+  })
+
+  it('rejects tokens with invalid format (not 3 parts)', async () => {
+    await expect(_verifyJWT('only.two', CLERK_DOMAIN)).rejects.toThrow('Invalid JWT format')
+    await expect(_verifyJWT('single', CLERK_DOMAIN)).rejects.toThrow('Invalid JWT format')
+    await expect(_verifyJWT('a.b.c.d', CLERK_DOMAIN)).rejects.toThrow('Invalid JWT format')
+    await expect(_verifyJWT('', CLERK_DOMAIN)).rejects.toThrow('Invalid JWT format')
+  })
+
+  it('rejects tokens with unsupported algorithm', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = { sub: 'user_123', exp: now + 3600 }
+
+    // Create a token with HS256 header but RS256 signature (header claim mismatch)
+    const header = { alg: 'HS256', typ: 'JWT', kid: 'key-1' }
+    const headerB64 = encodeJWTPart(header)
+    const payloadB64 = encodeJWTPart(payload)
+    const fakeToken = `${headerB64}.${payloadB64}.fakesignature`
+
+    await expect(_verifyJWT(fakeToken, CLERK_DOMAIN)).rejects.toThrow('Unsupported algorithm: HS256')
+  })
+
+  it('rejects tokens with missing kid in header', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = { sub: 'user_123', exp: now + 3600 }
+
+    const header = { alg: 'RS256', typ: 'JWT' } // no kid
+    const headerB64 = encodeJWTPart(header)
+    const payloadB64 = encodeJWTPart(payload)
+    const fakeToken = `${headerB64}.${payloadB64}.fakesignature`
+
+    await expect(_verifyJWT(fakeToken, CLERK_DOMAIN)).rejects.toThrow('Missing kid in JWT header')
+  })
+
+  it('rejects expired tokens', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now - 100, // expired 100 seconds ago
+      iat: now - 3700,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('JWT expired')
+  })
+
+  it('rejects tokens not yet valid (nbf in the future beyond skew)', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 7200,
+      nbf: now + 120, // not valid for 2 minutes (beyond 30s skew tolerance)
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('JWT not yet valid')
+  })
+
+  it('accepts tokens with nbf within clock skew tolerance (30s)', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 7200,
+      nbf: now + 20, // 20 seconds in the future, within 30s skew tolerance
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN)
+
+    expect(result.sub).toBe('user_abc123')
+  })
+
+  it('rejects tokens with missing sub claim', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+      // no sub
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Missing sub claim')
+  })
+
+  it('rejects tokens with invalid signature', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    // Sign with a different key pair (same kid, different key material)
+    const wrongKeySet = await generateRSAKeyPair('key-1')
+    const token = await createSignedJWT(payload, wrongKeySet.privateKey, 'key-1')
+
+    // Mock returns the original key (not the one used to sign).
+    // After signature fails, it will refetch JWKS (key rotation), but still get the same
+    // original key, so verification fails again.
+    // Need fresh Response per call since fetchJWKS reads the body
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
+      )
+    )
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Invalid JWT signature')
+  })
+
+  it('rejects tokens when signing key is not found in JWKS', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+    }
+
+    // Use a kid that does not exist in the JWKS
+    const token = await createSignedJWT(payload, keySet.privateKey, 'unknown-key-id')
+
+    // Need fresh Response per call since kid miss triggers a refetch
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
+      )
+    )
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow(
+      'Signing key not found in JWKS'
+    )
+  })
+})
+
+// ============================================================================
+// JWKS fetching and caching
+// ============================================================================
+
+describe('JWKS fetching and caching', () => {
+  let keySet: RSAKeySet
+  const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+  beforeEach(async () => {
+    _resetJWKSCache()
+    keySet = await generateRSAKeyPair('key-1')
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('fetches JWKS on first JWT verification', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const now = Math.floor(Date.now() / 1000)
+    const token = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+
+    await _verifyJWT(token, CLERK_DOMAIN)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://${CLERK_DOMAIN}/.well-known/jwks.json`
+    )
+  })
+
+  it('uses cached JWKS for subsequent verifications', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const now = Math.floor(Date.now() / 1000)
+
+    // First verification — triggers fetch
+    const token1 = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+    await _verifyJWT(token1, CLERK_DOMAIN)
+
+    // Second verification — should use cache
+    const token2 = await createSignedJWT(
+      { sub: 'user_2', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+    await _verifyJWT(token2, CLERK_DOMAIN)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1) // only fetched once
+  })
+
+  it('throws when JWKS endpoint returns non-OK status', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('Not Found', { status: 404 }))
+    )
+
+    const now = Math.floor(Date.now() / 1000)
+    const token = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+
+    await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Failed to fetch JWKS: 404')
+  })
+
+  it('ignores non-RSA or non-RS256 keys in JWKS response', async () => {
+    const ecKey = {
+      kty: 'EC',
+      alg: 'ES256',
+      kid: 'ec-key',
+      crv: 'P-256',
+      x: 'fake',
+      y: 'fake',
+    }
+    const rsaKeyNoAlg = {
+      ...keySet.publicJWK,
+      kid: 'rsa-no-alg',
+      alg: undefined,
+    }
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        createJWKSResponse([ecKey as JsonWebKey & { kid: string }, keySet.publicJWK])
+      )
+    )
+
+    const now = Math.floor(Date.now() / 1000)
+    const token = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+
+    // Should succeed because the valid RSA key-1 is present
+    const result = await _verifyJWT(token, CLERK_DOMAIN)
+    expect(result.sub).toBe('user_1')
+  })
+})
+
+// ============================================================================
+// Key rotation handling
+// ============================================================================
+
+describe('Key rotation handling', () => {
+  const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+  beforeEach(() => {
+    _resetJWKSCache()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('refetches JWKS when kid is not in cache (new key)', async () => {
+    const oldKeySet = await generateRSAKeyPair('old-key')
+    const newKeySet = await generateRSAKeyPair('new-key')
+
+    let callCount = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        callCount++
+        if (callCount === 1) {
+          // First call: only old key
+          return Promise.resolve(createJWKSResponse([oldKeySet.publicJWK]))
+        }
+        // Second call: new key added (rotation)
+        return Promise.resolve(
+          createJWKSResponse([oldKeySet.publicJWK, newKeySet.publicJWK])
+        )
+      })
+    )
+
+    // First: verify with old key to populate cache
+    const now = Math.floor(Date.now() / 1000)
+    const token1 = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      oldKeySet.privateKey,
+      'old-key'
+    )
+    await _verifyJWT(token1, CLERK_DOMAIN)
+
+    // Second: verify with new key — cache miss triggers refetch
+    const token2 = await createSignedJWT(
+      { sub: 'user_2', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      newKeySet.privateKey,
+      'new-key'
+    )
+    const result = await _verifyJWT(token2, CLERK_DOMAIN)
+
+    expect(result.sub).toBe('user_2')
+    expect(callCount).toBe(2)
+  })
+
+  it('refetches JWKS when signature verification fails with cached key', async () => {
+    const keySetV1 = await generateRSAKeyPair('rotating-key')
+    const keySetV2 = await generateRSAKeyPair('rotating-key') // same kid, different key material
+
+    let callCount = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        callCount++
+        if (callCount === 1) {
+          return Promise.resolve(createJWKSResponse([keySetV1.publicJWK]))
+        }
+        // After rotation, the JWKS endpoint serves the new key with same kid
+        return Promise.resolve(createJWKSResponse([keySetV2.publicJWK]))
+      })
+    )
+
+    // First: verify with v1 key
+    const now = Math.floor(Date.now() / 1000)
+    const token1 = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySetV1.privateKey,
+      'rotating-key'
+    )
+    await _verifyJWT(token1, CLERK_DOMAIN)
+    expect(callCount).toBe(1)
+
+    // Second: verify with v2 key — cached key will fail verification, triggering refetch
+    const token2 = await createSignedJWT(
+      { sub: 'user_2', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySetV2.privateKey,
+      'rotating-key'
+    )
+    const result = await _verifyJWT(token2, CLERK_DOMAIN)
+
+    expect(result.sub).toBe('user_2')
+    expect(callCount).toBe(2) // refetched once after signature failure
+  })
+
+  it('refetches JWKS when cache has expired', async () => {
+    const keySet = await generateRSAKeyPair('key-1')
+
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve(createJWKSResponse([keySet.publicJWK]))
+      )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const now = Math.floor(Date.now() / 1000)
+
+    // First verify to populate cache
+    const token1 = await createSignedJWT(
+      { sub: 'user_1', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+    await _verifyJWT(token1, CLERK_DOMAIN)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    // Advance time past TTL (1 hour)
+    vi.useFakeTimers()
+    vi.setSystemTime(Date.now() + 61 * 60 * 1000)
+
+    const token2 = await createSignedJWT(
+      { sub: 'user_2', exp: Math.floor(Date.now() / 1000) + 3600, iss: `https://${CLERK_DOMAIN}` },
+      keySet.privateKey,
+      'key-1'
+    )
+    await _verifyJWT(token2, CLERK_DOMAIN)
+
+    expect(fetchMock).toHaveBeenCalledTimes(2) // refetched because TTL expired
+
+    vi.useRealTimers()
+  })
+})
+
+// ============================================================================
+// Auth middleware branching
+// ============================================================================
+
+describe('authMiddleware', () => {
+  const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+  beforeEach(() => {
+    _resetJWKSCache()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('JWT authentication path', () => {
+    it('authenticates with a valid Bearer token and sets userId', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+      )
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        { sub: 'user_jwt_123', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_jwt_123')
+      expect(body.ok).toBe(true)
+    })
+
+    it('returns 401 for an invalid Bearer token', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: 'Bearer invalid.token.here' },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('returns 401 for an expired Bearer token', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+      )
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        { sub: 'user_exp', exp: now - 60, iss: `https://${CLERK_DOMAIN}` },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+  })
+
+  describe('X-User-Id fallback path', () => {
+    it('authenticates with X-User-Id when no Authorization header is present', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { 'X-User-Id': 'user_fallback_456' },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_fallback_456')
+      expect(body.ok).toBe(true)
+    })
+
+    it('authenticates with X-User-Id when CLERK_DOMAIN is not set', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: {
+          Authorization: 'Bearer some.jwt.token',
+          'X-User-Id': 'user_no_clerk',
+        },
+        // no clerkDomain
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_no_clerk')
+      expect(body.ok).toBe(true)
+    })
+
+    it('authenticates with X-User-Id when Authorization header is not Bearer', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: {
+          Authorization: 'Basic dXNlcjpwYXNz',
+          'X-User-Id': 'user_basic_auth',
+        },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_basic_auth')
+      expect(body.ok).toBe(true)
+    })
+  })
+
+  describe('Missing authentication', () => {
+    it('returns 401 when no auth headers are provided', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
+    })
+
+    it('returns 401 when Authorization header is empty', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: '' },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
+    })
+  })
+
+  describe('JWT takes priority over X-User-Id', () => {
+    it('uses JWT sub when both Authorization and X-User-Id are present', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+      )
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        { sub: 'user_jwt_wins', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'X-User-Id': 'user_header_loses',
+        },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string }
+      expect(body.userId).toBe('user_jwt_wins')
+    })
+
+    it('falls back to X-User-Id when JWT verification fails', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK]))
+      )
+
+      const app = createTestApp()
+      // Invalid JWT but valid X-User-Id — should NOT fall back, should return 401
+      // because the code returns 401 on JWT failure when Bearer is present
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: {
+          Authorization: 'Bearer invalid.jwt.token',
+          'X-User-Id': 'user_fallback',
+        },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      // The middleware returns 401 on JWT failure, does NOT fall back
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+  })
+
+  describe('Public routes are unaffected', () => {
+    it('does not apply auth to routes outside the middleware scope', async () => {
+      const app = createTestApp()
+      const res = await makeRequest(app, '/public')
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { ok: boolean }
+      expect(body.ok).toBe(true)
+    })
+  })
+})
