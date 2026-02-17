@@ -1,24 +1,157 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import { centsToDollars } from '../calculations'
 import { app } from '../index'
+import { _resetJWKSCache } from '../middleware/auth'
 
 // ============================================================================
 // CSV Export Tests
 // ============================================================================
 
+// ---------------------------------------------------------------------------
+// JWT Helpers
+// ---------------------------------------------------------------------------
+
+const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+
+function base64urlEncode(data: Uint8Array | ArrayBuffer): string {
+  const bytes = data instanceof ArrayBuffer ? new Uint8Array(data) : data
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function encodeJWTPart(obj: Record<string, unknown>): string {
+  const json = JSON.stringify(obj)
+  const bytes = new TextEncoder().encode(json)
+  return base64urlEncode(bytes)
+}
+
+interface RSAKeySet {
+  privateKey: CryptoKey
+  publicKey: CryptoKey
+  publicJWK: JsonWebKey & { kid: string }
+}
+
+async function generateRSAKeyPair(kid: string): Promise<RSAKeySet> {
+  const keyPair = (await crypto.subtle.generateKey(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: 'SHA-256',
+    },
+    true,
+    ['sign', 'verify']
+  )) as CryptoKeyPair
+
+  const publicJWK = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  return {
+    privateKey: keyPair.privateKey,
+    publicKey: keyPair.publicKey,
+    publicJWK: {
+      ...publicJWK,
+      kid,
+      alg: 'RS256',
+      kty: 'RSA',
+      use: 'sig',
+    },
+  }
+}
+
+async function createSignedJWT(
+  payload: Record<string, unknown>,
+  privateKey: CryptoKey,
+  kid: string
+): Promise<string> {
+  const header = { alg: 'RS256', typ: 'JWT', kid }
+  const headerB64 = encodeJWTPart(header)
+  const payloadB64 = encodeJWTPart(payload)
+  const signingInput = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, signingInput)
+  return `${headerB64}.${payloadB64}.${base64urlEncode(signature)}`
+}
+
+function createJWKSResponse(keys: Array<JsonWebKey & { kid: string }>): Response {
+  return new Response(JSON.stringify({ keys }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+let keySet: RSAKeySet
+const tokenCache = new Map<string, string>()
+
+beforeAll(async () => {
+  keySet = await generateRSAKeyPair('export-key-1')
+})
+
+beforeEach(() => {
+  _resetJWKSCache()
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
+  )
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+async function getToken(userId: string): Promise<string> {
+  const cached = tokenCache.get(userId)
+  if (cached) return cached
+  const now = Math.floor(Date.now() / 1000)
+  const token = await createSignedJWT(
+    { sub: userId, exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+    keySet.privateKey,
+    'export-key-1'
+  )
+  tokenCache.set(userId, token)
+  return token
+}
+
 // Helper to make authenticated requests
-function makeRequest(path: string, options?: RequestInit) {
+async function makeRequest(path: string, options?: RequestInit) {
+  const token = await getToken('user-001')
   return app.request(
     path,
     {
       ...options,
       headers: {
-        'X-User-Id': 'user-001',
+        Authorization: `Bearer ${token}`,
         ...(options?.headers || {}),
       },
     },
     {
       DB: {} as D1Database, // stub
+      CLERK_DOMAIN,
+    }
+  )
+}
+
+/** Make an authenticated request with a custom mock DB. */
+async function makeAuthRequestWithDb(
+  path: string,
+  mockDb: unknown,
+  userId: string = 'user-001',
+  options?: RequestInit
+) {
+  const token = await getToken(userId)
+  return app.request(
+    path,
+    {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(options?.headers || {}),
+      },
+    },
+    {
+      DB: mockDb as D1Database,
+      CLERK_DOMAIN,
     }
   )
 }
@@ -31,6 +164,7 @@ describe('CSV Export', () => {
         {},
         {
           DB: {} as D1Database,
+          CLERK_DOMAIN,
         }
       )
       expect(res.status).toBe(401)
@@ -42,6 +176,7 @@ describe('CSV Export', () => {
         {},
         {
           DB: {} as D1Database,
+          CLERK_DOMAIN,
         }
       )
       expect(res.status).toBe(401)
@@ -114,14 +249,11 @@ describe('CSV Export', () => {
             }),
           }
         }),
-      } as unknown as D1Database
+      }
 
-      const res = await app.request(
+      const res = await makeAuthRequestWithDb(
         '/families/fam-001/expenses/export/csv',
-        {
-          headers: { 'X-User-Id': 'user-001' },
-        },
-        { DB: mockDb }
+        mockDb
       )
 
       expect(res.status).toBe(403)
@@ -155,14 +287,11 @@ describe('CSV Export', () => {
             }),
           }
         }),
-      } as unknown as D1Database
+      }
 
-      const res = await app.request(
+      const res = await makeAuthRequestWithDb(
         '/families/fam-001/payments/export/csv',
-        {
-          headers: { 'X-User-Id': 'user-001' },
-        },
-        { DB: mockDb }
+        mockDb
       )
 
       expect(res.status).toBe(403)
@@ -214,14 +343,11 @@ describe('CSV Export', () => {
             }),
           }
         }),
-      } as unknown as D1Database
+      }
 
-      const res = await app.request(
+      const res = await makeAuthRequestWithDb(
         '/families/fam-001/expenses/export/csv',
-        {
-          headers: { 'X-User-Id': 'user-001' },
-        },
-        { DB: mockDb }
+        mockDb
       )
 
       expect(res.status).toBe(200)
@@ -274,14 +400,11 @@ describe('CSV Export', () => {
             }),
           }
         }),
-      } as unknown as D1Database
+      }
 
-      const res = await app.request(
+      const res = await makeAuthRequestWithDb(
         '/families/fam-001/payments/export/csv',
-        {
-          headers: { 'X-User-Id': 'user-001' },
-        },
-        { DB: mockDb }
+        mockDb
       )
 
       expect(res.status).toBe(200)

@@ -800,21 +800,20 @@ describe('authMiddleware', () => {
     })
   })
 
-  describe('X-User-Id fallback path', () => {
-    it('authenticates with X-User-Id when no Authorization header is present', async () => {
+  describe('X-User-Id header is rejected (no fallback)', () => {
+    it('returns 401 with X-User-Id when no Authorization header is present', async () => {
       const app = createTestApp()
       const res = await makeRequest(app, '/protected/resource', {
         headers: { 'X-User-Id': 'user_fallback_456' },
         clerkDomain: CLERK_DOMAIN,
       })
 
-      expect(res.status).toBe(200)
-      const body = (await res.json()) as { userId: string; ok: boolean }
-      expect(body.userId).toBe('user_fallback_456')
-      expect(body.ok).toBe(true)
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
     })
 
-    it('authenticates with X-User-Id when CLERK_DOMAIN is not set', async () => {
+    it('returns 401 with X-User-Id when CLERK_DOMAIN is not set', async () => {
       const app = createTestApp()
       const res = await makeRequest(app, '/protected/resource', {
         headers: {
@@ -824,13 +823,12 @@ describe('authMiddleware', () => {
         // no clerkDomain
       })
 
-      expect(res.status).toBe(200)
-      const body = (await res.json()) as { userId: string; ok: boolean }
-      expect(body.userId).toBe('user_no_clerk')
-      expect(body.ok).toBe(true)
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
     })
 
-    it('authenticates with X-User-Id when Authorization header is not Bearer', async () => {
+    it('returns 401 with X-User-Id when Authorization header is not Bearer', async () => {
       const app = createTestApp()
       const res = await makeRequest(app, '/protected/resource', {
         headers: {
@@ -840,10 +838,9 @@ describe('authMiddleware', () => {
         clerkDomain: CLERK_DOMAIN,
       })
 
-      expect(res.status).toBe(200)
-      const body = (await res.json()) as { userId: string; ok: boolean }
-      expect(body.userId).toBe('user_basic_auth')
-      expect(body.ok).toBe(true)
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
     })
   })
 
@@ -872,8 +869,8 @@ describe('authMiddleware', () => {
     })
   })
 
-  describe('JWT takes priority over X-User-Id', () => {
-    it('uses JWT sub when both Authorization and X-User-Id are present', async () => {
+  describe('JWT is the only auth path; X-User-Id is ignored', () => {
+    it('uses JWT sub even when X-User-Id header is also present', async () => {
       const keySet = await generateRSAKeyPair('key-1')
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
@@ -888,7 +885,7 @@ describe('authMiddleware', () => {
       const res = await makeRequest(app, '/protected/resource', {
         headers: {
           Authorization: `Bearer ${token}`,
-          'X-User-Id': 'user_header_loses',
+          'X-User-Id': 'user_header_ignored',
         },
         clerkDomain: CLERK_DOMAIN,
       })
@@ -898,13 +895,11 @@ describe('authMiddleware', () => {
       expect(body.userId).toBe('user_jwt_wins')
     })
 
-    it('falls back to X-User-Id when JWT verification fails', async () => {
+    it('returns 401 when JWT is invalid, even if X-User-Id is present', async () => {
       const keySet = await generateRSAKeyPair('key-1')
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
 
       const app = createTestApp()
-      // Invalid JWT but valid X-User-Id — should NOT fall back, should return 401
-      // because the code returns 401 on JWT failure when Bearer is present
       const res = await makeRequest(app, '/protected/resource', {
         headers: {
           Authorization: 'Bearer invalid.jwt.token',
@@ -913,7 +908,6 @@ describe('authMiddleware', () => {
         clerkDomain: CLERK_DOMAIN,
       })
 
-      // The middleware returns 401 on JWT failure, does NOT fall back
       expect(res.status).toBe(401)
       const body = (await res.json()) as { error: string }
       expect(body.error).toBe('Invalid or expired token')

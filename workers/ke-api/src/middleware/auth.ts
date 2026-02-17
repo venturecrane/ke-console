@@ -182,14 +182,5 @@ export const authMiddleware = createMiddleware<AppType>(async (c, next) => {
     }
   }
 
-  // Fallback to X-User-Id header (backward compat during migration)
-  const userId = c.req.header('X-User-Id')
-  if (userId) {
-    c.set('userId', userId)
-    console.log('Auth: X-User-Id fallback for user', userId)
-    await next()
-    return
-  }
-
   return c.json({ error: 'Missing authentication' }, 401)
 })
