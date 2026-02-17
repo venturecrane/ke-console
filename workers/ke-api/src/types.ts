@@ -3,6 +3,7 @@ export interface Env {
   RESEND_API_KEY?: string
   APP_URL?: string
   CLERK_DOMAIN?: string
+  CLERK_ISSUER_URL?: string
   STRIPE_SECRET_KEY?: string
   STRIPE_WEBHOOK_SECRET?: string
 }

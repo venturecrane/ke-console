@@ -63,7 +63,11 @@ interface JWTPayload {
   [key: string]: unknown
 }
 
-async function verifyJWT(token: string, clerkDomain: string): Promise<JWTPayload> {
+async function verifyJWT(
+  token: string,
+  clerkDomain: string,
+  expectedIssuer?: string
+): Promise<JWTPayload> {
   const parts = token.split('.')
   if (parts.length !== 3) {
     throw new Error('Invalid JWT format')
@@ -126,6 +130,19 @@ async function verifyJWT(token: string, clerkDomain: string): Promise<JWTPayload
     throw new Error('Missing sub claim')
   }
 
+  // Validate issuer — reject tokens from other Clerk applications
+  if (expectedIssuer) {
+    if (!payload.iss) {
+      throw new Error('Missing iss claim')
+    }
+    if (payload.iss !== expectedIssuer) {
+      throw new Error('Invalid issuer')
+    }
+  }
+
+  // TODO: Validate aud (audience) and azp (authorized party) claims
+  // when Clerk custom JWT templates are configured with audience restrictions.
+
   return payload
 }
 
@@ -147,11 +164,14 @@ export const authMiddleware = createMiddleware<AppType>(async (c, next) => {
   const authHeader = c.req.header('Authorization')
   const clerkDomain = c.env.CLERK_DOMAIN
 
+  // Determine expected issuer: explicit env var takes precedence, otherwise derive from CLERK_DOMAIN
+  const expectedIssuer = c.env.CLERK_ISSUER_URL || (clerkDomain ? `https://${clerkDomain}` : undefined)
+
   // Try JWT auth first if Authorization header and CLERK_DOMAIN are present
   if (authHeader?.startsWith('Bearer ') && clerkDomain) {
     try {
       const token = authHeader.slice(7)
-      const payload = await verifyJWT(token, clerkDomain)
+      const payload = await verifyJWT(token, clerkDomain, expectedIssuer)
       c.set('userId', payload.sub)
       console.log('Auth: JWT verified for user', payload.sub)
       await next()

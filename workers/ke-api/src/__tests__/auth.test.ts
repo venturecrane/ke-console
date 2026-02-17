@@ -109,6 +109,7 @@ function makeRequest(
   options?: {
     headers?: Record<string, string>
     clerkDomain?: string
+    clerkIssuerUrl?: string
   }
 ) {
   const headers = options?.headers ?? {}
@@ -118,6 +119,7 @@ function makeRequest(
     {
       DB: {} as D1Database,
       CLERK_DOMAIN: options?.clerkDomain,
+      CLERK_ISSUER_URL: options?.clerkIssuerUrl,
     }
   )
 }
@@ -290,6 +292,86 @@ describe('verifyJWT', () => {
     const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
 
     await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Missing sub claim')
+  })
+
+  it('rejects tokens with wrong issuer when expectedIssuer is provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: 'https://evil.clerk.accounts.dev',
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+    ).rejects.toThrow('Invalid issuer')
+  })
+
+  it('rejects tokens with missing iss claim when expectedIssuer is provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      exp: now + 3600,
+      iat: now,
+      // no iss
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+    ).rejects.toThrow('Missing iss claim')
+  })
+
+  it('accepts tokens with correct issuer when expectedIssuer is provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+
+    expect(result.sub).toBe('user_abc123')
+    expect(result.iss).toBe(`https://${CLERK_DOMAIN}`)
+  })
+
+  it('skips issuer validation when expectedIssuer is not provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: 'https://any-issuer.example.com',
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    // No expectedIssuer argument — should succeed regardless of iss claim
+    const result = await _verifyJWT(token, CLERK_DOMAIN)
+
+    expect(result.sub).toBe('user_abc123')
+  })
+
+  it('rejects tokens with issuer substring match (not exact)', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_abc123',
+      iss: `https://${CLERK_DOMAIN}/extra`,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+    ).rejects.toThrow('Invalid issuer')
   })
 
   it('rejects tokens with invalid signature', async () => {
@@ -622,6 +704,77 @@ describe('authMiddleware', () => {
       expect(res.status).toBe(401)
       const body = (await res.json()) as { error: string }
       expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('returns 401 when token has wrong issuer', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        { sub: 'user_wrong_iss', exp: now + 3600, iss: 'https://evil.clerk.accounts.dev' },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('returns 401 when token has wrong issuer with explicit CLERK_ISSUER_URL', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        { sub: 'user_wrong_iss', exp: now + 3600, iss: `https://${CLERK_DOMAIN}` },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      // CLERK_ISSUER_URL explicitly set to a different value than what's in the token
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        clerkIssuerUrl: 'https://different-issuer.clerk.accounts.dev',
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('authenticates successfully when CLERK_ISSUER_URL matches token issuer', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const customIssuer = 'https://custom-clerk-issuer.example.com'
+      const token = await createSignedJWT(
+        { sub: 'user_custom_iss', exp: now + 3600, iss: customIssuer },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        clerkIssuerUrl: customIssuer,
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_custom_iss')
+      expect(body.ok).toBe(true)
     })
 
     it('returns 401 for an expired Bearer token', async () => {
