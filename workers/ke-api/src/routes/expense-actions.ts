@@ -51,7 +51,7 @@ app.get('/:id', async (c) => {
     return c.json({ expense })
   } catch (error) {
     console.error('Get expense error:', error)
-    return c.json({ error: 'Failed to get expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get expense' }, 500)
   }
 })
 
@@ -173,7 +173,7 @@ app.post('/:id/question', async (c) => {
     return c.json({ success: true, expense: updatedExpense })
   } catch (error) {
     console.error('Question expense error:', error)
-    return c.json({ error: 'Failed to question expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to question expense' }, 500)
   }
 })
 
@@ -316,7 +316,7 @@ app.post('/:id/resolve', async (c) => {
     return c.json({ success: true, expense: updatedExpense })
   } catch (error) {
     console.error('Resolve expense error:', error)
-    return c.json({ error: 'Failed to resolve expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to resolve expense' }, 500)
   }
 })
 
@@ -395,7 +395,7 @@ app.post('/:id/satisfy', async (c) => {
     return c.json({ success: true, expense: updatedExpense })
   } catch (error) {
     console.error('Satisfy expense error:', error)
-    return c.json({ error: 'Failed to satisfy expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to satisfy expense' }, 500)
   }
 })
 
@@ -554,7 +554,7 @@ app.patch('/:id', async (c) => {
     return c.json({ success: true, expense: updatedExpense })
   } catch (error) {
     console.error('Edit expense error:', error)
-    return c.json({ error: 'Failed to edit expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to edit expense' }, 500)
   }
 })
 
@@ -621,7 +621,7 @@ app.delete('/:id', async (c) => {
     return c.json({ success: true, id: expenseId })
   } catch (error) {
     console.error('Delete expense error:', error)
-    return c.json({ error: 'Failed to delete expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to delete expense' }, 500)
   }
 })
 

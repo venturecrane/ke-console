@@ -57,7 +57,7 @@ app.post('/', async (c) => {
     return c.json({ success: true, family }, 201)
   } catch (error) {
     console.error('Create family error:', error)
-    return c.json({ error: 'Failed to create family', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create family' }, 500)
   }
 })
 
@@ -146,7 +146,7 @@ app.post('/join', async (c) => {
     })
   } catch (error) {
     console.error('Join family error:', error)
-    return c.json({ error: 'Failed to join family', details: String(error) }, 500)
+    return c.json({ error: 'Failed to join family' }, 500)
   }
 })
 
@@ -188,7 +188,7 @@ app.get('/:id', async (c) => {
     })
   } catch (error) {
     console.error('Get family error:', error)
-    return c.json({ error: 'Failed to get family', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get family' }, 500)
   }
 })
 
@@ -263,7 +263,7 @@ app.patch('/:id', async (c) => {
     return c.json({ success: true, family: updatedFamily })
   } catch (error) {
     console.error('Update family error:', error)
-    return c.json({ error: 'Failed to update family', details: String(error) }, 500)
+    return c.json({ error: 'Failed to update family' }, 500)
   }
 })
 
@@ -411,7 +411,7 @@ app.post('/:id/invite/email', async (c) => {
     })
   } catch (error) {
     console.error('Send email invite error:', error)
-    return c.json({ error: 'Failed to send invite', details: String(error) }, 500)
+    return c.json({ error: 'Failed to send invite' }, 500)
   }
 })
 
@@ -474,7 +474,7 @@ app.post('/:id/invite', async (c) => {
     })
   } catch (error) {
     console.error('Generate invite error:', error)
-    return c.json({ error: 'Failed to generate invite code', details: String(error) }, 500)
+    return c.json({ error: 'Failed to generate invite code' }, 500)
   }
 })
 
@@ -518,7 +518,7 @@ app.get('/:id/invites', async (c) => {
     })
   } catch (error) {
     console.error('Get invites error:', error)
-    return c.json({ error: 'Failed to get invites', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get invites' }, 500)
   }
 })
 
@@ -565,7 +565,7 @@ app.delete('/:id/invites/:inviteId', async (c) => {
     return c.json({ success: true })
   } catch (error) {
     console.error('Cancel invite error:', error)
-    return c.json({ error: 'Failed to cancel invite', details: String(error) }, 500)
+    return c.json({ error: 'Failed to cancel invite' }, 500)
   }
 })
 
@@ -649,7 +649,7 @@ app.post('/:id/leave', async (c) => {
     return c.json({ success: true, family_archived: familyArchived })
   } catch (error) {
     console.error('Leave family error:', error)
-    return c.json({ error: 'Failed to leave family', details: String(error) }, 500)
+    return c.json({ error: 'Failed to leave family' }, 500)
   }
 })
 

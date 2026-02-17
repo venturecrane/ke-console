@@ -138,7 +138,7 @@ app.post('/:id/fixed-expenses', async (c) => {
     return c.json({ success: true, fixedExpense }, 201)
   } catch (error) {
     console.error('Create fixed expense error:', error)
-    return c.json({ error: 'Failed to create fixed expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create fixed expense' }, 500)
   }
 })
 
@@ -188,7 +188,7 @@ app.get('/:id/fixed-expenses', async (c) => {
     })
   } catch (error) {
     console.error('List fixed expenses error:', error)
-    return c.json({ error: 'Failed to list fixed expenses', details: String(error) }, 500)
+    return c.json({ error: 'Failed to list fixed expenses' }, 500)
   }
 })
 
@@ -317,7 +317,7 @@ app.patch('/:id/fixed-expenses/:fixedExpenseId', async (c) => {
     return c.json({ success: true, fixedExpense: updatedFixedExpense })
   } catch (error) {
     console.error('Update fixed expense error:', error)
-    return c.json({ error: 'Failed to update fixed expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to update fixed expense' }, 500)
   }
 })
 
@@ -380,7 +380,7 @@ app.delete('/:id/fixed-expenses/:fixedExpenseId', async (c) => {
     return c.json({ success: true, fixedExpense: updatedFixedExpense })
   } catch (error) {
     console.error('End fixed expense error:', error)
-    return c.json({ error: 'Failed to end fixed expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to end fixed expense' }, 500)
   }
 })
 

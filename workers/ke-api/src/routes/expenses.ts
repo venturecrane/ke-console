@@ -148,7 +148,7 @@ app.post('/:id/expenses', async (c) => {
     return c.json({ success: true, expense }, 201)
   } catch (error) {
     console.error('Create expense error:', error)
-    return c.json({ error: 'Failed to create expense', details: String(error) }, 500)
+    return c.json({ error: 'Failed to create expense' }, 500)
   }
 })
 
@@ -272,7 +272,7 @@ app.get('/:id/expenses', async (c) => {
     })
   } catch (error) {
     console.error('List expenses error:', error)
-    return c.json({ error: 'Failed to list expenses', details: String(error) }, 500)
+    return c.json({ error: 'Failed to list expenses' }, 500)
   }
 })
 
@@ -491,7 +491,7 @@ app.get('/:id/balance', async (c) => {
     })
   } catch (error) {
     console.error('Get balance error:', error)
-    return c.json({ error: 'Failed to get balance', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get balance' }, 500)
   }
 })
 
@@ -667,7 +667,7 @@ app.get('/:id/balance/breakdown', async (c) => {
     return c.json(response)
   } catch (error) {
     console.error('Get balance breakdown error:', error)
-    return c.json({ error: 'Failed to get balance breakdown', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get balance breakdown' }, 500)
   }
 })
 

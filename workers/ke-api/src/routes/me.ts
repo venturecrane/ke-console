@@ -39,7 +39,7 @@ app.get('/', async (c) => {
     })
   } catch (error) {
     console.error('Get /me error:', error)
-    return c.json({ error: 'Failed to get user info', details: String(error) }, 500)
+    return c.json({ error: 'Failed to get user info' }, 500)
   }
 })
 
