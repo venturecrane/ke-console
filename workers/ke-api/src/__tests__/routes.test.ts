@@ -26,18 +26,20 @@ describe('Route wiring', () => {
       expect(body.endpoints).toContain('/health')
     })
 
-    it('POST /users/sync should not require auth', async () => {
-      const res = await makeRequest('/users/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: 'test', email: 'test@test.com' }),
-      })
-      // Will fail at DB access but should NOT return 401
-      expect(res.status).not.toBe(401)
-    })
   })
 
   describe('Auth middleware on protected routes', () => {
+    it('POST /users/sync should return 401 without auth', async () => {
+      const res = await makeRequest('/users/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'test@test.com' }),
+      })
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Missing authentication')
+    })
+
     it('GET /me should return 401 without auth', async () => {
       const res = await makeRequest('/me')
       expect(res.status).toBe(401)
