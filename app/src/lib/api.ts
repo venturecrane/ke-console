@@ -830,10 +830,10 @@ export interface UpdateNotificationPreferencesRequest {
 
 export async function getNotificationPreferences(
   userId: string,
-  familyId: string
+  _familyId: string
 ): Promise<NotificationPreferences> {
   return apiRequest<NotificationPreferences>(
-    `/families/${familyId}/notification-preferences`,
+    `/me/notification-preferences`,
     { method: 'GET' },
     userId
   )
@@ -841,11 +841,11 @@ export async function getNotificationPreferences(
 
 export async function updateNotificationPreferences(
   userId: string,
-  familyId: string,
+  _familyId: string,
   updates: UpdateNotificationPreferencesRequest
 ): Promise<NotificationPreferences> {
   return apiRequest<NotificationPreferences>(
-    `/families/${familyId}/notification-preferences`,
+    `/me/notification-preferences`,
     {
       method: 'PATCH',
       body: JSON.stringify(updates),
