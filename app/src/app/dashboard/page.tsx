@@ -131,7 +131,7 @@ export default function DashboardPage() {
     )
   }
 
-  const hasFamily = meData?.family !== null
+  const hasFamily = !!meData?.family
   const isParentA = meData?.role === 'parent_a'
   const hasPartner = meData?.family?.parent_b_id !== null
 
