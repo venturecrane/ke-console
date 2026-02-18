@@ -2,7 +2,7 @@
 
 Instructions for AI agents in this repository.
 
-**Important:** This repo does NOT use slash commands. Do not attempt `/sod`, `/eod`, or any `/` commands — they will fail. Use the MCP tools below instead.
+**Important:** This repo uses MCP tools for session start (not slash commands). See CLAUDE.md for primary instructions and enterprise rules.
 
 ## Automatic Session Start
 
