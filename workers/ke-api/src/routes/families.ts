@@ -80,15 +80,53 @@ app.post('/join', async (c) => {
       return c.json({ error: 'User not found' }, 404)
     }
 
-    // Check if user already belongs to a family
+    // Check if user already belongs to an active family
     const existingFamily = await c.env.DB.prepare(
-      'SELECT id FROM families WHERE parent_a_id = ? OR parent_b_id = ?'
+      `SELECT * FROM families
+       WHERE (parent_a_id = ? OR parent_b_id = ?)
+       AND (status IS NULL OR status != 'archived')`
     )
       .bind(userId, userId)
-      .first()
+      .first<Family>()
 
     if (existingFamily) {
-      return c.json({ error: 'User already belongs to a family' }, 400)
+      // Allow joining if the existing family is an empty auto-created one
+      // (no partner, no expenses, no children, no payments)
+      if (existingFamily.parent_b_id) {
+        return c.json({ error: 'User already belongs to a family' }, 400)
+      }
+
+      const expenseCount = await c.env.DB.prepare(
+        `SELECT COUNT(*) as cnt FROM expenses WHERE family_id = ? AND deleted_at IS NULL`
+      )
+        .bind(existingFamily.id)
+        .first<{ cnt: number }>()
+
+      const childCount = await c.env.DB.prepare(
+        `SELECT COUNT(*) as cnt FROM children WHERE family_id = ? AND deleted_at IS NULL`
+      )
+        .bind(existingFamily.id)
+        .first<{ cnt: number }>()
+
+      const paymentCount = await c.env.DB.prepare(
+        `SELECT COUNT(*) as cnt FROM payments WHERE family_id = ? AND deleted_at IS NULL`
+      )
+        .bind(existingFamily.id)
+        .first<{ cnt: number }>()
+
+      const isEmpty =
+        (expenseCount?.cnt ?? 0) === 0 &&
+        (childCount?.cnt ?? 0) === 0 &&
+        (paymentCount?.cnt ?? 0) === 0
+
+      if (!isEmpty) {
+        return c.json({ error: 'User already belongs to a family' }, 400)
+      }
+
+      // Delete the empty auto-created family so the user can join
+      await c.env.DB.prepare(`DELETE FROM families WHERE id = ?`)
+        .bind(existingFamily.id)
+        .run()
     }
 
     // Find family with invite code

@@ -22,12 +22,13 @@ app.get('/', async (c) => {
       return c.json({ error: 'User not found' }, 404)
     }
 
-    // Get user's family (as parent_a or parent_b)
+    // Get user's active family (as parent_a or parent_b), excluding archived
     const family = await c.env.DB.prepare(
       `SELECT id, name, parent_a_id, parent_b_id, parent_a_ratio,
               invite_code, invite_expires_at, created_at, updated_at
        FROM families
-       WHERE parent_a_id = ? OR parent_b_id = ?`
+       WHERE (parent_a_id = ? OR parent_b_id = ?)
+       AND (status IS NULL OR status != 'archived')`
     )
       .bind(userId, userId)
       .first<Family>()
