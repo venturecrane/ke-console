@@ -165,7 +165,8 @@ export const authMiddleware = createMiddleware<AppType>(async (c, next) => {
   const clerkDomain = c.env.CLERK_DOMAIN
 
   // Determine expected issuer: explicit env var takes precedence, otherwise derive from CLERK_DOMAIN
-  const expectedIssuer = c.env.CLERK_ISSUER_URL || (clerkDomain ? `https://${clerkDomain}` : undefined)
+  const expectedIssuer =
+    c.env.CLERK_ISSUER_URL || (clerkDomain ? `https://${clerkDomain}` : undefined)
 
   // Try JWT auth first if Authorization header and CLERK_DOMAIN are present
   if (authHeader?.startsWith('Bearer ') && clerkDomain) {

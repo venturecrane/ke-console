@@ -56,32 +56,32 @@ export default function SettingsPage() {
 
         <Card>
           <div className="divide-y divide-ke-divider">
-              {SETTINGS_SECTIONS.map((section) => (
-                <Link
-                  key={section.href}
-                  href={section.href}
-                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-ke-elevated"
+            {SETTINGS_SECTIONS.map((section) => (
+              <Link
+                key={section.href}
+                href={section.href}
+                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-ke-elevated"
+              >
+                <div>
+                  <p className="font-medium text-ke-primary">{section.label}</p>
+                  <p className="mt-0.5 text-sm text-ke-muted">{section.description}</p>
+                </div>
+                <svg
+                  className="h-5 w-5 shrink-0 text-ke-muted"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <div>
-                    <p className="font-medium text-ke-primary">{section.label}</p>
-                    <p className="mt-0.5 text-sm text-ke-muted">{section.description}</p>
-                  </div>
-                  <svg
-                    className="h-5 w-5 shrink-0 text-ke-muted"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              ))}
-            </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            ))}
+          </div>
         </Card>
       </div>
     </div>

@@ -181,10 +181,7 @@ app.patch('/notification-preferences', async (c) => {
     })
   } catch (error) {
     console.error('Update notification preferences error:', error)
-    return c.json(
-      { error: 'Failed to update notification preferences' },
-      500
-    )
+    return c.json({ error: 'Failed to update notification preferences' }, 500)
   }
 })
 

@@ -353,7 +353,12 @@ export default function DashboardPage() {
                       className="shrink-0 text-ke-muted transition-colors hover:text-ke-secondary"
                       aria-label="Dismiss setup guide"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"

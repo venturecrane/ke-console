@@ -1,9 +1,5 @@
 import { Hono } from 'hono'
-import {
-  dollarsToCents,
-  calculateBalanceFromData,
-  calculateShares,
-} from '../calculations'
+import { dollarsToCents, calculateBalanceFromData, calculateShares } from '../calculations'
 import type {
   AppType,
   CreateExpenseRequest,

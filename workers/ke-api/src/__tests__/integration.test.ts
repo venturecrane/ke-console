@@ -756,7 +756,7 @@ describe('Balance endpoint (integration)', () => {
 
 describe('Dispute lifecycle (integration)', () => {
   describe('POST /expenses/:id/question', () => {
-    it('returns success when questioning another user\'s posted expense', async () => {
+    it("returns success when questioning another user's posted expense", async () => {
       let prepareCallIndex = 0
 
       // user-002 is questioning user-001's expense

@@ -268,9 +268,7 @@ describe('Auto-create family on user sync', () => {
     expect(body.action).toBe('updated')
 
     // Verify NO family INSERT was called (only SELECT on families, no INSERT)
-    const familyInsert = preparedStatements.find(
-      (s) => s.includes('INSERT INTO families')
-    )
+    const familyInsert = preparedStatements.find((s) => s.includes('INSERT INTO families'))
     expect(familyInsert).toBeUndefined()
   })
 })
@@ -358,9 +356,7 @@ describe('Join family with auto-created empty family', () => {
     expect(body.family.parent_b_id).toBe('user-joiner')
 
     // Verify the auto-created family was deleted
-    const deleteStatement = preparedStatements.find(
-      (s) => s.includes('DELETE FROM families')
-    )
+    const deleteStatement = preparedStatements.find((s) => s.includes('DELETE FROM families'))
     expect(deleteStatement).toBeDefined()
   })
 
