@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   title: 'Kid Expenses',
   description:
     'Co-parent expense tracking made simple. Split expenses, track payments, and stay balanced.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Kid Expenses',
+  },
   openGraph: {
     title: 'Kid Expenses',
     description:
@@ -38,6 +48,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  themeColor: '#4f46e5',
 }
 
 export default function RootLayout({
