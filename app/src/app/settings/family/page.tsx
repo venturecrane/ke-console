@@ -90,9 +90,9 @@ export default function FamilySettingsPage() {
   if (!meData?.family) {
     return (
       <div className="mx-auto max-w-lg px-4 py-8">
-        <Alert variant="attention">No family found. Complete onboarding first.</Alert>
-        <Link href="/onboarding" className="mt-4 inline-block text-ke-accent hover:underline">
-          Go to Onboarding
+        <Alert variant="attention">No family found. Create or join a family first.</Alert>
+        <Link href="/dashboard" className="mt-4 inline-block text-ke-accent hover:underline">
+          Go to Dashboard
         </Link>
       </div>
     )
