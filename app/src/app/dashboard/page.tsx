@@ -493,12 +493,6 @@ export default function DashboardPage() {
               >
                 Activity Feed
               </Link>
-              <Link
-                href="/settings"
-                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
-              >
-                Settings
-              </Link>
             </div>
 
             {/* Recent Activity */}
