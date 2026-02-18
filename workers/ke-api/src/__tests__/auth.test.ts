@@ -305,9 +305,9 @@ describe('verifyJWT', () => {
 
     const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
 
-    await expect(
-      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
-    ).rejects.toThrow('Invalid issuer')
+    await expect(_verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)).rejects.toThrow(
+      'Invalid issuer'
+    )
   })
 
   it('rejects tokens with missing iss claim when expectedIssuer is provided', async () => {
@@ -321,9 +321,9 @@ describe('verifyJWT', () => {
 
     const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
 
-    await expect(
-      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
-    ).rejects.toThrow('Missing iss claim')
+    await expect(_verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)).rejects.toThrow(
+      'Missing iss claim'
+    )
   })
 
   it('accepts tokens with correct issuer when expectedIssuer is provided', async () => {
@@ -369,9 +369,9 @@ describe('verifyJWT', () => {
 
     const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
 
-    await expect(
-      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
-    ).rejects.toThrow('Invalid issuer')
+    await expect(_verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)).rejects.toThrow(
+      'Invalid issuer'
+    )
   })
 
   it('rejects tokens with invalid signature', async () => {

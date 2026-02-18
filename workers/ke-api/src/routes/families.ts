@@ -124,9 +124,7 @@ app.post('/join', async (c) => {
       }
 
       // Delete the empty auto-created family so the user can join
-      await c.env.DB.prepare(`DELETE FROM families WHERE id = ?`)
-        .bind(existingFamily.id)
-        .run()
+      await c.env.DB.prepare(`DELETE FROM families WHERE id = ?`).bind(existingFamily.id).run()
     }
 
     // Find family with invite code

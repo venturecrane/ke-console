@@ -251,10 +251,7 @@ describe('CSV Export', () => {
         }),
       }
 
-      const res = await makeAuthRequestWithDb(
-        '/families/fam-001/expenses/export/csv',
-        mockDb
-      )
+      const res = await makeAuthRequestWithDb('/families/fam-001/expenses/export/csv', mockDb)
 
       expect(res.status).toBe(403)
       const body = (await res.json()) as { error: string }
@@ -289,10 +286,7 @@ describe('CSV Export', () => {
         }),
       }
 
-      const res = await makeAuthRequestWithDb(
-        '/families/fam-001/payments/export/csv',
-        mockDb
-      )
+      const res = await makeAuthRequestWithDb('/families/fam-001/payments/export/csv', mockDb)
 
       expect(res.status).toBe(403)
       const body = (await res.json()) as { error: string }
@@ -345,10 +339,7 @@ describe('CSV Export', () => {
         }),
       }
 
-      const res = await makeAuthRequestWithDb(
-        '/families/fam-001/expenses/export/csv',
-        mockDb
-      )
+      const res = await makeAuthRequestWithDb('/families/fam-001/expenses/export/csv', mockDb)
 
       expect(res.status).toBe(200)
       expect(res.headers.get('Content-Type')).toBe('text/csv')
@@ -402,10 +393,7 @@ describe('CSV Export', () => {
         }),
       }
 
-      const res = await makeAuthRequestWithDb(
-        '/families/fam-001/payments/export/csv',
-        mockDb
-      )
+      const res = await makeAuthRequestWithDb('/families/fam-001/payments/export/csv', mockDb)
 
       expect(res.status).toBe(200)
       expect(res.headers.get('Content-Type')).toBe('text/csv')

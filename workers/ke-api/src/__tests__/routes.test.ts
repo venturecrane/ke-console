@@ -126,7 +126,6 @@ describe('Route wiring', () => {
       expect(body.name).toBe('ke-api')
       expect(body.endpoints).toContain('/health')
     })
-
   })
 
   describe('Auth middleware on protected routes', () => {
