@@ -17,6 +17,8 @@ import {
   Alert,
 } from '@/components/ui'
 
+const SETUP_DISMISSED_KEY = 'ke-setup-dismissed'
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser()
   const api = useApi()
@@ -27,6 +29,14 @@ export default function DashboardPage() {
   const [balance, setBalance] = useState<BalanceResponse | null>(null)
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
   const [attentionExpenses, setAttentionExpenses] = useState<Expense[]>([])
+
+  // Setup guide state
+  const [setupDismissed, setSetupDismissed] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return localStorage.getItem(SETUP_DISMISSED_KEY) === 'true'
+  })
+  const [hasChildren, setHasChildren] = useState(false)
+  const [hasFixedExpenses, setHasFixedExpenses] = useState(false)
 
   const fetchUserData = useCallback(async () => {
     if (!user) return
@@ -65,11 +75,25 @@ export default function DashboardPage() {
           setIsLoadingExpenses(false)
           setIsLoadingBalance(false)
         }
+
+        // Setup guide data — separate try/catch so failures don't affect core dashboard
+        if (!setupDismissed) {
+          try {
+            const [childrenData, fixedExpenseData] = await Promise.all([
+              api.getChildren(family.id),
+              api.getFixedExpenses(family.id),
+            ])
+            setHasChildren(childrenData.children.length > 0)
+            setHasFixedExpenses(fixedExpenseData.fixedExpenses.length > 0)
+          } catch (err) {
+            console.error('Failed to fetch setup guide data:', err)
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error)
     }
-  }, [user, api])
+  }, [user, api, setupDismissed])
 
   useEffect(() => {
     async function syncUser() {
@@ -111,6 +135,34 @@ export default function DashboardPage() {
   const isParentA = meData?.role === 'parent_a'
   const hasPartner = meData?.family?.parent_b_id !== null
 
+  // Setup guide suggestions — only show incomplete ones
+  const setupSuggestions: { text: string; href: string }[] = []
+  if (!setupDismissed && hasFamily) {
+    if (!hasChildren) {
+      setupSuggestions.push({
+        text: 'Tip: Add your kids to tag expenses to specific family members.',
+        href: '/settings/children',
+      })
+    }
+    if (!hasPartner && isParentA) {
+      setupSuggestions.push({
+        text: 'You can invite a co-parent to share this expense ledger.',
+        href: '/settings/family',
+      })
+    }
+    if (!hasFixedExpenses) {
+      setupSuggestions.push({
+        text: 'Save time with recurring expense templates for predictable costs.',
+        href: '/settings/fixed-expenses',
+      })
+    }
+  }
+
+  function handleDismissSetup() {
+    localStorage.setItem(SETUP_DISMISSED_KEY, 'true')
+    setSetupDismissed(true)
+  }
+
   // Balance color logic
   const getBalanceColor = () => {
     if (!balance || balance.balance_cents === 0) return 'text-ke-positive'
@@ -123,6 +175,13 @@ export default function DashboardPage() {
     if (balance.payer_id === user?.id) return 'You owe'
     return 'You are owed'
   }
+
+  // Setup guide header text
+  const setupHeader = isParentA
+    ? 'Getting Started'
+    : meData?.family?.name
+      ? `Welcome to ${meData.family.name}!`
+      : 'Welcome!'
 
   return (
     <div className="min-h-screen bg-ke-bg">
@@ -141,6 +200,28 @@ export default function DashboardPage() {
             <span className="hidden text-sm text-ke-secondary sm:inline">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
+            {hasFamily && (
+              <Link
+                href="/settings"
+                className="text-ke-muted transition-colors hover:text-ke-secondary"
+                aria-label="Settings"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </Link>
+            )}
             <UserButton afterSignOutUrl="/" />
           </div>
         </div>
@@ -258,6 +339,60 @@ export default function DashboardPage() {
               </CardBody>
             </Card>
 
+            {/* Setup Guide — dismissable suggestions */}
+            {setupSuggestions.length > 0 && (
+              <Card className="mt-6">
+                <CardBody>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-ke-primary">{setupHeader}</h3>
+                      <p className="mt-0.5 text-xs text-ke-muted">
+                        Optional tips to help you get the most out of Kid Expenses.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleDismissSetup}
+                      className="shrink-0 text-ke-muted transition-colors hover:text-ke-secondary"
+                      aria-label="Dismiss setup guide"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {setupSuggestions.map((suggestion) => (
+                      <Link
+                        key={suggestion.href}
+                        href={suggestion.href}
+                        className="flex items-center justify-between rounded-lg border border-ke-border px-3 py-2.5 text-sm text-ke-secondary transition-colors hover:bg-ke-elevated"
+                      >
+                        <span>{suggestion.text}</span>
+                        <svg
+                          className="ml-2 h-4 w-4 shrink-0 text-ke-muted"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
             {/* Needs Attention Section */}
             {attentionExpenses.length > 0 && (
               <div className="mt-6 rounded-lg border border-ke-attention-border/30 bg-ke-surface">
@@ -357,6 +492,12 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
               >
                 Activity Feed
+              </Link>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
+              >
+                Settings
               </Link>
             </div>
 

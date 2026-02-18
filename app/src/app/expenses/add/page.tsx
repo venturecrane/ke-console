@@ -51,6 +51,10 @@ export default function AddExpensePage() {
         // Fetch children for the family
         const childrenData = await api.getChildren(data.family.id)
         setChildren(childrenData.children)
+        // Auto-assign when exactly one kid
+        if (childrenData.children.length === 1) {
+          setSelectedChildIds([childrenData.children[0].id])
+        }
       } catch (err) {
         console.error('Failed to load user data:', err)
         setError('Failed to load user data')
@@ -242,6 +246,28 @@ export default function AddExpensePage() {
                   required
                 />
               </div>
+
+              {/* Auto-assignment tag — visible when exactly 1 kid is auto-selected */}
+              {children.length === 1 && selectedChildIds.length === 1 && (
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-ke-accent/10 px-3 py-1 text-xs font-medium text-ke-accent">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Tagged to {children[0].name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedChildIds([])
+                      setShowAdditionalDetails(true)
+                    }}
+                    className="text-xs text-ke-muted hover:text-ke-secondary"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
 
               {/* Collapsible Additional Details */}
               <div className="mb-6">
