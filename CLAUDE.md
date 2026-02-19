@@ -21,6 +21,21 @@ At the start of every session, initialize your context:
 
 This creates a session in the Context Worker, downloads venture documentation, and establishes context for handoffs.
 
+## MCP Tools Reference
+
+| Tool               | When to Use                     | Arguments                                                                           |
+| ------------------ | ------------------------------- | ----------------------------------------------------------------------------------- |
+| `crane_preflight`  | Session start                   | none                                                                                |
+| `crane_sod`        | Session start (after preflight) | `venture: "ke"`                                                                     |
+| `crane_status`     | Check work queue                | none                                                                                |
+| `crane_plan`       | Read weekly plan                | none                                                                                |
+| `crane_context`    | Verify current venture/repo     | none                                                                                |
+| `crane_handoff`    | End of session                  | `summary`, `status` ("in_progress" / "blocked" / "done"), optional `issue_number`   |
+| `crane_doc`        | Fetch instruction module        | `scope`, `doc_name`                                                                 |
+| `crane_notes`      | Search knowledge store          | optional `q`, `tag`, `venture`                                                      |
+| `crane_note`       | Create/update a note            | `action` ("create" / "update"), `content`, optional `title`, `tags`, `venture`      |
+| `crane_schedule`   | View/complete recurring tasks   | `action` ("list" / "complete")                                                      |
+
 ## Enterprise Rules
 
 - **All changes through PRs.** Never push directly to main. Branch, PR, CI, QA, merge.
