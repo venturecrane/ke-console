@@ -42,6 +42,8 @@ npm run build           # Production build
 npm run lint            # ESLint check
 ```
 
+**Deployment:** Vercel auto-deploys from GitHub on push to `main`. Do NOT run `npx vercel` manually.
+
 ### API Worker
 
 ```bash
