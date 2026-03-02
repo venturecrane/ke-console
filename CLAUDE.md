@@ -23,18 +23,18 @@ This creates a session in the Context Worker, downloads venture documentation, a
 
 ## MCP Tools Reference
 
-| Tool               | When to Use                     | Arguments                                                                           |
-| ------------------ | ------------------------------- | ----------------------------------------------------------------------------------- |
-| `crane_preflight`  | Session start                   | none                                                                                |
-| `crane_sod`        | Session start (after preflight) | `venture: "ke"`                                                                     |
-| `crane_status`     | Check work queue                | none                                                                                |
-| `crane_plan`       | Read weekly plan                | none                                                                                |
-| `crane_context`    | Verify current venture/repo     | none                                                                                |
-| `crane_handoff`    | End of session                  | `summary`, `status` ("in_progress" / "blocked" / "done"), optional `issue_number`   |
-| `crane_doc`        | Fetch instruction module        | `scope`, `doc_name`                                                                 |
-| `crane_notes`      | Search knowledge store          | optional `q`, `tag`, `venture`                                                      |
-| `crane_note`       | Create/update a note            | `action` ("create" / "update"), `content`, optional `title`, `tags`, `venture`      |
-| `crane_schedule`   | View/complete recurring tasks   | `action` ("list" / "complete")                                                      |
+| Tool              | When to Use                     | Arguments                                                                         |
+| ----------------- | ------------------------------- | --------------------------------------------------------------------------------- |
+| `crane_preflight` | Session start                   | none                                                                              |
+| `crane_sod`       | Session start (after preflight) | `venture: "ke"`                                                                   |
+| `crane_status`    | Check work queue                | none                                                                              |
+| `crane_plan`      | Read weekly plan                | none                                                                              |
+| `crane_context`   | Verify current venture/repo     | none                                                                              |
+| `crane_handoff`   | End of session                  | `summary`, `status` ("in_progress" / "blocked" / "done"), optional `issue_number` |
+| `crane_doc`       | Fetch instruction module        | `scope`, `doc_name`                                                               |
+| `crane_notes`     | Search knowledge store          | optional `q`, `tag`, `venture`                                                    |
+| `crane_note`      | Create/update a note            | `action` ("create" / "update"), `content`, optional `title`, `tags`, `venture`    |
+| `crane_schedule`  | View/complete recurring tasks   | `action` ("list" / "complete")                                                    |
 
 ## Enterprise Rules
 
@@ -167,7 +167,7 @@ Fetch the relevant module when working in that domain.
 | `content-policy.md` | Never auto-save to VCMS; agents ARE the voice                            | VCMS tags, storage rules, editorial, style    |
 | `team-workflow.md`  | All changes through PRs; never push to main                              | Full workflow, QA grades, escalation triggers |
 | `fleet-ops.md`      | Bootstrap phases IN ORDER: Tailscale > CLI > bootstrap > optimize > mesh | SSH, machines, Tailscale, macOS               |
-| `pr-workflow.md`   | Push branch, `gh pr create`, assign QA grade - never skip the PR             | Branch naming, commit format, PR template     |
+| `pr-workflow.md`    | Push branch, `gh pr create`, assign QA grade - never skip the PR         | Branch naming, commit format, PR template     |
 
 Fetch with: `crane_doc('global', '<module>')`
 
