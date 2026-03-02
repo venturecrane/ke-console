@@ -1,20 +1,18 @@
 {
   "private": true,
   "type": "module",
+  "workspaces": [
+    "app",
+    "workers/*"
+  ],
   "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "npm run format:check",
+    "verify": "npm run typecheck && npm run format:check && npm run lint && npm run test",
     "prepare": "node -e \"if(process.env.CI)process.exit(0)\" && husky"
-  },
-  "lint-staged": {
-    "app/**/*.{ts,tsx}": [
-      "prettier --write",
-      "app/node_modules/.bin/eslint --no-warn-ignored --config app/eslint.config.mjs"
-    ],
-    "*.{md,json,yml,yaml,css}": [
-      "prettier --write"
-    ]
   },
   "devDependencies": {
     "husky": "^9",
