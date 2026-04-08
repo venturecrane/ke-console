@@ -6,7 +6,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
-    "test": "vitest run",
+    "test": "vitest run --project unit --project harness",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint"
@@ -14,6 +14,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240117.0",
     "@eslint/js": "^10.0.1",
+    "@venturecrane/crane-test-harness": "https://github.com/venturecrane/crane-console/releases/download/crane-test-harness-v0.1.0/venturecrane-crane-test-harness-0.1.0.tgz",
     "eslint": "^10.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0",
