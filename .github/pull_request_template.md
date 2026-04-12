@@ -1,19 +1,34 @@
 ## Summary
 
-<!-- What does this PR do? -->
+<!-- Brief description of what this PR does -->
 
-## Related Issue
+## Related Issues
 
-Closes #
+<!-- Link to related issues: Closes #123, Relates to #456 -->
 
 ## Changes
+
+<!-- Bullet list of key changes -->
 
 -
 
 ## Test Plan
 
+<!-- How was this tested? Include commands, screenshots, etc. -->
+
 - [ ]
 
-## Screenshots
+## Security Checklist
 
-<!-- If applicable -->
+<!-- Review each item - check if addressed or N/A -->
+
+- [ ] No secrets in code or comments
+- [ ] No PII exposed in frontend responses
+- [ ] Input validation on new endpoints
+- [ ] Parameterized queries for any SQL (use `.bind()`)
+- [ ] Auth required on new endpoints
+- [ ] No internal IDs that enable enumeration
+
+## Deployment Notes
+
+<!-- Any special deployment considerations? Leave blank if standard deploy -->

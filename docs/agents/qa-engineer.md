@@ -77,12 +77,11 @@ Priority edge cases that MUST have test coverage:
 
 ## Testing Rules
 
-1. **Every `test:required` labeled issue** MUST have corresponding test file changes
-2. **Money tests** must use exact integer comparison (never approximate)
-3. **State machine tests** must verify both success AND failure transitions
-4. **Mock Clerk auth** for API route tests (set `X-User-Id` header)
-5. **Test timeout logic** with deterministic date mocking, not real waits
-6. **Idempotency tests** must run the operation twice and verify same result
+1. **Money tests** must use exact integer comparison (never approximate)
+2. **State machine tests** must verify both success AND failure transitions
+3. **Mock Clerk auth** for API route tests (set `X-User-Id` header)
+4. **Test timeout logic** with deterministic date mocking, not real waits
+5. **Idempotency tests** must run the operation twice and verify same result
 
 ## Test Patterns
 
@@ -178,22 +177,6 @@ npm run test:watch                    # Watch mode
 npx vitest run --reporter=verbose     # Detailed output
 npx vitest run __tests__/timeout.test.ts  # Single file
 ```
-
-## Issues Requiring Tests (test:required label)
-
-| Issue | Description             | Test Coverage                   |
-| ----- | ----------------------- | ------------------------------- |
-| #88   | 7-day timeout           | timeout.test.ts                 |
-| #89   | 30-day closure          | timeout.test.ts                 |
-| #90   | Edit own expense        | state-machine.test.ts           |
-| #91   | Delete own expense      | state-machine.test.ts           |
-| #92   | Stripe integration      | billing.test.ts (if applicable) |
-| #93   | Free tier limits        | tier-limits.test.ts             |
-| #96   | Auto-generate recurring | recurring.test.ts               |
-| #97   | Split ratio             | calculations.test.ts (extend)   |
-| #101  | CSV export              | export.test.ts                  |
-| #107  | Balance audit trail     | calculations.test.ts (extend)   |
-| #108  | Leave family            | families.test.ts (new)          |
 
 ## Working Directory
 

@@ -120,24 +120,6 @@ npm run test:watch # Watch mode
 
 **Test files location:** `workers/ke-api/src/__tests__/`
 
-### test:required Label Enforcement
-
-Issues involving calculations, money math, or state transitions are automatically labeled `test:required` by crane-classifier. When working on these issues:
-
-1. **PR must include test file changes** - CI will block merge otherwise
-2. **Escape hatch**: Add `test:exempt` label with comment explaining why
-
-### What Requires Tests
-
-| Change Type             | Tests Required? |
-| ----------------------- | --------------- |
-| Balance calculations    | ✅ Yes          |
-| Dollar/cents conversion | ✅ Yes          |
-| Share splitting logic   | ✅ Yes          |
-| Status transitions      | ✅ Yes          |
-| UI styling/layout       | ❌ No           |
-| Documentation           | ❌ No           |
-
 ### Core Calculation Module
 
 Money math logic lives in `workers/ke-api/src/calculations.ts`:
@@ -161,13 +143,13 @@ These functions are pure and fully tested. When modifying, update tests first (T
 Detailed domain instructions stored as on-demand documents.
 Fetch the relevant module when working in that domain.
 
-| Module              | Key Rule (always applies)                                                | Fetch for details                             |
-| ------------------- | ------------------------------------------------------------------------ | --------------------------------------------- |
-| `secrets.md`        | Verify secret VALUES, not just key existence                             | Infisical, vault, API keys, GitHub App        |
-| `content-policy.md` | Never auto-save to VCMS; agents ARE the voice                            | VCMS tags, storage rules, editorial, style    |
-| `team-workflow.md`  | All changes through PRs; never push to main                              | Full workflow, QA grades, escalation triggers |
-| `fleet-ops.md`      | Bootstrap phases IN ORDER: Tailscale > CLI > bootstrap > optimize > mesh | SSH, machines, Tailscale, macOS               |
-| `pr-workflow.md`    | Push branch, `gh pr create`, assign QA grade - never skip the PR         | Branch naming, commit format, PR template     |
+| Module              | Key Rule (always applies)                                                | Fetch for details                          |
+| ------------------- | ------------------------------------------------------------------------ | ------------------------------------------ |
+| `secrets.md`        | Verify secret VALUES, not just key existence                             | Infisical, vault, API keys, GitHub App     |
+| `content-policy.md` | Never auto-save to VCMS; agents ARE the voice                            | VCMS tags, storage rules, editorial, style |
+| `team-workflow.md`  | All changes through PRs; never push to main                              | Full workflow, escalation triggers         |
+| `fleet-ops.md`      | Bootstrap phases IN ORDER: Tailscale > CLI > bootstrap > optimize > mesh | SSH, machines, Tailscale, macOS            |
+| `pr-workflow.md`    | Push branch, `gh pr create`, never skip the PR                           | Branch naming, commit format, PR template  |
 
 Fetch with: `crane_doc('global', '<module>')`
 

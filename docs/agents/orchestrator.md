@@ -82,7 +82,6 @@ Before marking a wave complete, ALL must pass:
 
 **QA checks:**
 
-- [ ] Tests written for all test:required issues
 - [ ] State machine transitions tested (success + failure)
 - [ ] Money math tests use exact integer comparison
 - [ ] No regressions in existing test suite
