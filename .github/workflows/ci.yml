@@ -13,8 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: npm run format:check
 
   typecheck-api:
@@ -24,8 +28,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: npm run typecheck -w workers/ke-api
 
   lint-app:
@@ -35,8 +43,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: npm run lint -w app
 
   lint-api:
@@ -46,8 +58,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: npm run lint -w workers/ke-api
 
   test:
@@ -57,8 +73,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: npm run test -w workers/ke-api
 
   build:
@@ -68,8 +88,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
           cache: 'npm'
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
       - run: |
           cd app
           set -a && source .env.ci && set +a
