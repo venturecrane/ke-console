@@ -1,5 +1,8 @@
 import Link from 'next/link'
 
+// Sign-in CTA is intentionally hidden during private alpha. The /sign-in
+// route still exists; just unlinked from the public marketing surface.
+// Re-add when public beta opens.
 export function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-ke-bg/90 backdrop-blur-sm border-b border-ke-border">
@@ -10,20 +13,12 @@ export function Nav() {
           </span>
           <span className="text-lg font-semibold text-ke-primary tracking-tight">Kid Expenses</span>
         </Link>
-        <div className="flex items-center gap-5">
-          <a
-            href="#waitlist"
-            className="hidden sm:inline text-sm text-ke-secondary hover:text-ke-primary transition-colors"
-          >
-            Join the list
-          </a>
-          <Link
-            href="/sign-in"
-            className="text-sm font-medium text-ke-accent hover:text-ke-accent-hover transition-colors"
-          >
-            Sign in
-          </Link>
-        </div>
+        <a
+          href="#waitlist"
+          className="text-sm font-medium text-ke-accent hover:text-ke-accent-hover transition-colors"
+        >
+          Join the list
+        </a>
       </div>
     </nav>
   )
