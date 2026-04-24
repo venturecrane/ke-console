@@ -18,6 +18,7 @@ import billingRoutes from './routes/billing'
 import webhookRoutes from './routes/webhooks'
 import notificationPrefsRoutes from './routes/notification-prefs'
 import exportRoutes from './routes/export'
+import waitlistRoutes from './routes/waitlist'
 
 const app = new Hono<AppType>()
 
@@ -64,6 +65,7 @@ app.route('/families', exportRoutes)
 app.route('/expenses', expenseActionsRoutes)
 app.route('/families', billingRoutes)
 app.route('/webhooks', webhookRoutes)
+app.route('/waitlist', waitlistRoutes)
 
 // API info
 app.get('/', (c) => {
