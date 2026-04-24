@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "npm run typecheck && npm run format:check && npm run lint && npm run test",
-    "prepare": "node -e \"if(process.env.CI)process.exit(0)\" && husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "husky": "^9",
