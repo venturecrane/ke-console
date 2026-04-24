@@ -1,65 +1,52 @@
-import Link from 'next/link'
+import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui'
+import { Footer } from '@/components/marketing/Footer'
+import { Hero } from '@/components/marketing/Hero'
+import { HowItWorks } from '@/components/marketing/HowItWorks'
+import { Nav } from '@/components/marketing/Nav'
+import { Problem } from '@/components/marketing/Problem'
+import { WaitlistCTA } from '@/components/marketing/WaitlistCTA'
+import { WhyDifferent } from '@/components/marketing/WhyDifferent'
 
-export default async function Home() {
+export const metadata: Metadata = {
+  title: 'Kid Expenses — The shared ledger for co-parents',
+  description:
+    'A neutral space to log shared child expenses, track running balance, and settle without arguments. In private alpha — request access.',
+  openGraph: {
+    title: 'Kid Expenses — The shared ledger for co-parents',
+    description:
+      'A neutral space to log shared child expenses, track running balance, and settle without arguments.',
+    url: 'https://kidexpenses.app',
+    siteName: 'Kid Expenses',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kid Expenses — The shared ledger for co-parents',
+    description: 'A neutral space for co-parents. In private alpha — request access.',
+  },
+}
+
+export default async function LandingPage() {
   const { userId } = await auth()
 
-  // Redirect authenticated users to dashboard
+  // Authenticated testers go straight to their dashboard, not the marketing page.
   if (userId) {
     redirect('/dashboard')
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4">
-      <main className="flex max-w-2xl flex-col items-center text-center">
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-ke-primary sm:text-5xl">
-          The shared ledger for co-parents.
-        </h1>
-        <p className="mb-12 text-lg text-ke-secondary">
-          A neutral space to track shared costs. No guesswork, no arguments — just clear numbers.
-        </p>
-
-        <div className="mb-12 w-full max-w-lg space-y-3">
-          <div className="border-l-2 border-ke-accent/60 pl-4 py-2">
-            <p className="text-sm text-ke-secondary">
-              Log expenses with category, date, and receipt link
-            </p>
-          </div>
-          <div className="border-l-2 border-ke-accent/60 pl-4 py-2">
-            <p className="text-sm text-ke-secondary">
-              Recurring expenses post automatically each month
-            </p>
-          </div>
-          <div className="border-l-2 border-ke-accent/60 pl-4 py-2">
-            <p className="text-sm text-ke-secondary">
-              Configurable split ratios with full audit trail
-            </p>
-          </div>
-          <div className="border-l-2 border-ke-accent/60 pl-4 py-2">
-            <p className="text-sm text-ke-secondary">Running balance calculated to the cent</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Link href="/sign-up">
-            <Button size="lg" className="px-8">
-              Get Started
-            </Button>
-          </Link>
-          <Link href="/sign-in">
-            <Button variant="secondary" size="lg" className="px-8">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/demo">
-            <Button variant="ghost" size="lg" className="px-8">
-              See How It Works
-            </Button>
-          </Link>
-        </div>
+    <div className="min-h-dvh bg-ke-bg">
+      <Nav />
+      <main>
+        <Hero />
+        <Problem />
+        <HowItWorks />
+        <WhyDifferent />
+        <WaitlistCTA />
       </main>
+      <Footer />
     </div>
   )
 }
