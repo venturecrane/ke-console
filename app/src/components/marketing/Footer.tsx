@@ -17,12 +17,6 @@ export function Footer() {
             Join the list
           </a>
           <Link
-            href="/sign-in"
-            className="text-sm text-ke-secondary hover:text-ke-primary transition-colors"
-          >
-            Sign in
-          </Link>
-          <Link
             href="/demo"
             className="text-sm text-ke-secondary hover:text-ke-primary transition-colors"
           >
