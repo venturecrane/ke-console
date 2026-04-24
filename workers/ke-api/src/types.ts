@@ -6,6 +6,11 @@ export interface Env {
   CLERK_ISSUER_URL?: string
   STRIPE_SECRET_KEY?: string
   STRIPE_WEBHOOK_SECRET?: string
+
+  // Waitlist (public POST /waitlist endpoint)
+  TURNSTILE_SECRET_KEY?: string // Cloudflare Turnstile server-side verification
+  WAITLIST_FROM_EMAIL?: string // Sender, default: "Kid Expenses <hello@mail.kidexpenses.app>"
+  WAITLIST_NOTIFY_EMAIL?: string // Where to notify on signup, default: smdurgan@venturecrane.com
 }
 
 export type AppType = {
