@@ -1,0 +1,9 @@
+{
+  "_comment": "UI drift audit thresholds for KE. Baseline captured 2026-04-25 (Stream C1 - design-system migration to @venturecrane/tokens/ke.css). KE's Next.js app layout puts sources under app/src - the src_dirs override targets that. Pre-existing 9 raw hex/rgb in JSX and 4 raw Tailwind color classes are baseline; this PR introduces no new drift. Inline-style hex/rgb is hard-zero (already at zero on main). Subsequent design-debt PRs ratchet thresholds toward 0.",
+  "src_dirs": ["app/src/app", "app/src/components"],
+  "thresholds": {
+    "raw_hex_rgb_in_jsx_max": 12,
+    "raw_hex_rgb_in_inline_style_max": 0,
+    "raw_tailwind_color_classes_max": 8
+  }
+}
