@@ -8,3 +8,9 @@ node_modules/
 
 # UI drift audit (CI artifacts, not durable source)
 .design/audits/
+
+# Playwright + Clerk auth state (session secret)
+app/playwright/.clerk/
+playwright/.clerk/
+playwright-report/
+test-results/
