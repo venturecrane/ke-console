@@ -55,7 +55,7 @@ Semgrep scan metadata: `Rules run: 312`, `Targets scanned: 238`.
 
 ## CI run — canary removed (GREEN, post-removal)
 
-**Run (canary-removed):** _(appended after green run confirms)_
+**Run (canary-removed):** https://github.com/venturecrane/ke-console/actions/runs/24942194759 — all 5 security checks pass (NPM Audit, Secret Detection, TypeScript x2, Semgrep, nosemgrep Audit); Security Summary aggregates green.
 
 ## Takeaways
 
