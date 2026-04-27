@@ -187,17 +187,19 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="sticky top-0 z-30 border-b border-ke-border bg-ke-surface/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ke-accent text-xs font-bold text-ke-inverse">
+          <div className="flex items-center gap-ke-row">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ke-accent text-ke-label font-bold text-ke-inverse">
               KE
             </div>
-            <h1 className="text-lg font-semibold text-ke-primary">Kid Expenses</h1>
+            <h1 className="text-ke-body-lg font-semibold text-ke-primary">Kid Expenses</h1>
             {meData?.family?.name && (
-              <span className="hidden text-sm text-ke-muted sm:inline">{meData.family.name}</span>
+              <span className="hidden text-ke-caption text-ke-muted sm:inline">
+                {meData.family.name}
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-ke-secondary sm:inline">
+          <div className="flex items-center gap-ke-stack">
+            <span className="hidden text-ke-caption text-ke-secondary sm:inline">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
             <Link
@@ -225,12 +227,12 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-ke-section">
         {/* Loading/Error State */}
         {syncStatus === 'pending' && (
           <Card>
             <CardBody>
-              <p className="text-sm text-ke-muted">Loading your data...</p>
+              <p className="text-ke-caption text-ke-muted">Loading your data...</p>
             </CardBody>
           </Card>
         )}
@@ -243,7 +245,7 @@ export default function DashboardPage() {
           <>
             <Card>
               <CardBody>
-                <h2 className="mb-4 text-lg font-medium text-ke-primary">
+                <h2 className="mb-4 text-ke-body-lg font-medium text-ke-primary">
                   Welcome, {user?.firstName || 'there'}!
                 </h2>
                 <p className="text-ke-secondary">
@@ -251,23 +253,25 @@ export default function DashboardPage() {
                 </p>
               </CardBody>
             </Card>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="mt-ke-section grid gap-ke-stack sm:grid-cols-2">
               <Link
                 href="/family/create"
-                className="rounded-lg border border-ke-border bg-ke-surface p-6 transition-colors hover:bg-ke-elevated"
+                className="rounded-lg border border-ke-border bg-ke-surface p-ke-card transition-colors hover:bg-ke-elevated"
               >
-                <h3 className="mb-2 text-lg font-medium text-ke-primary">Create a Family</h3>
-                <p className="text-sm text-ke-secondary">
+                <h3 className="mb-2 text-ke-body-lg font-medium text-ke-primary">
+                  Create a Family
+                </h3>
+                <p className="text-ke-caption text-ke-secondary">
                   Start tracking expenses and invite your co-parent to join
                 </p>
               </Link>
 
               <Link
                 href="/family/join"
-                className="rounded-lg border border-ke-border bg-ke-surface p-6 transition-colors hover:bg-ke-elevated"
+                className="rounded-lg border border-ke-border bg-ke-surface p-ke-card transition-colors hover:bg-ke-elevated"
               >
-                <h3 className="mb-2 text-lg font-medium text-ke-primary">Join a Family</h3>
-                <p className="text-sm text-ke-secondary">
+                <h3 className="mb-2 text-ke-body-lg font-medium text-ke-primary">Join a Family</h3>
+                <p className="text-ke-caption text-ke-secondary">
                   Have an invite code? Join your co-parent&apos;s family
                 </p>
               </Link>
@@ -282,7 +286,9 @@ export default function DashboardPage() {
             <Card>
               <CardBody>
                 {isLoadingBalance ? (
-                  <p className="text-center text-sm text-ke-muted">Calculating balance...</p>
+                  <p className="text-center text-ke-caption text-ke-muted">
+                    Calculating balance...
+                  </p>
                 ) : balance ? (
                   <div className="text-center">
                     <SectionHeader title="Net Balance" className="justify-center" />
@@ -291,7 +297,7 @@ export default function DashboardPage() {
                         ? '$0.00'
                         : formatCurrency(balance.balance_cents)}
                     </p>
-                    <p className="mt-1 text-sm text-ke-muted">
+                    <p className="mt-1 text-ke-caption text-ke-muted">
                       {balance.balance_cents === 0
                         ? hasPartner
                           ? 'Settled up'
@@ -302,20 +308,20 @@ export default function DashboardPage() {
                     {/* Summary Stats */}
                     {balance.breakdown.total_expenses_cents > 0 && (
                       <div className="mt-6 border-t border-ke-divider pt-4">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-ke-stack text-ke-caption">
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+                            <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                               Total Expenses
                             </p>
-                            <p className="mt-1 text-lg font-semibold font-mono text-ke-primary">
+                            <p className="mt-1 text-ke-body-lg font-semibold font-mono text-ke-primary">
                               {formatCurrency(balance.breakdown.total_expenses_cents)}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+                            <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                               Your Share
                             </p>
-                            <p className="mt-1 text-lg font-semibold font-mono text-ke-primary">
+                            <p className="mt-1 text-ke-body-lg font-semibold font-mono text-ke-primary">
                               {formatCurrency(
                                 isParentA
                                   ? balance.breakdown.a_share_cents
@@ -331,7 +337,7 @@ export default function DashboardPage() {
                   <div className="text-center">
                     <SectionHeader title="Net Balance" className="justify-center" />
                     <p className="mt-2 text-4xl font-bold font-mono text-ke-muted">$0.00</p>
-                    <p className="mt-1 text-sm text-ke-muted">No expenses recorded yet</p>
+                    <p className="mt-1 text-ke-caption text-ke-muted">No expenses recorded yet</p>
                   </div>
                 )}
               </CardBody>
@@ -343,8 +349,10 @@ export default function DashboardPage() {
                 <CardBody>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-ke-primary">{setupHeader}</h3>
-                      <p className="mt-0.5 text-xs text-ke-muted">
+                      <h3 className="text-ke-caption font-semibold text-ke-primary">
+                        {setupHeader}
+                      </h3>
+                      <p className="mt-0.5 text-ke-label text-ke-muted">
                         Optional tips to help you get the most out of Kid Expenses.
                       </p>
                     </div>
@@ -373,7 +381,7 @@ export default function DashboardPage() {
                       <Link
                         key={suggestion.href}
                         href={suggestion.href}
-                        className="flex items-center justify-between rounded-lg border border-ke-border px-3 py-2.5 text-sm text-ke-secondary transition-colors hover:bg-ke-elevated"
+                        className="flex items-center justify-between rounded-lg border border-ke-border px-3 py-2.5 text-ke-caption text-ke-secondary transition-colors hover:bg-ke-elevated"
                       >
                         <span>{suggestion.text}</span>
                         <svg
@@ -401,12 +409,12 @@ export default function DashboardPage() {
               <div className="mt-6 rounded-lg border border-ke-attention-border/30 bg-ke-surface">
                 <div className="border-l-4 border-ke-attention-border p-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-xs font-semibold uppercase tracking-widest text-ke-status-questioned-text">
+                    <h3 className="text-ke-label font-semibold uppercase tracking-widest text-ke-status-questioned-text">
                       Needs Attention ({attentionExpenses.length})
                     </h3>
                     <Link
                       href="/expenses?status=needs_attention"
-                      className="text-xs font-medium text-ke-status-questioned-text hover:opacity-80"
+                      className="text-ke-label font-medium text-ke-status-questioned-text hover:opacity-80"
                     >
                       View all
                     </Link>
@@ -420,13 +428,13 @@ export default function DashboardPage() {
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-medium text-ke-primary">
+                            <p className="truncate text-ke-caption font-medium text-ke-primary">
                               {expense.description}
                             </p>
                             <StatusBadge status={expense.status} />
                           </div>
                         </div>
-                        <p className="ml-4 shrink-0 text-sm font-semibold font-mono text-ke-primary">
+                        <p className="ml-4 shrink-0 text-ke-caption font-semibold font-mono text-ke-primary">
                           {formatCurrency(expense.amount_cents)}
                         </p>
                       </Link>
@@ -437,7 +445,7 @@ export default function DashboardPage() {
             )}
 
             {/* Action Bar */}
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6 grid grid-cols-2 gap-ke-row">
               <Link href="/expenses/add">
                 <Button fullWidth size="lg">
                   <svg
@@ -477,39 +485,42 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Navigation */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-ke-row">
               <Link
                 href="/expenses"
-                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
+                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-caption font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
               >
                 All Expenses
               </Link>
               <Link
                 href="/payments"
-                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
+                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-caption font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
               >
                 Payment History
               </Link>
               <Link
                 href="/activity"
-                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-sm font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
+                className="inline-flex items-center gap-2 rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-caption font-medium text-ke-secondary-text transition-colors hover:bg-ke-elevated"
               >
                 Activity Feed
               </Link>
             </div>
 
             {/* Recent Activity */}
-            <Card className="mt-8">
-              <div className="flex items-center justify-between px-6 py-4">
+            <Card className="mt-ke-section">
+              <div className="flex items-center justify-between px-ke-card py-4">
                 <SectionHeader title="Recent Activity" />
-                <Link href="/expenses" className="text-sm text-ke-secondary hover:text-ke-primary">
+                <Link
+                  href="/expenses"
+                  className="text-ke-caption text-ke-secondary hover:text-ke-primary"
+                >
                   View All
                 </Link>
               </div>
 
               {isLoadingExpenses && (
-                <div className="px-6 pb-6">
-                  <p className="text-sm text-ke-muted">Loading...</p>
+                <div className="px-ke-card pb-ke-card">
+                  <p className="text-ke-caption text-ke-muted">Loading...</p>
                 </div>
               )}
 
@@ -529,7 +540,7 @@ export default function DashboardPage() {
                     <Link
                       key={expense.id}
                       href={`/expenses/${expense.id}`}
-                      className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-ke-elevated"
+                      className="flex items-center justify-between px-ke-card py-3.5 transition-colors hover:bg-ke-elevated"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -538,7 +549,7 @@ export default function DashboardPage() {
                             {expense.description}
                           </p>
                         </div>
-                        <div className="mt-0.5 flex items-center gap-3 text-xs text-ke-muted">
+                        <div className="mt-0.5 flex items-center gap-ke-row text-ke-label text-ke-muted">
                           <span>{formatCategory(expense.category)}</span>
                           <span className="font-mono">
                             {new Date(expense.expense_date).toLocaleDateString()}

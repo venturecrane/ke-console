@@ -34,12 +34,12 @@ function UpgradeModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <Card className="w-full max-w-sm">
         <CardBody>
-          <h3 className="text-lg font-semibold text-ke-primary">{title}</h3>
-          <p className="mt-2 text-sm text-ke-secondary">{description}</p>
+          <h3 className="text-ke-body-lg font-semibold text-ke-primary">{title}</h3>
+          <p className="mt-2 text-ke-caption text-ke-secondary">{description}</p>
 
           <ul className="mt-4 space-y-2">
             {PRO_BENEFITS.map((benefit) => (
-              <li key={benefit} className="flex items-start gap-2 text-sm text-ke-primary">
+              <li key={benefit} className="flex items-start gap-2 text-ke-caption text-ke-primary">
                 <svg
                   className="mt-0.5 h-4 w-4 flex-shrink-0 text-ke-positive"
                   fill="none"

@@ -39,8 +39,8 @@ const SETTINGS_SECTIONS = [
 export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-ke-bg">
-      <div className="mx-auto max-w-5xl px-4 py-8">
-        <div className="mb-8 flex items-center gap-4">
+      <div className="mx-auto max-w-5xl px-4 py-ke-section">
+        <div className="mb-ke-section flex items-center gap-ke-stack">
           <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -51,7 +51,7 @@ export default function SettingsPage() {
               />
             </svg>
           </Link>
-          <h1 className="text-2xl font-semibold text-ke-primary">Settings</h1>
+          <h1 className="text-ke-display font-semibold text-ke-primary">Settings</h1>
         </div>
 
         <Card>
@@ -60,11 +60,11 @@ export default function SettingsPage() {
               <Link
                 key={section.href}
                 href={section.href}
-                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-ke-elevated"
+                className="flex items-center justify-between px-ke-card py-4 transition-colors hover:bg-ke-elevated"
               >
                 <div>
                   <p className="font-medium text-ke-primary">{section.label}</p>
-                  <p className="mt-0.5 text-sm text-ke-muted">{section.description}</p>
+                  <p className="mt-0.5 text-ke-caption text-ke-muted">{section.description}</p>
                 </div>
                 <svg
                   className="h-5 w-5 shrink-0 text-ke-muted"

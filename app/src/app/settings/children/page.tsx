@@ -170,7 +170,7 @@ export default function ChildrenSettingsPage() {
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-ke-stack">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -181,12 +181,12 @@ export default function ChildrenSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-ke-primary">Manage Kids</h1>
+              <h1 className="text-ke-title font-semibold text-ke-primary">Manage Kids</h1>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">
+        <main className="mx-auto max-w-5xl px-4 py-ke-section">
           <Card>
             <CardBody className="text-center">
               <p className="text-ke-secondary">You need to create or join a family first.</p>
@@ -204,7 +204,7 @@ export default function ChildrenSettingsPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -215,13 +215,13 @@ export default function ChildrenSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Manage Kids</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Manage Kids</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {/* Error Display */}
         {error && (
           <Alert variant="error" className="mb-6">
@@ -232,8 +232,8 @@ export default function ChildrenSettingsPage() {
         {/* Add Child Form */}
         <Card className="mb-6">
           <CardBody>
-            <h2 className="mb-4 text-lg font-medium text-ke-primary">Add a Kid</h2>
-            <form onSubmit={handleAddChild} className="flex gap-3">
+            <h2 className="mb-4 text-ke-body-lg font-medium text-ke-primary">Add a Kid</h2>
+            <form onSubmit={handleAddChild} className="flex gap-ke-row">
               <div className="flex-1">
                 <input
                   type="text"
@@ -246,7 +246,7 @@ export default function ChildrenSettingsPage() {
                   maxLength={100}
                   className="w-full rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
-                {addError && <p className="mt-1 text-sm text-ke-negative">{addError}</p>}
+                {addError && <p className="mt-1 text-ke-caption text-ke-negative">{addError}</p>}
               </div>
               <Button type="submit" disabled={isAdding || !newChildName.trim()}>
                 {isAdding ? 'Adding...' : 'Add Kid'}
@@ -258,8 +258,10 @@ export default function ChildrenSettingsPage() {
         {/* Children List */}
         <Card>
           <CardHeader className="border-b border-ke-border">
-            <h2 className="text-lg font-medium text-ke-primary">Kids ({children.length})</h2>
-            <p className="mt-1 text-sm text-ke-muted">
+            <h2 className="text-ke-body-lg font-medium text-ke-primary">
+              Kids ({children.length})
+            </h2>
+            <p className="mt-1 text-ke-caption text-ke-muted">
               Add kids to tag expenses to specific family members.
             </p>
           </CardHeader>
@@ -277,13 +279,13 @@ export default function ChildrenSettingsPage() {
           ) : (
             <ul className="divide-y divide-ke-divider">
               {children.map((child) => (
-                <li key={child.id} className="px-6 py-4">
+                <li key={child.id} className="px-ke-card py-4">
                   {editingChildId === child.id ? (
                     /* Inline Edit Mode */
                     <div className="space-y-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-ke-row">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ke-elevated">
-                          <span className="text-lg font-medium text-ke-secondary">
+                          <span className="text-ke-body-lg font-medium text-ke-secondary">
                             {editName.charAt(0)?.toUpperCase() ||
                               child.name.charAt(0).toUpperCase()}
                           </span>
@@ -305,16 +307,16 @@ export default function ChildrenSettingsPage() {
                               cancelEdit()
                             }
                           }}
-                          className="flex-1 rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                          className="flex-1 rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                         />
                       </div>
                       {editError && (
-                        <div className="flex gap-3">
+                        <div className="flex gap-ke-row">
                           <div className="w-10 shrink-0" aria-hidden="true" />
-                          <p className="text-sm text-ke-negative">{editError}</p>
+                          <p className="text-ke-caption text-ke-negative">{editError}</p>
                         </div>
                       )}
-                      <div className="flex gap-3">
+                      <div className="flex gap-ke-row">
                         <div className="w-10 shrink-0" aria-hidden="true" />
                         <div className="flex items-center gap-2">
                           <Button
@@ -338,15 +340,15 @@ export default function ChildrenSettingsPage() {
                   ) : (
                     /* Display Mode */
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-ke-row">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ke-elevated">
-                          <span className="text-lg font-medium text-ke-secondary">
+                          <span className="text-ke-body-lg font-medium text-ke-secondary">
                             {child.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <p className="font-medium text-ke-primary">{child.name}</p>
-                          <p className="text-sm font-mono text-ke-muted">
+                          <p className="text-ke-caption font-mono text-ke-muted">
                             Added {new Date(child.created_at).toLocaleDateString()}
                           </p>
                         </div>
@@ -354,7 +356,7 @@ export default function ChildrenSettingsPage() {
 
                       {showDeleteConfirm === child.id ? (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-ke-muted">Delete?</span>
+                          <span className="text-ke-caption text-ke-muted">Delete?</span>
                           <Button
                             variant="danger"
                             size="sm"
@@ -424,7 +426,7 @@ export default function ChildrenSettingsPage() {
 
         {/* Info Note */}
         <Alert variant="info" className="mt-6">
-          <div className="flex gap-3">
+          <div className="flex gap-ke-row">
             <svg
               className="h-5 w-5 flex-shrink-0"
               fill="none"

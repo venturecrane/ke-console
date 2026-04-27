@@ -536,7 +536,7 @@ export default function ActivityFeedPage() {
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-ke-stack">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -547,13 +547,13 @@ export default function ActivityFeedPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-ke-primary">Activity Feed</h1>
+              <h1 className="text-ke-title font-semibold text-ke-primary">Activity Feed</h1>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">
-          <Card className="p-6 text-center">
+        <main className="mx-auto max-w-5xl px-4 py-ke-section">
+          <Card className="p-ke-card text-center">
             <p className="text-ke-secondary">You need to create or join a family first.</p>
             <Link href="/dashboard" className="mt-4 inline-block">
               <Button>Go to Dashboard</Button>
@@ -568,7 +568,7 @@ export default function ActivityFeedPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -579,13 +579,13 @@ export default function ActivityFeedPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Activity Feed</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Activity Feed</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {/* Error Display */}
         {error && (
           <Alert variant="error" className="mb-6">
@@ -617,23 +617,26 @@ export default function ActivityFeedPage() {
                   placeholder="Search activity..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface py-2 pl-10 pr-4 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface py-2 pl-10 pr-4 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
               </div>
             </div>
 
             {/* Filter Row */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-ke-stack">
               {/* Type Filter Dropdown */}
               <div className="flex items-center gap-2">
-                <label htmlFor="type-filter" className="text-sm font-medium text-ke-secondary">
+                <label
+                  htmlFor="type-filter"
+                  className="text-ke-caption font-medium text-ke-secondary"
+                >
                   Type:
                 </label>
                 <select
                   id="type-filter"
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as ActivityTypeFilter)}
-                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {TYPE_FILTER_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -645,7 +648,10 @@ export default function ActivityFeedPage() {
 
               {/* Date Range */}
               <div className="flex items-center gap-2">
-                <label htmlFor="start-date" className="text-sm font-medium text-ke-secondary">
+                <label
+                  htmlFor="start-date"
+                  className="text-ke-caption font-medium text-ke-secondary"
+                >
                   From:
                 </label>
                 <input
@@ -653,12 +659,12 @@ export default function ActivityFeedPage() {
                   id="start-date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <label htmlFor="end-date" className="text-sm font-medium text-ke-secondary">
+                <label htmlFor="end-date" className="text-ke-caption font-medium text-ke-secondary">
                   To:
                 </label>
                 <input
@@ -666,7 +672,7 @@ export default function ActivityFeedPage() {
                   id="end-date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="rounded-lg border border-ke-border bg-ke-surface px-3 py-1.5 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
               </div>
 
@@ -674,7 +680,7 @@ export default function ActivityFeedPage() {
               {hasActiveFilters && (
                 <button
                   onClick={handleClearFilters}
-                  className="text-sm text-ke-muted hover:text-ke-primary"
+                  className="text-ke-caption text-ke-muted hover:text-ke-primary"
                 >
                   Clear filters
                 </button>
@@ -684,7 +690,7 @@ export default function ActivityFeedPage() {
         </Card>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-ke-muted">
+        <div className="mb-4 text-ke-caption text-ke-muted">
           {isLoading ? (
             'Loading...'
           ) : (
@@ -725,20 +731,20 @@ export default function ActivityFeedPage() {
                 const link = getEventLink(event)
 
                 const content = (
-                  <div className="flex items-start gap-4 px-4 py-4 sm:px-6">
+                  <div className="flex items-start gap-ke-stack px-4 py-4 sm:px-ke-card">
                     <div
                       className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${style.bgColor}`}
                     >
                       <span className={style.textColor}>{style.icon}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-ke-primary">{action}</p>
+                      <p className="text-ke-caption font-medium text-ke-primary">{action}</p>
                       {details && (
-                        <p className="mt-0.5 text-sm font-mono text-ke-secondary truncate">
+                        <p className="mt-0.5 text-ke-caption font-mono text-ke-secondary truncate">
                           {details}
                         </p>
                       )}
-                      <p className="mt-1 text-xs font-mono text-ke-muted">
+                      <p className="mt-1 text-ke-label font-mono text-ke-muted">
                         {formatRelativeTime(event.created_at)}
                       </p>
                     </div>
@@ -786,7 +792,7 @@ export default function ActivityFeedPage() {
 
         {/* Info Box */}
         <Alert variant="info" className="mt-6">
-          <div className="flex gap-3">
+          <div className="flex gap-ke-row">
             <svg
               className="h-5 w-5 flex-shrink-0"
               fill="none"
@@ -801,8 +807,8 @@ export default function ActivityFeedPage() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium">About Activity Feed</p>
-              <p className="mt-1 text-sm opacity-80">
+              <p className="text-ke-caption font-medium">About Activity Feed</p>
+              <p className="mt-1 text-ke-caption opacity-80">
                 This feed shows all actions taken by you and your co-parent, including expenses
                 added, edited, questioned, resolved, payments made, and kids added or removed. By
                 default, it shows activity from the last 30 days.

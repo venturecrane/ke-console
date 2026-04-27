@@ -15,7 +15,9 @@ const variantClasses: Record<AlertVariant, string> = {
 
 function Alert({ variant = 'info', className = '', children }: AlertProps) {
   return (
-    <div className={`rounded-lg border p-3 text-sm ${variantClasses[variant]} ${className}`}>
+    <div
+      className={`rounded-lg border p-3 text-ke-caption ${variantClasses[variant]} ${className}`}
+    >
       {children}
     </div>
   )

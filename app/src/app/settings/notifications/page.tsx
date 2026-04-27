@@ -115,7 +115,7 @@ export default function NotificationSettingsPage() {
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-ke-stack">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -126,12 +126,12 @@ export default function NotificationSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-ke-primary">Notifications</h1>
+              <h1 className="text-ke-title font-semibold text-ke-primary">Notifications</h1>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">
+        <main className="mx-auto max-w-5xl px-4 py-ke-section">
           <Card>
             <CardBody className="text-center">
               <p className="text-ke-secondary">You need to create or join a family first.</p>
@@ -149,7 +149,7 @@ export default function NotificationSettingsPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -160,13 +160,13 @@ export default function NotificationSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Notifications</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Notifications</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {error && (
           <Alert variant="error" className="mb-6">
             <p>{error}</p>
@@ -175,8 +175,8 @@ export default function NotificationSettingsPage() {
 
         <Card>
           <CardHeader className="border-b border-ke-border">
-            <h2 className="text-lg font-medium text-ke-primary">Email Notifications</h2>
-            <p className="mt-1 text-sm text-ke-muted">
+            <h2 className="text-ke-body-lg font-medium text-ke-primary">Email Notifications</h2>
+            <p className="mt-1 text-ke-caption text-ke-muted">
               Choose which notifications you want to receive by email.
             </p>
           </CardHeader>
@@ -184,7 +184,7 @@ export default function NotificationSettingsPage() {
           {isLoading ? (
             <div className="divide-y divide-ke-divider">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center justify-between px-6 py-4">
+                <div key={i} className="flex items-center justify-between px-ke-card py-4">
                   <div className="space-y-2">
                     <div className="h-4 w-32 animate-pulse rounded bg-ke-elevated" />
                     <div className="h-3 w-48 animate-pulse rounded bg-ke-elevated" />
@@ -196,14 +196,14 @@ export default function NotificationSettingsPage() {
           ) : preferences ? (
             <ul className="divide-y divide-ke-divider">
               {NOTIFICATION_TYPES.map(({ key, label, description }) => (
-                <li key={key} className="flex items-center justify-between px-6 py-4">
+                <li key={key} className="flex items-center justify-between px-ke-card py-4">
                   <div className="min-w-0 flex-1 pr-4">
                     <p className="font-medium text-ke-primary">{label}</p>
-                    <p className="mt-0.5 text-sm text-ke-muted">{description}</p>
+                    <p className="mt-0.5 text-ke-caption text-ke-muted">{description}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-ke-row shrink-0">
                     {savedKey === key && (
-                      <span className="text-xs font-medium text-ke-positive">Saved</span>
+                      <span className="text-ke-label font-medium text-ke-positive">Saved</span>
                     )}
                     <button
                       onClick={() => handleToggle(key)}

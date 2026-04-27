@@ -27,7 +27,7 @@ function CountdownBadge({ days, total }: { days: number | null; total: number })
   const normalClass = 'bg-ke-elevated text-ke-muted'
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isUrgent ? urgentClass : normalClass}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-ke-label font-medium ${isUrgent ? urgentClass : normalClass}`}
     >
       {days} of {total} days left
     </span>
@@ -107,7 +107,7 @@ export default function QuestioningDashboardPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -118,16 +118,16 @@ export default function QuestioningDashboardPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Questions</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Questions</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-ke-card">
         {/* Section 1: Awaiting Your Resolution */}
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-3 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
             Awaiting Your Resolution ({awaitingResolution.length})
           </h2>
           {awaitingResolution.length === 0 ? (
@@ -141,7 +141,7 @@ export default function QuestioningDashboardPage() {
                 <Link key={expense.id} href={`/expenses/${expense.id}?focus=actions`}>
                   <Card className="transition-colors hover:bg-ke-elevated">
                     <CardBody>
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-ke-stack">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate font-medium text-ke-primary">
@@ -149,7 +149,7 @@ export default function QuestioningDashboardPage() {
                             </p>
                             <StatusBadge status={expense.status} />
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ke-muted">
+                          <div className="mt-1 flex flex-wrap items-center gap-x-ke-row gap-y-1 text-ke-label text-ke-muted">
                             <span className="font-mono">
                               {new Date(expense.expense_date).toLocaleDateString()}
                             </span>
@@ -173,7 +173,7 @@ export default function QuestioningDashboardPage() {
 
         {/* Section 2: Awaiting Satisfaction */}
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-3 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
             Awaiting Satisfaction ({awaitingSatisfaction.length})
           </h2>
           {awaitingSatisfaction.length === 0 ? (
@@ -187,7 +187,7 @@ export default function QuestioningDashboardPage() {
                 <Link key={expense.id} href={`/expenses/${expense.id}?focus=actions`}>
                   <Card className="transition-colors hover:bg-ke-elevated">
                     <CardBody>
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-ke-stack">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate font-medium text-ke-primary">
@@ -195,7 +195,7 @@ export default function QuestioningDashboardPage() {
                             </p>
                             <StatusBadge status={expense.status} />
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ke-muted">
+                          <div className="mt-1 flex flex-wrap items-center gap-x-ke-row gap-y-1 text-ke-label text-ke-muted">
                             <span className="font-mono">
                               {new Date(expense.expense_date).toLocaleDateString()}
                             </span>
@@ -219,7 +219,7 @@ export default function QuestioningDashboardPage() {
 
         {/* Section 3: Recently Resolved */}
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-3 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
             Recently Resolved ({recentlyResolved.length})
           </h2>
           {recentlyResolved.length === 0 ? (
@@ -233,7 +233,7 @@ export default function QuestioningDashboardPage() {
                 <Link key={expense.id} href={`/expenses/${expense.id}`}>
                   <Card className="transition-colors hover:bg-ke-elevated">
                     <CardBody>
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-ke-stack">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate font-medium text-ke-primary">
@@ -241,7 +241,7 @@ export default function QuestioningDashboardPage() {
                             </p>
                             <StatusBadge status={expense.status} />
                           </div>
-                          <div className="mt-1 text-xs text-ke-muted">
+                          <div className="mt-1 text-ke-label text-ke-muted">
                             <span className="font-mono">
                               {new Date(expense.expense_date).toLocaleDateString()}
                             </span>

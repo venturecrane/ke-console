@@ -43,8 +43,8 @@ export default function CreateFamilyPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4">
       <div className="w-full max-w-md">
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
+        <div className="mb-ke-section">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -55,7 +55,7 @@ export default function CreateFamilyPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-ke-primary">Create Your Family</h1>
+            <h1 className="text-ke-display font-semibold text-ke-primary">Create Your Family</h1>
           </div>
           <p className="mt-2 text-ke-secondary">
             Set up a shared expense ledger with your co-parent
@@ -68,7 +68,7 @@ export default function CreateFamilyPage() {
               <div className="mb-6">
                 <label
                   htmlFor="familyName"
-                  className="mb-2 block text-sm font-medium text-ke-secondary"
+                  className="mb-2 block text-ke-caption font-medium text-ke-secondary"
                 >
                   Family Name (optional)
                 </label>
@@ -80,7 +80,7 @@ export default function CreateFamilyPage() {
                   placeholder="e.g., Smith Family"
                   className="w-full rounded-lg border border-ke-border bg-ke-surface px-4 py-2 text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
-                <p className="mt-1 text-sm text-ke-muted">
+                <p className="mt-1 text-ke-caption text-ke-muted">
                   You can leave this blank and add it later
                 </p>
               </div>
@@ -99,7 +99,7 @@ export default function CreateFamilyPage() {
         </Card>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-ke-secondary">
+          <p className="text-ke-caption text-ke-secondary">
             Already have an invite code?{' '}
             <Link href="/family/join" className="font-medium text-ke-primary hover:underline">
               Join a family

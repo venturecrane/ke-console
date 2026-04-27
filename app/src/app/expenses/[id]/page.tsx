@@ -341,7 +341,7 @@ export default function ExpenseDetailPage() {
     return (
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
-          <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-4">
+          <div className="mx-auto flex max-w-3xl items-center gap-ke-stack px-4 py-4">
             <Link href="/expenses" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -352,10 +352,10 @@ export default function ExpenseDetailPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Expense Detail</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Expense Detail</h1>
           </div>
         </header>
-        <main className="mx-auto max-w-3xl px-4 py-8">
+        <main className="mx-auto max-w-3xl px-4 py-ke-section">
           <Alert variant="error">{error || 'Expense not found'}</Alert>
         </main>
       </div>
@@ -372,7 +372,7 @@ export default function ExpenseDetailPage() {
     <div className="min-h-screen bg-ke-bg">
       {/* Header */}
       <header className="border-b border-ke-border bg-ke-surface">
-        <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-3xl items-center gap-ke-stack px-4 py-4">
           <Link
             href="/expenses"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-ke-muted hover:text-ke-secondary"
@@ -386,7 +386,7 @@ export default function ExpenseDetailPage() {
               />
             </svg>
           </Link>
-          <h1 className="flex-1 text-xl font-semibold text-ke-primary">Expense Detail</h1>
+          <h1 className="flex-1 text-ke-title font-semibold text-ke-primary">Expense Detail</h1>
           {/* Edit / Delete buttons in header for creator of posted expenses */}
           {canEdit && !showEditForm && (
             <div className="flex items-center gap-2">
@@ -423,17 +423,17 @@ export default function ExpenseDetailPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 space-y-6">
+      <main className="mx-auto max-w-3xl px-4 py-ke-card space-y-6">
         {/* ---------- Delete Confirmation ---------- */}
         {showDeleteConfirm && (
           <Alert variant="error">
             <div>
               <p className="font-medium">Delete this expense?</p>
-              <p className="mt-1 text-sm">
+              <p className="mt-1 text-ke-caption">
                 This action cannot be undone. The expense will be permanently removed.
               </p>
-              {deleteError && <p className="mt-2 text-sm font-medium">{deleteError}</p>}
-              <div className="mt-3 flex gap-3">
+              {deleteError && <p className="mt-2 text-ke-caption font-medium">{deleteError}</p>}
+              <div className="mt-3 flex gap-ke-row">
                 <Button
                   variant="danger"
                   size="sm"
@@ -464,7 +464,7 @@ export default function ExpenseDetailPage() {
         {showEditForm && (
           <Card>
             <CardBody>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-ke-caption font-semibold uppercase tracking-widest text-ke-muted">
                 Edit Expense
               </h2>
 
@@ -476,7 +476,7 @@ export default function ExpenseDetailPage() {
 
               <form onSubmit={handleEdit} className="space-y-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Description *
                   </label>
                   <input
@@ -485,13 +485,13 @@ export default function ExpenseDetailPage() {
                     onChange={(e) => setEditDescription(e.target.value)}
                     maxLength={200}
                     required
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-ke-stack">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Amount ($) *
                     </label>
                     <input
@@ -501,18 +501,18 @@ export default function ExpenseDetailPage() {
                       value={editAmount}
                       onChange={(e) => setEditAmount(e.target.value)}
                       required
-                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm font-mono text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption font-mono text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Category *
                     </label>
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value as ExpenseCategory)}
-                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                      className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                     >
                       {CATEGORIES.map((cat) => (
                         <option key={cat.value} value={cat.value}>
@@ -524,7 +524,7 @@ export default function ExpenseDetailPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Date *
                   </label>
                   <input
@@ -532,12 +532,12 @@ export default function ExpenseDetailPage() {
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Link URL (optional)
                   </label>
                   <input
@@ -545,12 +545,12 @@ export default function ExpenseDetailPage() {
                     value={editLinkUrl}
                     onChange={(e) => setEditLinkUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Memo (optional)
                   </label>
                   <textarea
@@ -559,11 +559,11 @@ export default function ExpenseDetailPage() {
                     placeholder="Additional notes..."
                     rows={2}
                     maxLength={500}
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-ke-row">
                   <Button
                     type="button"
                     variant="secondary"
@@ -596,11 +596,13 @@ export default function ExpenseDetailPage() {
         {!showEditForm && (
           <Card>
             <CardBody>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-ke-stack">
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-medium text-ke-primary">{expense.description}</h2>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
-                    <span className="font-mono text-sm">
+                  <h2 className="text-ke-body-lg font-medium text-ke-primary">
+                    {expense.description}
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-ke-stack gap-y-1 text-ke-caption text-ke-muted">
+                    <span className="font-mono text-ke-caption">
                       {new Date(expense.expense_date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -612,27 +614,27 @@ export default function ExpenseDetailPage() {
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary">
+                    <span className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-ke-label font-medium text-ke-secondary">
                       {formatCategory(expense.category)}
                     </span>
                     <StatusBadge status={expense.status} />
                   </div>
                 </div>
-                <p className="shrink-0 text-2xl font-semibold font-mono text-ke-primary">
+                <p className="shrink-0 text-ke-display font-semibold font-mono text-ke-primary">
                   {formatCurrency(expense.amount_cents)}
                 </p>
               </div>
 
               {/* Memo */}
               {expense.memo && (
-                <p className="mt-3 text-sm text-ke-secondary border-t border-ke-divider pt-3">
+                <p className="mt-3 text-ke-caption text-ke-secondary border-t border-ke-divider pt-3">
                   {expense.memo}
                 </p>
               )}
 
               {/* Link */}
               {expense.link_url && (
-                <p className="mt-2 text-sm">
+                <p className="mt-2 text-ke-caption">
                   <a
                     href={expense.link_url}
                     target="_blank"
@@ -647,7 +649,7 @@ export default function ExpenseDetailPage() {
               {/* Children */}
               {expense.child_ids && children.length > 0 && (
                 <div className="mt-3 border-t border-ke-divider pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted mb-1">
+                  <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted mb-1">
                     Kids
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -656,7 +658,7 @@ export default function ExpenseDetailPage() {
                       return child ? (
                         <span
                           key={child.id}
-                          className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary"
+                          className="inline-flex items-center rounded-md bg-ke-elevated px-2 py-0.5 text-ke-label font-medium text-ke-secondary"
                         >
                           {child.name}
                         </span>
@@ -686,7 +688,7 @@ export default function ExpenseDetailPage() {
                   </Button>
                 ) : (
                   <div>
-                    <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+                    <h3 className="mb-4 text-ke-caption font-semibold uppercase tracking-widest text-ke-muted">
                       Question Expense
                     </h3>
 
@@ -697,13 +699,13 @@ export default function ExpenseDetailPage() {
                     )}
 
                     <div className="mb-4">
-                      <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                         Reason
                       </label>
                       <select
                         value={questionReason}
                         onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
-                        className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                        className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                       >
                         {QUESTION_REASONS.map((r) => (
                           <option key={r.value} value={r.value}>
@@ -714,7 +716,7 @@ export default function ExpenseDetailPage() {
                     </div>
 
                     <div className="mb-4">
-                      <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                      <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                         Note (optional)
                       </label>
                       <textarea
@@ -722,11 +724,11 @@ export default function ExpenseDetailPage() {
                         onChange={(e) => setQuestionNote(e.target.value)}
                         placeholder="Add details..."
                         rows={3}
-                        className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                        className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                       />
                     </div>
 
-                    <div className="flex justify-end gap-3">
+                    <div className="flex justify-end gap-ke-row">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -762,11 +764,11 @@ export default function ExpenseDetailPage() {
                 {/* Show the question context */}
                 {expense.question_reason && (
                   <div className="mb-4 rounded-lg bg-ke-status-questioned-bg p-3">
-                    <p className="text-sm font-medium text-ke-status-questioned-text">
+                    <p className="text-ke-caption font-medium text-ke-status-questioned-text">
                       Questioned: {formatReasonLabel(expense.question_reason)}
                     </p>
                     {expense.question_note && (
-                      <p className="mt-1 text-sm text-ke-status-questioned-text opacity-80">
+                      <p className="mt-1 text-ke-caption text-ke-status-questioned-text opacity-80">
                         &ldquo;{expense.question_note}&rdquo;
                       </p>
                     )}
@@ -787,7 +789,7 @@ export default function ExpenseDetailPage() {
                   </Button>
                 ) : (
                   <div>
-                    <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+                    <h3 className="mb-4 text-ke-caption font-semibold uppercase tracking-widest text-ke-muted">
                       Respond to Question
                     </h3>
 
@@ -801,7 +803,7 @@ export default function ExpenseDetailPage() {
                       {RESOLUTION_ACTIONS.map((action) => (
                         <label
                           key={action.value}
-                          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors min-h-[44px] ${
+                          className={`flex cursor-pointer items-center gap-ke-row rounded-lg border p-3 transition-colors min-h-[44px] ${
                             resolveAction === action.value
                               ? 'border-ke-accent bg-ke-accent/10'
                               : 'border-ke-border hover:bg-ke-elevated'
@@ -816,8 +818,10 @@ export default function ExpenseDetailPage() {
                             className="h-4 w-4 text-ke-accent"
                           />
                           <div>
-                            <p className="text-sm font-medium text-ke-primary">{action.label}</p>
-                            <p className="text-xs text-ke-muted">{action.description}</p>
+                            <p className="text-ke-caption font-medium text-ke-primary">
+                              {action.label}
+                            </p>
+                            <p className="text-ke-label text-ke-muted">{action.description}</p>
                           </div>
                         </label>
                       ))}
@@ -825,7 +829,7 @@ export default function ExpenseDetailPage() {
 
                     {resolveAction === 'edit' && (
                       <div className="mb-4">
-                        <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                        <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                           New Amount ($)
                         </label>
                         <input
@@ -834,12 +838,12 @@ export default function ExpenseDetailPage() {
                           min="0.01"
                           value={resolveNewAmount}
                           onChange={(e) => setResolveNewAmount(e.target.value)}
-                          className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm font-mono text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
+                          className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption font-mono text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus min-h-[44px]"
                         />
                       </div>
                     )}
 
-                    <div className="flex justify-end gap-3">
+                    <div className="flex justify-end gap-ke-row">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -887,17 +891,19 @@ export default function ExpenseDetailPage() {
                 {/* Show resolution context */}
                 {expense.resolution_action && (
                   <div className="mb-4 rounded-lg bg-ke-attention-bg p-3">
-                    <p className="text-sm font-medium text-ke-primary">
+                    <p className="text-ke-caption font-medium text-ke-primary">
                       Creator responded: {formatResolutionLabel(expense.resolution_action)}
                     </p>
-                    <p className="mt-1 text-sm text-ke-secondary">Waiting for your confirmation</p>
+                    <p className="mt-1 text-ke-caption text-ke-secondary">
+                      Waiting for your confirmation
+                    </p>
                   </div>
                 )}
 
                 {/* Auto-resolve countdown (#87) */}
                 {daysLeft !== null && (
                   <div className="mb-4 rounded-lg bg-ke-elevated p-3">
-                    <p className="text-sm text-ke-muted text-center">
+                    <p className="text-ke-caption text-ke-muted text-center">
                       {daysLeft === 0
                         ? 'Auto-resolves today if no action is taken'
                         : `Auto-resolves in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}
@@ -905,7 +911,7 @@ export default function ExpenseDetailPage() {
                   </div>
                 )}
 
-                <div className="flex gap-3">
+                <div className="flex gap-ke-row">
                   <Button
                     variant="primary"
                     fullWidth
@@ -933,7 +939,7 @@ export default function ExpenseDetailPage() {
           {expense.status === 'closed_unresolved' && (
             <Card>
               <CardBody>
-                <p className="text-sm text-ke-muted text-center">
+                <p className="text-ke-caption text-ke-muted text-center">
                   This expense is closed with no resolution. No actions available.
                 </p>
               </CardBody>
@@ -943,14 +949,14 @@ export default function ExpenseDetailPage() {
 
         {/* ---------- Timeline ---------- */}
         <div>
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-4 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
             Timeline
           </h2>
 
           {timeline.length === 0 ? (
-            <p className="text-sm text-ke-muted">No activity recorded yet.</p>
+            <p className="text-ke-caption text-ke-muted">No activity recorded yet.</p>
           ) : (
-            <div className="relative border-l-2 border-ke-divider pl-6 space-y-6">
+            <div className="relative border-l-2 border-ke-divider pl-ke-card space-y-6">
               {timeline.map((event) => {
                 const rendered = renderTimelineEvent(event, userId)
                 if (!rendered) return null
@@ -960,7 +966,7 @@ export default function ExpenseDetailPage() {
                     {/* Timeline dot */}
                     <div className="absolute -left-[31px] top-1 h-3 w-3 rounded-full border-2 border-ke-border bg-ke-surface" />
 
-                    <p className="font-mono text-xs text-ke-muted">
+                    <p className="font-mono text-ke-label text-ke-muted">
                       {new Date(event.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -971,12 +977,14 @@ export default function ExpenseDetailPage() {
                         minute: '2-digit',
                       })}
                     </p>
-                    <p className="mt-0.5 text-sm font-medium text-ke-primary">{rendered.label}</p>
+                    <p className="mt-0.5 text-ke-caption font-medium text-ke-primary">
+                      {rendered.label}
+                    </p>
                     {rendered.detail && (
-                      <p className="mt-0.5 text-sm text-ke-secondary">{rendered.detail}</p>
+                      <p className="mt-0.5 text-ke-caption text-ke-secondary">{rendered.detail}</p>
                     )}
                     {rendered.note && (
-                      <p className="mt-1 text-sm text-ke-muted italic">
+                      <p className="mt-1 text-ke-caption text-ke-muted italic">
                         &ldquo;{rendered.note}&rdquo;
                       </p>
                     )}

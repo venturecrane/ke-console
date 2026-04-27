@@ -121,7 +121,7 @@ export default function BillingPage() {
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-ke-stack">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -132,12 +132,12 @@ export default function BillingPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-ke-primary">Billing</h1>
+              <h1 className="text-ke-title font-semibold text-ke-primary">Billing</h1>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
         </header>
-        <main className="mx-auto max-w-3xl px-4 py-8">
+        <main className="mx-auto max-w-3xl px-4 py-ke-section">
           <Card>
             <CardBody className="text-center">
               <p className="text-ke-secondary">You need to create or join a family first.</p>
@@ -161,7 +161,7 @@ export default function BillingPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -172,13 +172,13 @@ export default function BillingPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Billing</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Billing</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 space-y-6">
+      <main className="mx-auto max-w-3xl px-4 py-ke-card space-y-6">
         {/* Error / Success messages */}
         {error && <Alert variant="error">{error}</Alert>}
         {actionMessage && <Alert variant="success">{actionMessage}</Alert>}
@@ -186,21 +186,21 @@ export default function BillingPage() {
         {/* Current Plan Card */}
         <Card>
           <CardBody>
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-ke-stack">
               <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-medium text-ke-primary">Current Plan</h2>
+                <div className="flex items-center gap-ke-row">
+                  <h2 className="text-ke-body-lg font-medium text-ke-primary">Current Plan</h2>
                   <Badge variant={isPro ? 'success' : 'default'}>{isPro ? 'Pro' : 'Free'}</Badge>
                 </div>
                 {isPro && sub?.currentPeriodEnd && (
-                  <p className="mt-2 text-sm text-ke-muted">
+                  <p className="mt-2 text-ke-caption text-ke-muted">
                     {sub.cancelAtPeriodEnd
                       ? `Cancels on ${new Date(sub.currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
                       : `Renews on ${new Date(sub.currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
                   </p>
                 )}
                 {isPro && sub?.currentPeriodStart && (
-                  <p className="mt-1 text-sm text-ke-muted">
+                  <p className="mt-1 text-ke-caption text-ke-muted">
                     Current period started{' '}
                     {new Date(sub.currentPeriodStart).toLocaleDateString('en-US', {
                       month: 'long',
@@ -210,7 +210,7 @@ export default function BillingPage() {
                   </p>
                 )}
                 {!isPro && (
-                  <p className="mt-2 text-sm text-ke-muted">
+                  <p className="mt-2 text-ke-caption text-ke-muted">
                     Upgrade for unlimited templates and full history.
                   </p>
                 )}
@@ -240,11 +240,11 @@ export default function BillingPage() {
           <Alert variant="attention">
             <div>
               <p className="font-medium">Cancel your Pro subscription?</p>
-              <p className="mt-1 text-sm">
+              <p className="mt-1 text-ke-caption">
                 You&apos;ll keep Pro features until the end of your current billing period. After
                 that, your account will revert to the Free plan.
               </p>
-              <div className="mt-3 flex gap-3">
+              <div className="mt-3 flex gap-ke-row">
                 <Button
                   variant="danger"
                   size="sm"
@@ -271,31 +271,39 @@ export default function BillingPage() {
         {/* Feature Comparison Table */}
         <Card>
           <CardHeader className="border-b border-ke-border">
-            <h2 className="text-lg font-medium text-ke-primary">Plan Comparison</h2>
+            <h2 className="text-ke-body-lg font-medium text-ke-primary">Plan Comparison</h2>
           </CardHeader>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-ke-caption">
               <thead>
                 <tr className="border-b border-ke-divider">
-                  <th className="px-4 py-3 text-left font-medium text-ke-muted sm:px-6">Feature</th>
-                  <th className="px-4 py-3 text-center font-medium text-ke-muted sm:px-6">Free</th>
-                  <th className="px-4 py-3 text-center font-medium text-ke-muted sm:px-6">Pro</th>
+                  <th className="px-4 py-3 text-left font-medium text-ke-muted sm:px-ke-card">
+                    Feature
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium text-ke-muted sm:px-ke-card">
+                    Free
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium text-ke-muted sm:px-ke-card">
+                    Pro
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ke-divider">
                 {FEATURE_ROWS.map((row) => (
                   <tr key={row.label}>
-                    <td className="px-4 py-3 text-ke-primary sm:px-6">{row.label}</td>
-                    <td className="px-4 py-3 text-center text-ke-secondary sm:px-6">{row.free}</td>
-                    <td className="px-4 py-3 text-center font-medium text-ke-primary sm:px-6">
+                    <td className="px-4 py-3 text-ke-primary sm:px-ke-card">{row.label}</td>
+                    <td className="px-4 py-3 text-center text-ke-secondary sm:px-ke-card">
+                      {row.free}
+                    </td>
+                    <td className="px-4 py-3 text-center font-medium text-ke-primary sm:px-ke-card">
                       {row.pro}
                     </td>
                   </tr>
                 ))}
                 <tr>
-                  <td className="px-4 py-3 text-ke-primary sm:px-6">Price</td>
-                  <td className="px-4 py-3 text-center text-ke-secondary sm:px-6">$0</td>
-                  <td className="px-4 py-3 text-center font-medium text-ke-primary sm:px-6">
+                  <td className="px-4 py-3 text-ke-primary sm:px-ke-card">Price</td>
+                  <td className="px-4 py-3 text-center text-ke-secondary sm:px-ke-card">$0</td>
+                  <td className="px-4 py-3 text-center font-medium text-ke-primary sm:px-ke-card">
                     $5/month
                   </td>
                 </tr>
@@ -308,8 +316,8 @@ export default function BillingPage() {
         {!isPro && (
           <Card>
             <CardBody className="text-center">
-              <h3 className="text-lg font-medium text-ke-primary">Ready to upgrade?</h3>
-              <p className="mt-2 text-sm text-ke-muted">
+              <h3 className="text-ke-body-lg font-medium text-ke-primary">Ready to upgrade?</h3>
+              <p className="mt-2 text-ke-caption text-ke-muted">
                 Get unlimited recurring templates, full expense history, and priority support.
               </p>
               <div className="mt-4">

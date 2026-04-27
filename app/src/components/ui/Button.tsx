@@ -18,9 +18,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2.5 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'px-3 py-1.5 text-ke-caption',
+  md: 'px-4 py-2.5 text-ke-caption',
+  lg: 'px-ke-card py-3 text-ke-body',
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
