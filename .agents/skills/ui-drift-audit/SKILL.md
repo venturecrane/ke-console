@@ -1,7 +1,7 @@
 ---
 name: ui-drift-audit
 description: Source-level audit of UI visual-design drift across Astro/React/Next surfaces; counts token / typography / spacing / heading violations and emits a markdown matrix or JSON.
-version: 2.1.0
+version: 2.1.1
 scope: enterprise
 owner: agent-team
 status: stable
@@ -108,12 +108,6 @@ Markdown document at `.design/audits/ui-drift-{YYYY-MM-DD}.md`:
 ### JSON (`--format json`)
 
 Stable schema documented in `audit.py` module docstring. Designed for CI threshold gating and tooling integration.
-
-## Companion scripts
-
-- **`normalize.py`** — Post-Stitch class-attribute normalizer. Rewrites raw Tailwind / Material-3 colors to semantic tokens.
-- **`strip.py`** — Post-Stitch DOM stripper. Removes hero imagery, marketing CTAs, decorative ornaments per UI CONTRACT.
-- **`evaluate-embellishments.py`** — Detects Stitch-invented features (stat cards, auto-pay banners, etc.) not in source.
 
 ## Relationship to other skills
 
