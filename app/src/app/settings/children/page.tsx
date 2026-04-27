@@ -309,24 +309,30 @@ export default function ChildrenSettingsPage() {
                         />
                       </div>
                       {editError && (
-                        <p className="ml-[52px] text-sm text-ke-negative">{editError}</p>
+                        <div className="flex gap-3">
+                          <div className="w-10 shrink-0" aria-hidden="true" />
+                          <p className="text-sm text-ke-negative">{editError}</p>
+                        </div>
                       )}
-                      <div className="ml-[52px] flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleEditChild(child.id)}
-                          disabled={isEditing || !editName.trim()}
-                        >
-                          {isEditing ? 'Saving...' : 'Save'}
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={cancelEdit}
-                          disabled={isEditing}
-                        >
-                          Cancel
-                        </Button>
+                      <div className="flex gap-3">
+                        <div className="w-10 shrink-0" aria-hidden="true" />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleEditChild(child.id)}
+                            disabled={isEditing || !editName.trim()}
+                          >
+                            {isEditing ? 'Saving...' : 'Save'}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={cancelEdit}
+                            disabled={isEditing}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ) : (

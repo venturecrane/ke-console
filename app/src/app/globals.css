@@ -20,8 +20,17 @@
    dist/ke-dark.css OR keep dark-mode in venture-local CSS using the
    same --ke-color-* names.
 
-   Rule: No raw Tailwind color classes (bg-indigo-600, text-slate-500) in
-   page code. Use token classes or component primitives instead.
+   Rules:
+   - No raw Tailwind color classes (bg-indigo-600, text-slate-500) in
+     page code. Use token classes or component primitives instead.
+   - Typography: use Tailwind's default type scale (text-xs through
+     text-3xl). KE does not define venture-specific size tokens.
+     Arbitrary sizes (text-[Npx]) are not allowed.
+   - Spacing: use Tailwind's default spacing scale (p-N, m-N, gap-N where
+     N is in Tailwind's standard set: 1, 2, 3, 4, 5, 6, 8, 10, 12, 14,
+     16, 20, ...). Arbitrary values (p-[Npx], gap-[N]) are not allowed;
+     for offsets that don't fit the scale, use a flex/grid layout with a
+     sized spacer div (see settings/children edit-mode for the pattern).
    ============================================ */
 
 @media (prefers-color-scheme: dark) {
