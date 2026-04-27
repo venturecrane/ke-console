@@ -21,15 +21,15 @@ Architecturally sound and operationally mature for a Tier 1 product — strict T
 
 ## Scorecard
 
-| Dimension | Grade | Trend |
-|-----------|-------|-------|
-| Architecture | C | new* |
-| Security | D | new* |
-| Code Quality | C | new* |
-| Testing | C | new* |
-| Dependencies | C | new* |
-| Documentation | B | new* |
-| Golden Path | B | new* |
+| Dimension     | Grade | Trend |
+| ------------- | ----- | ----- |
+| Architecture  | C     | new\* |
+| Security      | D     | new\* |
+| Code Quality  | C     | new\* |
+| Testing       | C     | new\* |
+| Dependencies  | C     | new\* |
+| Documentation | B     | new\* |
+| Golden Path   | B     | new\* |
 
 **Overall: C**
 
@@ -62,12 +62,14 @@ Architecturally sound and operationally mature for a Tier 1 product — strict T
    - `app/src/app/dashboard/page.tsx` — 576 LOC
 
    Each colocates data fetching, business logic, rendering, and state. **Recommendation:** Extract custom hooks (`useExpenses`, `useDashboard`) and sub-components. Anything > 500 LOC in a UI is a maintainability liability.
+
 3. **[MEDIUM]** Worker route files mix HTTP plumbing, auth-z, validation, D1 queries, and email side-effects with no service layer:
    - `workers/ke-api/src/routes/families.ts` — 692 LOC
    - `workers/ke-api/src/routes/expenses.ts` — 668 LOC
    - `workers/ke-api/src/routes/expense-actions.ts` — 628 LOC
 
    The same `SELECT * FROM families WHERE id = ?` membership-check pattern appears 5+ times. **Recommendation:** Introduce `FamilyService` / `ExpenseService` modules to centralise authorization.
+
 4. **[LOW]** `workers/ke-api/src/index.ts:56-67` — Multiple routes mounted on `/me` (meRoutes + notificationPrefsRoutes) and on `/families`. Functional but non-obvious. **Recommendation:** Group with comments.
 
 **Grade: C**
@@ -101,6 +103,7 @@ Architecturally sound and operationally mature for a Tier 1 product — strict T
    - `workers/ke-api/src/__tests__/recurring.test.ts`
 
    **Recommendation:** Extract to `workers/ke-api/src/__tests__/helpers/jwt.ts`. Pure DRY fix, zero behavior change.
+
 2. **[MEDIUM]** TypeScript hygiene: zero `: any` / `as any` in production source — excellent. Both tsconfigs use `strict: true`. **Recommendation:** Add `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` to `app/tsconfig.json` to catch additional bugs.
 3. **[MEDIUM]** `app/src/lib/api.ts` function layer — All function exports use the legacy `X-User-Id` auth header. The `useApi()` hook is the authoritative replacement. The functions are dead exports creating a footgun for new contributors. **Recommendation:** Delete the function exports.
 4. **[LOW]** `workers/ke-api/src/services/activity.ts` (~330 LOC) mixes activity logging, expense timeout business logic, tier limits, and recurring-expense generation. **Recommendation:** Split into `activity-log.ts`, `expense-timeouts.ts`, `tier-limits.ts`, `recurring.ts` next time the file needs meaningful change.
@@ -148,16 +151,17 @@ Architecturally sound and operationally mature for a Tier 1 product — strict T
 
 ### 7. Golden Path Compliance (Tier 1)
 
-| Requirement | Status | Note |
-|---|---|---|
-| Source control + basic CI | PASS | `.github/workflows/ci.yml`: format, typecheck, lint, test, build |
-| `CLAUDE.md` present + useful | PASS | Comprehensive root file |
-| TypeScript + ESLint configured | PASS | Both workspaces strict, ESLint configured |
-| Secrets not hardcoded | PASS | `c.env.*` / `process.env.*` everywhere |
-| `.gitleaks.toml` present | PASS | Repo root |
-| PWA assets | **PARTIAL — MEDIUM** | `manifest.webmanifest` references `icon.svg` only. Tier 1 requires `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`. iOS Safari will not install this PWA. **Recommendation:** Add the three PNGs to `app/public/` and update the manifest. |
+| Requirement                    | Status               | Note                                                                                                                                                                                                                                              |
+| ------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Source control + basic CI      | PASS                 | `.github/workflows/ci.yml`: format, typecheck, lint, test, build                                                                                                                                                                                  |
+| `CLAUDE.md` present + useful   | PASS                 | Comprehensive root file                                                                                                                                                                                                                           |
+| TypeScript + ESLint configured | PASS                 | Both workspaces strict, ESLint configured                                                                                                                                                                                                         |
+| Secrets not hardcoded          | PASS                 | `c.env.*` / `process.env.*` everywhere                                                                                                                                                                                                            |
+| `.gitleaks.toml` present       | PASS                 | Repo root                                                                                                                                                                                                                                         |
+| PWA assets                     | **PARTIAL — MEDIUM** | `manifest.webmanifest` references `icon.svg` only. Tier 1 requires `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`. iOS Safari will not install this PWA. **Recommendation:** Add the three PNGs to `app/public/` and update the manifest. |
 
 **Tier 2 indicators already in place (exceeds Tier 1):**
+
 - Semgrep static analysis CI
 - Serwist service worker with precaching + API bypass
 - Stripe subscription billing with webhook verification
