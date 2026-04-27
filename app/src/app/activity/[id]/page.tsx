@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { ActivityEvent } from '@/lib/api'
-import { formatCurrency, formatStatus } from '@/lib/statusColors'
+import { formatCurrency, formatStatus } from '@/lib/formatters'
 import { Card, CardBody, Alert } from '@/components/ui'
 
 function formatEventType(eventType: string): string {
@@ -261,9 +261,9 @@ export default function ActivityDetailPage() {
         {diffs.length > 0 && (
           <Card>
             <CardBody>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
                 Changes
-              </h3>
+              </h2>
               <div className="divide-y divide-ke-divider">
                 {diffs.map((diff) => (
                   <div key={diff.field} className="py-3 first:pt-0 last:pb-0">
@@ -306,9 +306,9 @@ export default function ActivityDetailPage() {
         {diffs.length === 0 && event.after_snapshot && (
           <Card>
             <CardBody>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
                 Snapshot
-              </h3>
+              </h2>
               <dl className="divide-y divide-ke-divider">
                 {Object.entries(event.after_snapshot)
                   .filter(([key]) => !['id', 'family_id', 'created_at', 'updated_at'].includes(key))
@@ -334,9 +334,9 @@ export default function ActivityDetailPage() {
         {event.metadata && Object.keys(event.metadata).length > 0 && (
           <Card>
             <CardBody>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
                 Metadata
-              </h3>
+              </h2>
               <dl className="divide-y divide-ke-divider">
                 {Object.entries(event.metadata).map(([key, value]) => (
                   <div key={key} className="flex justify-between py-2 text-sm first:pt-0 last:pb-0">
