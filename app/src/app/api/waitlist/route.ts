@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
  * Forwards POST to ke-api `/waitlist` so the worker side owns persistence,
  * Resend, and Turnstile verification. Next.js stays out of D1 bindings.
  *
- * Mounted at `/api/waitlist`. Public — added to proxy.ts public matcher.
+ * Mounted at `/api/waitlist`. Public — added to middleware.ts public matcher.
  */
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://ke-api.automation-ab6.workers.dev'
