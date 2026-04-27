@@ -1,3 +1,29 @@
+// Constant-time byte comparison to prevent timing attacks.
+// Use when comparing HMAC digests, auth tokens, or any other secret-derived
+// bytes where short-circuit equality could leak information through timing.
+export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i]
+  }
+  return diff === 0
+}
+
+// Decode a hex-encoded string to bytes. Returns null if the input is not
+// valid hex (odd length or non-hex characters). Lowercase output of
+// `.toString(16)` is what we generate, but we accept any case on input.
+export function hexToBytes(hex: string): Uint8Array | null {
+  if (hex.length % 2 !== 0) return null
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < bytes.length; i++) {
+    const byte = parseInt(hex.substr(i * 2, 2), 16)
+    if (Number.isNaN(byte)) return null
+    bytes[i] = byte
+  }
+  return bytes
+}
+
 // Generate 8-character alphanumeric invite code
 export function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Removed ambiguous chars (I,O,0,1)
