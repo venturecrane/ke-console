@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Hono } from 'hono'
 import type { AppType } from '../types'
-import { authMiddleware, _base64urlDecode, _verifyJWT, _resetJWKSCache } from '../middleware/auth'
+import {
+  authMiddleware,
+  _base64urlDecode,
+  _verifyJWT,
+  _resetJWKSCache,
+  _resetAudienceWarning,
+} from '../middleware/auth'
 import {
   base64urlEncode,
   encodeJWTPart,
@@ -38,6 +44,7 @@ function makeRequest(
     headers?: Record<string, string>
     clerkDomain?: string
     clerkIssuerUrl?: string
+    clerkJwtAudience?: string
   }
 ) {
   const headers = options?.headers ?? {}
@@ -48,6 +55,7 @@ function makeRequest(
       DB: {} as D1Database,
       CLERK_DOMAIN: options?.clerkDomain,
       CLERK_ISSUER_URL: options?.clerkIssuerUrl,
+      CLERK_JWT_AUDIENCE: options?.clerkJwtAudience,
     }
   )
 }
@@ -345,6 +353,145 @@ describe('verifyJWT', () => {
     )
 
     await expect(_verifyJWT(token, CLERK_DOMAIN)).rejects.toThrow('Signing key not found in JWKS')
+  })
+})
+
+// ============================================================================
+// verifyJWT — audience claim validation
+// ============================================================================
+
+describe('verifyJWT audience validation', () => {
+  let keySet: RSAKeySet
+  const CLERK_DOMAIN = 'test.clerk.accounts.dev'
+  const EXPECTED_AUD = 'ke-api'
+
+  beforeEach(async () => {
+    _resetJWKSCache()
+    keySet = await generateRSAKeyPair('key-1')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => Promise.resolve(createJWKSResponse([keySet.publicJWK])))
+    )
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('accepts a JWT whose aud claim matches expectedAudience', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_ok',
+      iss: `https://${CLERK_DOMAIN}`,
+      aud: EXPECTED_AUD,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`, EXPECTED_AUD)
+
+    expect(result.sub).toBe('user_aud_ok')
+    expect(result.aud).toBe(EXPECTED_AUD)
+  })
+
+  it('accepts a JWT whose aud array contains expectedAudience', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_array',
+      iss: `https://${CLERK_DOMAIN}`,
+      aud: ['other-app', EXPECTED_AUD, 'yet-another-app'],
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`, EXPECTED_AUD)
+
+    expect(result.sub).toBe('user_aud_array')
+  })
+
+  it('rejects a JWT whose aud claim does not match expectedAudience', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_wrong',
+      iss: `https://${CLERK_DOMAIN}`,
+      aud: 'some-other-app',
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`, EXPECTED_AUD)
+    ).rejects.toThrow('invalid audience')
+  })
+
+  it('rejects a JWT with no aud claim when expectedAudience is set', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_missing',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+      // no aud
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`, EXPECTED_AUD)
+    ).rejects.toThrow('invalid audience')
+  })
+
+  it('rejects a JWT whose aud array does not contain expectedAudience', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_array_miss',
+      iss: `https://${CLERK_DOMAIN}`,
+      aud: ['app-a', 'app-b'],
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+
+    await expect(
+      _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`, EXPECTED_AUD)
+    ).rejects.toThrow('invalid audience')
+  })
+
+  it('skips audience validation when expectedAudience is not provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_aud_skip',
+      iss: `https://${CLERK_DOMAIN}`,
+      aud: 'anything-goes',
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    // No expectedAudience argument — should succeed regardless of aud claim
+    const result = await _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+
+    expect(result.sub).toBe('user_aud_skip')
+  })
+
+  it('skips audience validation (and accepts missing aud) when expectedAudience is not provided', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+      sub: 'user_no_aud_no_check',
+      iss: `https://${CLERK_DOMAIN}`,
+      exp: now + 3600,
+      iat: now,
+    }
+
+    const token = await createSignedJWT(payload, keySet.privateKey, 'key-1')
+    const result = await _verifyJWT(token, CLERK_DOMAIN, `https://${CLERK_DOMAIN}`)
+
+    expect(result.sub).toBe('user_no_aud_no_check')
   })
 })
 
@@ -850,6 +997,159 @@ describe('authMiddleware', () => {
       expect(res.status).toBe(200)
       const body = (await res.json()) as { ok: boolean }
       expect(body.ok).toBe(true)
+    })
+  })
+
+  describe('CLERK_JWT_AUDIENCE enforcement', () => {
+    beforeEach(() => {
+      _resetAudienceWarning()
+    })
+
+    it('returns 200 when token aud matches CLERK_JWT_AUDIENCE', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        {
+          sub: 'user_aud_ok',
+          exp: now + 3600,
+          iss: `https://${CLERK_DOMAIN}`,
+          aud: 'ke-api',
+        },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        clerkJwtAudience: 'ke-api',
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string; ok: boolean }
+      expect(body.userId).toBe('user_aud_ok')
+    })
+
+    it('returns 401 when token aud does not match CLERK_JWT_AUDIENCE', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        {
+          sub: 'user_aud_mismatch',
+          exp: now + 3600,
+          iss: `https://${CLERK_DOMAIN}`,
+          aud: 'other-app',
+        },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        clerkJwtAudience: 'ke-api',
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('returns 401 when CLERK_JWT_AUDIENCE is set but the token has no aud claim', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        {
+          sub: 'user_aud_missing',
+          exp: now + 3600,
+          iss: `https://${CLERK_DOMAIN}`,
+          // no aud
+        },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        clerkJwtAudience: 'ke-api',
+      })
+
+      expect(res.status).toBe(401)
+      const body = (await res.json()) as { error: string }
+      expect(body.error).toBe('Invalid or expired token')
+    })
+
+    it('logs a single warning when CLERK_JWT_AUDIENCE is unset across multiple requests', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        {
+          sub: 'user_no_aud_check',
+          exp: now + 3600,
+          iss: `https://${CLERK_DOMAIN}`,
+          aud: 'whatever',
+        },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      // First request — warning is emitted
+      await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+      })
+      // Second request — warning is NOT re-emitted
+      await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+      })
+
+      const audienceWarnings = warnSpy.mock.calls.filter((call) =>
+        String(call[0] ?? '').includes('CLERK_JWT_AUDIENCE')
+      )
+      expect(audienceWarnings).toHaveLength(1)
+    })
+
+    it('keeps existing behavior unchanged when CLERK_JWT_AUDIENCE is unset (token without aud passes)', async () => {
+      const keySet = await generateRSAKeyPair('key-1')
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createJWKSResponse([keySet.publicJWK])))
+
+      const now = Math.floor(Date.now() / 1000)
+      const token = await createSignedJWT(
+        {
+          sub: 'user_legacy',
+          exp: now + 3600,
+          iss: `https://${CLERK_DOMAIN}`,
+          // no aud — legacy template
+        },
+        keySet.privateKey,
+        'key-1'
+      )
+
+      const app = createTestApp()
+      const res = await makeRequest(app, '/protected/resource', {
+        headers: { Authorization: `Bearer ${token}` },
+        clerkDomain: CLERK_DOMAIN,
+        // no clerkJwtAudience
+      })
+
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as { userId: string }
+      expect(body.userId).toBe('user_legacy')
     })
   })
 })

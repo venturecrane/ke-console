@@ -60,13 +60,19 @@ interface JWTPayload {
   iss: string
   exp: number
   nbf?: number
+  aud?: string | string[]
   [key: string]: unknown
 }
+
+// Track whether the missing-audience warning has already been emitted, so we
+// log it once per worker isolate instead of per request.
+let audienceWarningEmitted = false
 
 async function verifyJWT(
   token: string,
   clerkDomain: string,
-  expectedIssuer?: string
+  expectedIssuer?: string,
+  expectedAudience?: string
 ): Promise<JWTPayload> {
   const parts = token.split('.')
   if (parts.length !== 3) {
@@ -140,10 +146,26 @@ async function verifyJWT(
     }
   }
 
-  // TODO: Validate aud (audience) and azp (authorized party) claims
-  // when Clerk custom JWT templates are configured with audience restrictions.
+  // Validate aud (audience) — rejects tokens minted for other applications
+  // sharing the same Clerk instance. Only enforced when expectedAudience is
+  // configured (CLERK_JWT_AUDIENCE env var); when unset, behavior is unchanged
+  // and a one-time warning is logged at the middleware boundary.
+  if (expectedAudience) {
+    const audClaim = payload.aud
+    const audMatches = Array.isArray(audClaim)
+      ? audClaim.includes(expectedAudience)
+      : audClaim === expectedAudience
+    if (!audMatches) {
+      throw new Error('invalid audience')
+    }
+  }
 
   return payload
+}
+
+// Reset the audience warning flag — used by tests to ensure clean state.
+export function _resetAudienceWarning(): void {
+  audienceWarningEmitted = false
 }
 
 // Exported for testing only — not part of the public API
@@ -168,11 +190,24 @@ export const authMiddleware = createMiddleware<AppType>(async (c, next) => {
   const expectedIssuer =
     c.env.CLERK_ISSUER_URL || (clerkDomain ? `https://${clerkDomain}` : undefined)
 
+  const expectedAudience = c.env.CLERK_JWT_AUDIENCE
+
+  // Log a single warning on the first request that finds CLERK_JWT_AUDIENCE
+  // unset. Cross-application JWT replay is possible until an operator
+  // configures both a Clerk JWT template with `aud` and the matching secret.
+  if (!expectedAudience && !audienceWarningEmitted) {
+    audienceWarningEmitted = true
+    console.warn(
+      'Auth: CLERK_JWT_AUDIENCE is not configured — audience claim will not be validated. ' +
+        'Configure a Clerk JWT template with an `aud` claim and set CLERK_JWT_AUDIENCE to close the cross-application replay surface.'
+    )
+  }
+
   // Try JWT auth first if Authorization header and CLERK_DOMAIN are present
   if (authHeader?.startsWith('Bearer ') && clerkDomain) {
     try {
       const token = authHeader.slice(7)
-      const payload = await verifyJWT(token, clerkDomain, expectedIssuer)
+      const payload = await verifyJWT(token, clerkDomain, expectedIssuer, expectedAudience)
       c.set('userId', payload.sub)
       console.log('Auth: JWT verified for user', payload.sub)
       await next()

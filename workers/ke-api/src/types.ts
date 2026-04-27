@@ -4,6 +4,7 @@ export interface Env {
   APP_URL?: string
   CLERK_DOMAIN?: string
   CLERK_ISSUER_URL?: string
+  CLERK_JWT_AUDIENCE?: string
   STRIPE_SECRET_KEY?: string
   STRIPE_WEBHOOK_SECRET?: string
 
