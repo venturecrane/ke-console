@@ -78,7 +78,7 @@ export default function FamilySettingsPage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-8">
+      <div className="mx-auto max-w-lg px-4 py-ke-section">
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-48 rounded bg-ke-elevated" />
           <div className="h-40 rounded-xl bg-ke-elevated" />
@@ -89,7 +89,7 @@ export default function FamilySettingsPage() {
 
   if (!meData?.family) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-8">
+      <div className="mx-auto max-w-lg px-4 py-ke-section">
         <Alert variant="attention">No family found. Create or join a family first.</Alert>
         <Link href="/dashboard" className="mt-4 inline-block text-ke-accent hover:underline">
           Go to Dashboard
@@ -99,9 +99,9 @@ export default function FamilySettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
+    <div className="mx-auto max-w-lg px-4 py-ke-section">
       {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-ke-row">
         <Link
           href="/dashboard"
           className="rounded-lg p-2 text-ke-secondary hover:bg-ke-elevated"
@@ -109,7 +109,7 @@ export default function FamilySettingsPage() {
         >
           ←
         </Link>
-        <h1 className="text-xl font-bold text-ke-primary">Family Settings</h1>
+        <h1 className="text-ke-title font-bold text-ke-primary">Family Settings</h1>
       </div>
 
       {error && (
@@ -127,8 +127,10 @@ export default function FamilySettingsPage() {
       {/* Split Ratio Card */}
       <Card className="mb-6">
         <CardBody>
-          <h2 className="mb-1 text-lg font-semibold text-ke-primary">Expense Split Ratio</h2>
-          <p className="mb-5 text-sm text-ke-secondary">
+          <h2 className="mb-1 text-ke-body-lg font-semibold text-ke-primary">
+            Expense Split Ratio
+          </h2>
+          <p className="mb-5 text-ke-caption text-ke-secondary">
             How shared expenses are divided between parents. Changes apply to future expenses only —
             existing expenses keep their original split.
           </p>
@@ -140,7 +142,7 @@ export default function FamilySettingsPage() {
                 setSplitMode('even')
                 setSliderValue(50)
               }}
-              className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg border px-4 py-2.5 text-ke-caption font-medium transition-colors ${
                 splitMode === 'even'
                   ? 'border-ke-accent bg-ke-accent/10 text-ke-accent'
                   : 'border-ke-border text-ke-secondary hover:bg-ke-elevated'
@@ -150,7 +152,7 @@ export default function FamilySettingsPage() {
             </button>
             <button
               onClick={() => setSplitMode('custom')}
-              className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg border px-4 py-2.5 text-ke-caption font-medium transition-colors ${
                 splitMode === 'custom'
                   ? 'border-ke-accent bg-ke-accent/10 text-ke-accent'
                   : 'border-ke-border text-ke-secondary hover:bg-ke-elevated'
@@ -174,7 +176,7 @@ export default function FamilySettingsPage() {
                 aria-label="Split ratio slider"
               />
               {/* Percentage labels */}
-              <div className="flex justify-between text-xs text-ke-muted">
+              <div className="flex justify-between text-ke-label text-ke-muted">
                 <span>0%</span>
                 <span>50%</span>
                 <span>100%</span>
@@ -185,8 +187,10 @@ export default function FamilySettingsPage() {
           {/* Real-time preview */}
           <div className="rounded-lg border border-ke-border bg-ke-elevated/50 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-medium text-ke-primary">{parentALabel}</span>
-              <span className="font-mono text-lg font-bold text-ke-accent">{sliderValue}%</span>
+              <span className="text-ke-caption font-medium text-ke-primary">{parentALabel}</span>
+              <span className="font-mono text-ke-body-lg font-bold text-ke-accent">
+                {sliderValue}%
+              </span>
             </div>
             {/* Visual bar */}
             <div className="mb-3 flex h-3 overflow-hidden rounded-full bg-ke-border">
@@ -200,18 +204,18 @@ export default function FamilySettingsPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-ke-primary">{parentBLabel}</span>
-              <span className="font-mono text-lg font-bold text-ke-secondary">
+              <span className="text-ke-caption font-medium text-ke-primary">{parentBLabel}</span>
+              <span className="font-mono text-ke-body-lg font-bold text-ke-secondary">
                 {100 - sliderValue}%
               </span>
             </div>
 
             {/* Example calculation */}
             <div className="mt-4 border-t border-ke-border pt-3">
-              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-ke-muted">
+              <p className="mb-1 text-ke-label font-medium uppercase tracking-wider text-ke-muted">
                 Example: $100 expense
               </p>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-ke-caption">
                 <span className="text-ke-secondary">
                   {parentALabel}:{' '}
                   <span className="font-mono font-semibold text-ke-primary">
@@ -234,7 +238,7 @@ export default function FamilySettingsPage() {
               {isSaving ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'}
             </Button>
             {hasChanges && (
-              <p className="mt-2 text-center text-xs text-ke-muted">
+              <p className="mt-2 text-center text-ke-label text-ke-muted">
                 Current: {savedRatio}% / {100 - savedRatio}% → New: {sliderValue}% /{' '}
                 {100 - sliderValue}%
               </p>
@@ -246,28 +250,28 @@ export default function FamilySettingsPage() {
       {/* Family info card */}
       <Card>
         <CardBody>
-          <h2 className="mb-3 text-lg font-semibold text-ke-primary">Family Info</h2>
-          <dl className="space-y-2 text-sm">
+          <h2 className="mb-3 text-ke-body-lg font-semibold text-ke-primary">Family Info</h2>
+          <dl className="space-y-2 text-ke-caption">
             <div className="flex justify-between">
               <dt className="text-ke-secondary">Family Name</dt>
               <dd className="font-medium text-ke-primary">{meData.family.name || '—'}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-ke-secondary">Family ID</dt>
-              <dd className="font-mono text-xs text-ke-muted">{meData.family.id}</dd>
+              <dd className="font-mono text-ke-label text-ke-muted">{meData.family.id}</dd>
             </div>
           </dl>
         </CardBody>
       </Card>
 
       {/* Leave Family */}
-      <div className="mt-8 border-t border-ke-border pt-6">
+      <div className="mt-ke-section border-t border-ke-border pt-ke-card">
         <Link href="/settings/family/leave">
           <Button variant="danger" fullWidth>
             Leave Family
           </Button>
         </Link>
-        <p className="mt-2 text-center text-xs text-ke-muted">
+        <p className="mt-2 text-center text-ke-label text-ke-muted">
           This will remove you from the shared expense ledger.
         </p>
       </div>

@@ -456,7 +456,7 @@ export default function ExpenseListPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -467,9 +467,9 @@ export default function ExpenseListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Expenses</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Expenses</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Button size="sm" variant="secondary" onClick={handleExportCsv} disabled={isExporting}>
               {isExporting ? 'Exporting...' : 'Export CSV'}
             </Button>
@@ -481,15 +481,15 @@ export default function ExpenseListPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {/* Filters */}
         <Card className="mb-6">
           <CardBody>
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-ke-primary">Filters</h2>
+                <h2 className="text-ke-caption font-semibold text-ke-primary">Filters</h2>
                 {activeFilterCount > 0 && (
-                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ke-accent px-1.5 text-xs font-bold text-ke-inverse">
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ke-accent px-1.5 text-ke-label font-bold text-ke-inverse">
                     {activeFilterCount}
                   </span>
                 )}
@@ -497,23 +497,26 @@ export default function ExpenseListPage() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={handleClearFilters}
-                  className="text-xs font-medium text-ke-accent hover:text-ke-accent-hover"
+                  className="text-ke-label font-medium text-ke-accent hover:text-ke-accent-hover"
                 >
                   Clear Filters
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-ke-stack">
               {/* Category Filter */}
               <div className="flex-1 min-w-[140px]">
-                <label htmlFor="category" className="mb-1 block text-xs font-medium text-ke-muted">
+                <label
+                  htmlFor="category"
+                  className="mb-1 block text-ke-label font-medium text-ke-muted"
+                >
                   Category
                 </label>
                 <select
                   id="category"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value as ExpenseCategory | '')}
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
@@ -525,7 +528,10 @@ export default function ExpenseListPage() {
 
               {/* Status Filter */}
               <div className="flex-1 min-w-[140px]">
-                <label htmlFor="status" className="mb-1 block text-xs font-medium text-ke-muted">
+                <label
+                  htmlFor="status"
+                  className="mb-1 block text-ke-label font-medium text-ke-muted"
+                >
                   Status
                 </label>
                 <select
@@ -534,7 +540,7 @@ export default function ExpenseListPage() {
                   onChange={(e) =>
                     setStatusFilter(e.target.value as ExpenseStatus | '' | 'needs_attention')
                   }
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -546,14 +552,17 @@ export default function ExpenseListPage() {
 
               {/* Date Range Filter */}
               <div className="flex-1 min-w-[140px]">
-                <label htmlFor="dateRange" className="mb-1 block text-xs font-medium text-ke-muted">
+                <label
+                  htmlFor="dateRange"
+                  className="mb-1 block text-ke-label font-medium text-ke-muted"
+                >
                   Date Range
                 </label>
                 <select
                   id="dateRange"
                   value={dateRangePreset}
                   onChange={(e) => setDateRangePreset(e.target.value)}
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {DATE_RANGE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -566,14 +575,17 @@ export default function ExpenseListPage() {
               {/* Child Filter */}
               {children.length > 0 && (
                 <div className="flex-1 min-w-[140px]">
-                  <label htmlFor="child" className="mb-1 block text-xs font-medium text-ke-muted">
+                  <label
+                    htmlFor="child"
+                    className="mb-1 block text-ke-label font-medium text-ke-muted"
+                  >
                     Child
                   </label>
                   <select
                     id="child"
                     value={childFilter}
                     onChange={(e) => setChildFilter(e.target.value)}
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   >
                     <option value="">All Children</option>
                     {children.map((child) => (
@@ -588,11 +600,11 @@ export default function ExpenseListPage() {
 
             {/* Custom Date Range */}
             {dateRangePreset === 'custom' && (
-              <div className="mt-4 flex flex-wrap gap-4">
+              <div className="mt-4 flex flex-wrap gap-ke-stack">
                 <div className="flex-1 min-w-[150px]">
                   <label
                     htmlFor="startDate"
-                    className="mb-1 block text-xs font-medium text-ke-muted"
+                    className="mb-1 block text-ke-label font-medium text-ke-muted"
                   >
                     Start Date
                   </label>
@@ -601,11 +613,14 @@ export default function ExpenseListPage() {
                     id="startDate"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
                 </div>
                 <div className="flex-1 min-w-[150px]">
-                  <label htmlFor="endDate" className="mb-1 block text-xs font-medium text-ke-muted">
+                  <label
+                    htmlFor="endDate"
+                    className="mb-1 block text-ke-label font-medium text-ke-muted"
+                  >
                     End Date
                   </label>
                   <input
@@ -613,7 +628,7 @@ export default function ExpenseListPage() {
                     id="endDate"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
                 </div>
               </div>
@@ -622,7 +637,7 @@ export default function ExpenseListPage() {
         </Card>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-ke-muted">
+        <div className="mb-4 text-ke-caption text-ke-muted">
           {isLoading ? (
             'Loading...'
           ) : (
@@ -659,7 +674,7 @@ export default function ExpenseListPage() {
               <Card key={expense.id}>
                 <CardBody>
                   <Link href={`/expenses/${expense.id}`} className="block">
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-ke-stack">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium text-ke-primary truncate">
@@ -667,7 +682,7 @@ export default function ExpenseListPage() {
                           </p>
                           <StatusBadge status={expense.status} />
                         </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-ke-stack gap-y-1 text-ke-caption text-ke-muted">
                           <span className="inline-flex items-center gap-1">
                             <svg
                               className="h-4 w-4"
@@ -720,12 +735,14 @@ export default function ExpenseListPage() {
                           </span>
                         </div>
                         {expense.memo && (
-                          <p className="mt-2 text-sm text-ke-muted line-clamp-2">{expense.memo}</p>
+                          <p className="mt-2 text-ke-caption text-ke-muted line-clamp-2">
+                            {expense.memo}
+                          </p>
                         )}
                       </div>
                       <div className="text-right shrink-0">
                         <p
-                          className={`text-lg font-semibold font-mono ${
+                          className={`text-ke-body-lg font-semibold font-mono ${
                             expense.amount_cents < 0 ? 'text-ke-positive' : 'text-ke-primary'
                           }`}
                         >
@@ -740,13 +757,13 @@ export default function ExpenseListPage() {
                   {/* Dispute Info for questioned expenses */}
                   {expense.status === 'questioned' && expense.question_reason && (
                     <div className="mt-3 rounded-lg bg-ke-status-questioned-bg p-3">
-                      <p className="text-sm font-medium text-ke-status-questioned-text">
+                      <p className="text-ke-caption font-medium text-ke-status-questioned-text">
                         Questioned:{' '}
                         {QUESTION_REASONS.find((r) => r.value === expense.question_reason)?.label ||
                           expense.question_reason}
                       </p>
                       {expense.question_note && (
-                        <p className="mt-1 text-sm text-ke-status-questioned-text opacity-80">
+                        <p className="mt-1 text-ke-caption text-ke-status-questioned-text opacity-80">
                           {expense.question_note}
                         </p>
                       )}
@@ -756,7 +773,7 @@ export default function ExpenseListPage() {
                   {/* Pending satisfaction info */}
                   {expense.status === 'pending_satisfaction' && (
                     <div className="mt-3 rounded-lg bg-ke-attention-bg p-3">
-                      <p className="text-sm font-medium text-ke-primary">
+                      <p className="text-ke-caption font-medium text-ke-primary">
                         Creator responded:{' '}
                         {expense.resolution_action === 'kept'
                           ? 'Kept as-is'
@@ -764,7 +781,7 @@ export default function ExpenseListPage() {
                             ? 'Amount edited'
                             : expense.resolution_action}
                       </p>
-                      <p className="mt-1 text-sm text-ke-secondary">
+                      <p className="mt-1 text-ke-caption text-ke-secondary">
                         Waiting for questioner confirmation
                       </p>
                     </div>
@@ -775,7 +792,7 @@ export default function ExpenseListPage() {
                     {canQuestion(expense) && (
                       <button
                         onClick={() => setQuestionModalExpense(expense)}
-                        className="rounded-lg border border-ke-status-questioned-bg bg-ke-status-questioned-bg px-3 py-1.5 text-sm font-medium text-ke-status-questioned-text transition-colors hover:opacity-80"
+                        className="rounded-lg border border-ke-status-questioned-bg bg-ke-status-questioned-bg px-3 py-1.5 text-ke-caption font-medium text-ke-status-questioned-text transition-colors hover:opacity-80"
                       >
                         Question
                       </button>
@@ -787,7 +804,7 @@ export default function ExpenseListPage() {
                           setResolveModalExpense(expense)
                           setResolveNewAmount((expense.amount_cents / 100).toString())
                         }}
-                        className="rounded-lg border border-ke-accent/30 bg-ke-accent/10 px-3 py-1.5 text-sm font-medium text-ke-accent transition-colors hover:opacity-80"
+                        className="rounded-lg border border-ke-accent/30 bg-ke-accent/10 px-3 py-1.5 text-ke-caption font-medium text-ke-accent transition-colors hover:opacity-80"
                       >
                         Respond
                       </button>
@@ -797,7 +814,7 @@ export default function ExpenseListPage() {
                       <button
                         onClick={() => handleSatisfyExpense(expense.id)}
                         disabled={satisfyingExpenseId === expense.id}
-                        className="rounded-lg border border-ke-status-posted-bg bg-ke-status-posted-bg px-3 py-1.5 text-sm font-medium text-ke-status-posted-text transition-colors hover:opacity-80 disabled:opacity-50"
+                        className="rounded-lg border border-ke-status-posted-bg bg-ke-status-posted-bg px-3 py-1.5 text-ke-caption font-medium text-ke-status-posted-text transition-colors hover:opacity-80 disabled:opacity-50"
                       >
                         {satisfyingExpenseId === expense.id ? '...' : 'Satisfied'}
                       </button>
@@ -823,9 +840,11 @@ export default function ExpenseListPage() {
       {questionModalExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <Card className="w-full max-w-md">
-            <CardBody className="p-6">
-              <h3 className="mb-4 text-lg font-semibold text-ke-primary">Question Expense</h3>
-              <p className="mb-4 text-sm text-ke-secondary">
+            <CardBody className="p-ke-card">
+              <h3 className="mb-4 text-ke-body-lg font-semibold text-ke-primary">
+                Question Expense
+              </h3>
+              <p className="mb-4 text-ke-caption text-ke-secondary">
                 Questioning: <strong>{questionModalExpense.description}</strong> (
                 <span className="font-mono">
                   {formatCurrency(questionModalExpense.amount_cents)}
@@ -840,13 +859,13 @@ export default function ExpenseListPage() {
               )}
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                   Reason *
                 </label>
                 <select
                   value={questionReason}
                   onChange={(e) => setQuestionReason(e.target.value as QuestionReason)}
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 >
                   {QUESTION_REASONS.map((reason) => (
                     <option key={reason.value} value={reason.value}>
@@ -857,7 +876,7 @@ export default function ExpenseListPage() {
               </div>
 
               <div className="mb-6">
-                <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                   Note (optional)
                 </label>
                 <textarea
@@ -865,11 +884,11 @@ export default function ExpenseListPage() {
                   onChange={(e) => setQuestionNote(e.target.value)}
                   placeholder="Add additional details..."
                   rows={3}
-                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                  className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                 />
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-ke-row">
                 <Button
                   variant="secondary"
                   size="sm"
@@ -886,7 +905,7 @@ export default function ExpenseListPage() {
                 <button
                   onClick={handleQuestionExpense}
                   disabled={isQuestioning}
-                  className="rounded-lg bg-ke-status-questioned-text px-4 py-2 text-sm font-medium text-ke-inverse transition-colors hover:opacity-90 disabled:opacity-50"
+                  className="rounded-lg bg-ke-status-questioned-text px-4 py-2 text-ke-caption font-medium text-ke-inverse transition-colors hover:opacity-90 disabled:opacity-50"
                 >
                   {isQuestioning ? 'Submitting...' : 'Question Expense'}
                 </button>
@@ -908,9 +927,11 @@ export default function ExpenseListPage() {
       {resolveModalExpense && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <Card className="w-full max-w-md">
-            <CardBody className="p-6">
-              <h3 className="mb-4 text-lg font-semibold text-ke-primary">Respond to Question</h3>
-              <p className="mb-2 text-sm text-ke-secondary">
+            <CardBody className="p-ke-card">
+              <h3 className="mb-4 text-ke-body-lg font-semibold text-ke-primary">
+                Respond to Question
+              </h3>
+              <p className="mb-2 text-ke-caption text-ke-secondary">
                 Expense: <strong>{resolveModalExpense.description}</strong> (
                 <span className="font-mono">
                   {formatCurrency(resolveModalExpense.amount_cents)}
@@ -918,7 +939,7 @@ export default function ExpenseListPage() {
                 )
               </p>
               {resolveModalExpense.question_reason && (
-                <p className="mb-4 text-sm text-ke-status-questioned-text">
+                <p className="mb-4 text-ke-caption text-ke-status-questioned-text">
                   Questioned for:{' '}
                   {
                     QUESTION_REASONS.find((r) => r.value === resolveModalExpense.question_reason)
@@ -938,7 +959,7 @@ export default function ExpenseListPage() {
                 {RESOLUTION_ACTIONS.map((action) => (
                   <label
                     key={action.value}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                    className={`flex cursor-pointer items-center gap-ke-row rounded-lg border p-3 transition-colors ${
                       resolveAction === action.value
                         ? 'border-ke-accent bg-ke-accent/10'
                         : 'border-ke-border hover:bg-ke-elevated'
@@ -953,8 +974,8 @@ export default function ExpenseListPage() {
                       className="h-4 w-4 text-ke-accent"
                     />
                     <div>
-                      <p className="text-sm font-medium text-ke-primary">{action.label}</p>
-                      <p className="text-xs text-ke-muted">{action.description}</p>
+                      <p className="text-ke-caption font-medium text-ke-primary">{action.label}</p>
+                      <p className="text-ke-label text-ke-muted">{action.description}</p>
                     </div>
                   </label>
                 ))}
@@ -962,7 +983,7 @@ export default function ExpenseListPage() {
 
               {resolveAction === 'edit' && (
                 <div className="mb-6">
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     New Amount ($)
                   </label>
                   <input
@@ -971,12 +992,12 @@ export default function ExpenseListPage() {
                     min="0.01"
                     value={resolveNewAmount}
                     onChange={(e) => setResolveNewAmount(e.target.value)}
-                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+                    className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
                   />
                 </div>
               )}
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-ke-row">
                 <Button
                   variant="secondary"
                   size="sm"

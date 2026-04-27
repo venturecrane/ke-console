@@ -7,7 +7,7 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center gap-ke-stack px-4 py-4">
           <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -18,11 +18,11 @@ export default function ProfileSettingsPage() {
               />
             </svg>
           </Link>
-          <h1 className="text-xl font-semibold text-ke-primary">Profile Settings</h1>
+          <h1 className="text-ke-title font-semibold text-ke-primary">Profile Settings</h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         <div className="flex justify-center">
           <UserProfile
             routing="hash"

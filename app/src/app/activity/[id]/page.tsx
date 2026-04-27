@@ -158,7 +158,7 @@ export default function ActivityDetailPage() {
     return (
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
-          <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-4">
+          <div className="mx-auto flex max-w-3xl items-center gap-ke-stack px-4 py-4">
             <Link href="/activity" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -169,10 +169,10 @@ export default function ActivityDetailPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Activity Detail</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Activity Detail</h1>
           </div>
         </header>
-        <main className="mx-auto max-w-3xl px-4 py-8">
+        <main className="mx-auto max-w-3xl px-4 py-ke-section">
           <Alert variant="error">{error || 'Event not found'}</Alert>
         </main>
       </div>
@@ -191,7 +191,7 @@ export default function ActivityDetailPage() {
   return (
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
-        <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-3xl items-center gap-ke-stack px-4 py-4">
           <Link
             href="/activity"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-ke-muted hover:text-ke-secondary"
@@ -205,22 +205,22 @@ export default function ActivityDetailPage() {
               />
             </svg>
           </Link>
-          <h1 className="text-xl font-semibold text-ke-primary">Activity Detail</h1>
+          <h1 className="text-ke-title font-semibold text-ke-primary">Activity Detail</h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-ke-card">
         {/* Event Summary */}
         <Card>
           <CardBody>
             <div className="space-y-3">
               <div>
-                <span className="inline-flex items-center rounded-md bg-ke-elevated px-2.5 py-0.5 text-xs font-semibold text-ke-secondary">
+                <span className="inline-flex items-center rounded-md bg-ke-elevated px-2.5 py-0.5 text-ke-label font-semibold text-ke-secondary">
                   {formatEventType(event.event_type)}
                 </span>
               </div>
 
-              <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              <dl className="grid grid-cols-1 gap-ke-row text-ke-caption sm:grid-cols-2">
                 <div>
                   <dt className="text-ke-muted">Actor</dt>
                   <dd className="font-medium text-ke-primary">{actorName}</dd>
@@ -248,7 +248,7 @@ export default function ActivityDetailPage() {
                         View
                       </Link>
                     ) : isTargetDeleted ? (
-                      <span className="ml-2 text-xs text-ke-muted">(deleted)</span>
+                      <span className="ml-2 text-ke-label text-ke-muted">(deleted)</span>
                     ) : null}
                   </dd>
                 </div>
@@ -261,16 +261,16 @@ export default function ActivityDetailPage() {
         {diffs.length > 0 && (
           <Card>
             <CardBody>
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 Changes
               </h2>
               <div className="divide-y divide-ke-divider">
                 {diffs.map((diff) => (
                   <div key={diff.field} className="py-3 first:pt-0 last:pb-0">
-                    <p className="mb-1 text-sm font-medium text-ke-secondary">
+                    <p className="mb-1 text-ke-caption font-medium text-ke-secondary">
                       {formatFieldLabel(diff.field)}
                     </p>
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <div className="flex flex-wrap items-center gap-2 text-ke-caption">
                       <span
                         className={`font-mono ${isMoneyField(diff.field) ? 'font-semibold' : ''} text-ke-muted line-through`}
                       >
@@ -306,7 +306,7 @@ export default function ActivityDetailPage() {
         {diffs.length === 0 && event.after_snapshot && (
           <Card>
             <CardBody>
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 Snapshot
               </h2>
               <dl className="divide-y divide-ke-divider">
@@ -315,7 +315,7 @@ export default function ActivityDetailPage() {
                   .map(([key, value]) => (
                     <div
                       key={key}
-                      className="flex justify-between py-2 text-sm first:pt-0 last:pb-0"
+                      className="flex justify-between py-2 text-ke-caption first:pt-0 last:pb-0"
                     >
                       <dt className="text-ke-muted">{formatFieldLabel(key)}</dt>
                       <dd
@@ -334,12 +334,15 @@ export default function ActivityDetailPage() {
         {event.metadata && Object.keys(event.metadata).length > 0 && (
           <Card>
             <CardBody>
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 Metadata
               </h2>
               <dl className="divide-y divide-ke-divider">
                 {Object.entries(event.metadata).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 text-sm first:pt-0 last:pb-0">
+                  <div
+                    key={key}
+                    className="flex justify-between py-2 text-ke-caption first:pt-0 last:pb-0"
+                  >
                     <dt className="text-ke-muted">{formatFieldLabel(key)}</dt>
                     <dd className="font-mono text-ke-primary">
                       {typeof value === 'object' ? JSON.stringify(value) : String(value)}

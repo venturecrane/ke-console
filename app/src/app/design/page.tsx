@@ -74,7 +74,7 @@ const sampleExpenses = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <h2 className="border-b border-ke-border pb-2 text-lg font-semibold text-ke-primary">
+      <h2 className="border-b border-ke-border pb-2 text-ke-body-lg font-semibold text-ke-primary">
         {title}
       </h2>
       {children}
@@ -85,11 +85,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function DesignPage() {
   return (
     <div className="min-h-screen bg-ke-bg">
-      <div className="mx-auto max-w-4xl space-y-12 px-4 py-8">
+      <div className="mx-auto max-w-4xl space-y-12 px-4 py-ke-section">
         {/* Page header */}
         <div>
-          <h1 className="text-2xl font-bold text-ke-primary">Design System — Visual QA</h1>
-          <p className="mt-1 text-sm text-ke-muted">
+          <h1 className="text-ke-display font-bold text-ke-primary">Design System — Visual QA</h1>
+          <p className="mt-1 text-ke-caption text-ke-muted">
             Component library and token reference for Kid Expenses. All components use semantic
             tokens — no raw color classes.
           </p>
@@ -99,30 +99,30 @@ export default function DesignPage() {
             SURFACES
             ============================================ */}
         <Section title="Surfaces (4 tiers)">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="rounded-lg border border-ke-border bg-ke-bg p-6 text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <div className="grid grid-cols-2 gap-ke-stack sm:grid-cols-4">
+            <div className="rounded-lg border border-ke-border bg-ke-bg p-ke-card text-center">
+              <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 bg-ke-bg
               </p>
-              <p className="mt-1 text-sm text-ke-secondary">Page background</p>
+              <p className="mt-1 text-ke-caption text-ke-secondary">Page background</p>
             </div>
-            <div className="rounded-lg border border-ke-border bg-ke-surface p-6 text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+            <div className="rounded-lg border border-ke-border bg-ke-surface p-ke-card text-center">
+              <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 bg-ke-surface
               </p>
-              <p className="mt-1 text-sm text-ke-secondary">Card surface</p>
+              <p className="mt-1 text-ke-caption text-ke-secondary">Card surface</p>
             </div>
-            <div className="rounded-lg border border-ke-border bg-ke-elevated p-6 text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+            <div className="rounded-lg border border-ke-border bg-ke-elevated p-ke-card text-center">
+              <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 bg-ke-elevated
               </p>
-              <p className="mt-1 text-sm text-ke-secondary">Modal/sheet/active</p>
+              <p className="mt-1 text-ke-caption text-ke-secondary">Modal/sheet/active</p>
             </div>
-            <div className="rounded-lg border border-ke-border bg-ke-interactive p-6 text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+            <div className="rounded-lg border border-ke-border bg-ke-interactive p-ke-card text-center">
+              <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 bg-ke-interactive
               </p>
-              <p className="mt-1 text-sm text-ke-secondary">Hover/pressed</p>
+              <p className="mt-1 text-ke-caption text-ke-secondary">Hover/pressed</p>
             </div>
           </div>
         </Section>
@@ -133,16 +133,16 @@ export default function DesignPage() {
         <Section title="Text Tiers">
           <div className="space-y-2">
             <p className="text-ke-primary">
-              <span className="font-mono text-xs text-ke-muted">text-ke-primary </span>— Primary
-              text for headings, body, and important content
+              <span className="font-mono text-ke-label text-ke-muted">text-ke-primary </span>—
+              Primary text for headings, body, and important content
             </p>
             <p className="text-ke-secondary">
-              <span className="font-mono text-xs text-ke-muted">text-ke-secondary </span>— Secondary
-              text for descriptions and supporting content
+              <span className="font-mono text-ke-label text-ke-muted">text-ke-secondary </span>—
+              Secondary text for descriptions and supporting content
             </p>
             <p className="text-ke-muted">
-              <span className="font-mono text-xs text-ke-muted">text-ke-muted </span>— Muted text
-              for hints, captions, and timestamps
+              <span className="font-mono text-ke-label text-ke-muted">text-ke-muted </span>— Muted
+              text for hints, captions, and timestamps
             </p>
           </div>
         </Section>
@@ -154,8 +154,8 @@ export default function DesignPage() {
           <div className="space-y-6">
             {/* Variants */}
             <div>
-              <p className="mb-3 text-sm font-medium text-ke-secondary">Variants</p>
-              <div className="flex flex-wrap items-center gap-3">
+              <p className="mb-3 text-ke-caption font-medium text-ke-secondary">Variants</p>
+              <div className="flex flex-wrap items-center gap-ke-row">
                 <Button variant="primary">Primary</Button>
                 <Button variant="secondary">Secondary</Button>
                 <Button variant="ghost">Ghost</Button>
@@ -165,8 +165,8 @@ export default function DesignPage() {
 
             {/* Sizes */}
             <div>
-              <p className="mb-3 text-sm font-medium text-ke-secondary">Sizes</p>
-              <div className="flex flex-wrap items-center gap-3">
+              <p className="mb-3 text-ke-caption font-medium text-ke-secondary">Sizes</p>
+              <div className="flex flex-wrap items-center gap-ke-row">
                 <Button size="sm">Small</Button>
                 <Button size="md">Medium</Button>
                 <Button size="lg">Large</Button>
@@ -175,8 +175,8 @@ export default function DesignPage() {
 
             {/* States */}
             <div>
-              <p className="mb-3 text-sm font-medium text-ke-secondary">States</p>
-              <div className="flex flex-wrap items-center gap-3">
+              <p className="mb-3 text-ke-caption font-medium text-ke-secondary">States</p>
+              <div className="flex flex-wrap items-center gap-ke-row">
                 <Button disabled>Disabled</Button>
                 <Button variant="secondary" disabled>
                   Disabled
@@ -191,13 +191,13 @@ export default function DesignPage() {
             CARDS
             ============================================ */}
         <Section title="Cards">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-ke-stack sm:grid-cols-2">
             <Card>
               <CardHeader>
                 <SectionHeader title="Standard Card" />
               </CardHeader>
               <CardBody>
-                <p className="text-sm text-ke-secondary">
+                <p className="text-ke-caption text-ke-secondary">
                   Default card with bg-ke-surface background. Use for most content containers.
                 </p>
               </CardBody>
@@ -207,7 +207,7 @@ export default function DesignPage() {
                 <SectionHeader title="Elevated Card" />
               </CardHeader>
               <CardBody>
-                <p className="text-sm text-ke-secondary">
+                <p className="text-ke-caption text-ke-secondary">
                   Elevated card with bg-ke-elevated. Use for active states or nested surfaces.
                 </p>
               </CardBody>
@@ -221,16 +221,16 @@ export default function DesignPage() {
         <Section title="Status Badges (8 states)">
           <Card>
             <CardBody>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-ke-row">
                 {allStatuses.map((status) => (
                   <StatusBadge key={status} status={status} />
                 ))}
               </div>
               <div className="mt-6 space-y-2">
                 {allStatuses.map((status) => (
-                  <div key={status} className="flex items-center gap-3">
+                  <div key={status} className="flex items-center gap-ke-row">
                     <StatusBadge status={status} />
-                    <code className="font-mono text-xs text-ke-muted">{status}</code>
+                    <code className="font-mono text-ke-label text-ke-muted">{status}</code>
                   </div>
                 ))}
               </div>
@@ -242,7 +242,7 @@ export default function DesignPage() {
             GENERIC BADGES
             ============================================ */}
         <Section title="Generic Badges">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-ke-row">
             <Badge>Default</Badge>
             <Badge variant="success">Success</Badge>
             <Badge variant="warning">Warning</Badge>
@@ -316,7 +316,7 @@ export default function DesignPage() {
             <SectionHeader title="Recent Activity" />
             <SectionHeader
               title="Needs Attention"
-              action={<span className="text-sm text-ke-accent">View all</span>}
+              action={<span className="text-ke-caption text-ke-accent">View all</span>}
             />
           </div>
         </Section>
@@ -325,7 +325,7 @@ export default function DesignPage() {
             EMPTY STATES
             ============================================ */}
         <Section title="Empty States">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-ke-stack sm:grid-cols-2">
             <EmptyState
               title="No expenses yet"
               description="Add your first shared expense to get started."
@@ -345,15 +345,15 @@ export default function DesignPage() {
           <Card>
             <CardBody className="divide-y divide-ke-divider p-0">
               {sampleExpenses.map((expense, i) => (
-                <div key={i} className="flex items-center justify-between px-4 py-3 sm:px-6">
+                <div key={i} className="flex items-center justify-between px-4 py-3 sm:px-ke-card">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <StatusBadge status={expense.status} />
-                      <span className="truncate text-sm font-medium text-ke-primary">
+                      <span className="truncate text-ke-caption font-medium text-ke-primary">
                         {expense.description}
                       </span>
                     </div>
-                    <div className="mt-1 flex gap-2 text-xs text-ke-muted">
+                    <div className="mt-1 flex gap-2 text-ke-label text-ke-muted">
                       <span>{expense.category}</span>
                       <span>&middot;</span>
                       <span className="font-mono">{expense.date}</span>
@@ -361,7 +361,7 @@ export default function DesignPage() {
                       <span>{expense.payer} paid</span>
                     </div>
                   </div>
-                  <span className="ml-4 whitespace-nowrap text-sm font-semibold font-mono text-ke-primary">
+                  <span className="ml-4 whitespace-nowrap text-ke-caption font-semibold font-mono text-ke-primary">
                     {formatCurrency(expense.amount_cents)}
                   </span>
                 </div>
@@ -402,14 +402,14 @@ export default function DesignPage() {
                   time: 'Feb 1',
                 },
               ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between px-4 py-3 sm:px-6">
+                <div key={i} className="flex items-center justify-between px-4 py-3 sm:px-ke-card">
                   <div className="min-w-0 flex-1">
-                    <span className="text-sm text-ke-primary">{item.event}</span>
-                    <p className="mt-0.5 text-xs font-mono text-ke-muted">{item.detail}</p>
+                    <span className="text-ke-caption text-ke-primary">{item.event}</span>
+                    <p className="mt-0.5 text-ke-label font-mono text-ke-muted">{item.detail}</p>
                   </div>
                   <div className="ml-4 text-right">
-                    <span className="text-xs text-ke-secondary">{item.user}</span>
-                    <p className="text-xs font-mono text-ke-muted">{item.time}</p>
+                    <span className="text-ke-label text-ke-secondary">{item.user}</span>
+                    <p className="text-ke-label font-mono text-ke-muted">{item.time}</p>
                   </div>
                 </div>
               ))}
@@ -421,22 +421,22 @@ export default function DesignPage() {
             SEMANTIC COLORS
             ============================================ */}
         <Section title="Semantic Colors">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-ke-stack sm:grid-cols-4">
             <div className="rounded-lg border border-ke-border bg-ke-surface p-4 text-center">
-              <span className="text-lg font-mono font-bold text-ke-accent">$135.00</span>
-              <p className="mt-1 text-xs text-ke-muted">Accent (indigo)</p>
+              <span className="text-ke-body-lg font-mono font-bold text-ke-accent">$135.00</span>
+              <p className="mt-1 text-ke-label text-ke-muted">Accent (indigo)</p>
             </div>
             <div className="rounded-lg border border-ke-border bg-ke-surface p-4 text-center">
-              <span className="text-lg font-mono font-bold text-ke-positive">+$50.00</span>
-              <p className="mt-1 text-xs text-ke-muted">Positive (emerald)</p>
+              <span className="text-ke-body-lg font-mono font-bold text-ke-positive">+$50.00</span>
+              <p className="mt-1 text-ke-label text-ke-muted">Positive (emerald)</p>
             </div>
             <div className="rounded-lg border border-ke-border bg-ke-surface p-4 text-center">
-              <span className="text-lg font-mono font-bold text-ke-negative">-$75.00</span>
-              <p className="mt-1 text-xs text-ke-muted">Negative (red)</p>
+              <span className="text-ke-body-lg font-mono font-bold text-ke-negative">-$75.00</span>
+              <p className="mt-1 text-ke-label text-ke-muted">Negative (red)</p>
             </div>
             <div className="rounded-lg border border-ke-border bg-ke-surface p-4 text-center">
-              <span className="text-lg font-mono font-bold text-ke-muted">$0.00</span>
-              <p className="mt-1 text-xs text-ke-muted">Muted (settled)</p>
+              <span className="text-ke-body-lg font-mono font-bold text-ke-muted">$0.00</span>
+              <p className="mt-1 text-ke-label text-ke-muted">Muted (settled)</p>
             </div>
           </div>
         </Section>
@@ -448,7 +448,7 @@ export default function DesignPage() {
           <Card>
             <CardBody>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-ke-caption">
                   <thead>
                     <tr className="border-b border-ke-border text-left">
                       <th className="pb-2 pr-4 font-semibold text-ke-primary">Token</th>
@@ -471,8 +471,8 @@ export default function DesignPage() {
                       ['--ke-negative', 'text-ke-negative', 'Negative amounts, errors'],
                     ].map(([token, cls, usage]) => (
                       <tr key={token}>
-                        <td className="py-2 pr-4 font-mono text-xs text-ke-muted">{token}</td>
-                        <td className="py-2 pr-4 font-mono text-xs text-ke-accent">{cls}</td>
+                        <td className="py-2 pr-4 font-mono text-ke-label text-ke-muted">{token}</td>
+                        <td className="py-2 pr-4 font-mono text-ke-label text-ke-accent">{cls}</td>
                         <td className="py-2 text-ke-secondary">{usage}</td>
                       </tr>
                     ))}
@@ -483,7 +483,9 @@ export default function DesignPage() {
           </Card>
         </Section>
 
-        <p className="pb-8 text-center text-xs text-ke-muted">Kid Expenses Design System v1.0</p>
+        <p className="pb-ke-section text-center text-ke-label text-ke-muted">
+          Kid Expenses Design System v1.0
+        </p>
       </div>
     </div>
   )

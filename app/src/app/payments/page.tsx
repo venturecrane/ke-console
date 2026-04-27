@@ -129,7 +129,7 @@ export default function PaymentListPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -140,9 +140,9 @@ export default function PaymentListPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Payments</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Payments</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Button size="sm" variant="secondary" onClick={handleExportCsv} disabled={isExporting}>
               {isExporting ? 'Exporting...' : 'Export CSV'}
             </Button>
@@ -154,7 +154,7 @@ export default function PaymentListPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {/* Info Card */}
         <Alert variant="info" className="mb-6">
           Payments are records of money you paid to your co-parent (via Venmo, Zelle, cash, etc.).
@@ -162,7 +162,7 @@ export default function PaymentListPage() {
         </Alert>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-ke-muted">
+        <div className="mb-4 text-ke-caption text-ke-muted">
           {isLoading ? (
             'Loading...'
           ) : (
@@ -191,7 +191,7 @@ export default function PaymentListPage() {
           <div className="space-y-3">
             {payments.map((payment) => (
               <Card key={payment.id} className="p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-ke-stack">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ke-status-posted-bg">
@@ -213,17 +213,17 @@ export default function PaymentListPage() {
                         <p className="font-medium text-ke-primary">
                           {payment.paid_by === user?.id ? 'You paid' : 'Partner paid'}
                         </p>
-                        <p className="text-sm font-mono text-ke-muted">
+                        <p className="text-ke-caption font-mono text-ke-muted">
                           {new Date(payment.payment_date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     {payment.notes && (
-                      <p className="mt-2 text-sm text-ke-muted pl-10">{payment.notes}</p>
+                      <p className="mt-2 text-ke-caption text-ke-muted pl-10">{payment.notes}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-semibold font-mono text-ke-positive">
+                    <p className="text-ke-body-lg font-semibold font-mono text-ke-positive">
                       {formatCurrency(payment.amount_cents)}
                     </p>
                   </div>

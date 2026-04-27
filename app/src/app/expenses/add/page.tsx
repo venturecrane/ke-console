@@ -150,10 +150,10 @@ export default function AddExpensePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-ke-section">
       <div className="w-full max-w-md">
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
+        <div className="mb-ke-section">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -164,7 +164,7 @@ export default function AddExpensePage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-ke-primary">Add Expense</h1>
+            <h1 className="text-ke-display font-semibold text-ke-primary">Add Expense</h1>
           </div>
           <p className="mt-2 text-ke-secondary">Log a kid-related expense</p>
         </div>
@@ -250,7 +250,7 @@ export default function AddExpensePage() {
               {/* Auto-assignment tag — visible when exactly 1 kid is auto-selected */}
               {children.length === 1 && selectedChildIds.length === 1 && (
                 <div className="mb-4 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-ke-accent/10 px-3 py-1 text-xs font-medium text-ke-accent">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-ke-accent/10 px-3 py-1 text-ke-label font-medium text-ke-accent">
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
@@ -267,7 +267,7 @@ export default function AddExpensePage() {
                       setSelectedChildIds([])
                       setShowAdditionalDetails(true)
                     }}
-                    className="text-xs text-ke-muted hover:text-ke-secondary"
+                    className="text-ke-label text-ke-muted hover:text-ke-secondary"
                   >
                     Change
                   </button>
@@ -279,7 +279,7 @@ export default function AddExpensePage() {
                 <button
                   type="button"
                   onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
-                  className="flex w-full items-center justify-between rounded-lg border border-ke-border px-4 py-3 text-sm font-medium text-ke-secondary transition-colors hover:bg-ke-elevated"
+                  className="flex w-full items-center justify-between rounded-lg border border-ke-border px-4 py-3 text-ke-caption font-medium text-ke-secondary transition-colors hover:bg-ke-elevated"
                 >
                   <span>Additional Details</span>
                   <svg
@@ -345,7 +345,7 @@ export default function AddExpensePage() {
                     {/* Children */}
                     {children.length > 0 && (
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-ke-primary">
+                        <label className="mb-2 block text-ke-caption font-medium text-ke-primary">
                           Kids <span className="text-ke-muted">(optional)</span>
                         </label>
                         <div className="rounded-lg border border-ke-border p-3">
@@ -377,7 +377,7 @@ export default function AddExpensePage() {
                             ))}
                           </div>
                         </div>
-                        <p className="mt-1 text-xs text-ke-muted">
+                        <p className="mt-1 text-ke-label text-ke-muted">
                           Select which kids this expense applies to
                         </p>
                       </div>

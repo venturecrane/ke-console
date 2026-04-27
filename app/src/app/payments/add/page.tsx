@@ -88,10 +88,10 @@ export default function AddPaymentPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ke-bg px-4 py-ke-section">
       <div className="w-full max-w-md">
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
+        <div className="mb-ke-section">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -102,7 +102,7 @@ export default function AddPaymentPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-2xl font-semibold text-ke-primary">Record Payment</h1>
+            <h1 className="text-ke-display font-semibold text-ke-primary">Record Payment</h1>
           </div>
           <p className="mt-2 text-ke-secondary">Log a payment you made to your co-parent</p>
         </div>

@@ -17,7 +17,7 @@ function Card({ elevated = false, className = '', children, ...props }: CardProp
 
 function CardHeader({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-4 py-3 sm:px-6 ${className}`} {...props}>
+    <div className={`px-4 py-3 sm:px-ke-card ${className}`} {...props}>
       {children}
     </div>
   )
@@ -25,7 +25,7 @@ function CardHeader({ className = '', children, ...props }: HTMLAttributes<HTMLD
 
 function CardBody({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-4 py-4 sm:px-6 ${className}`} {...props}>
+    <div className={`px-4 py-4 sm:px-ke-card ${className}`} {...props}>
       {children}
     </div>
   )

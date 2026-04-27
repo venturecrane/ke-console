@@ -65,7 +65,7 @@ export default function BalanceBreakdownPage() {
     return (
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
-          <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+          <div className="mx-auto flex max-w-5xl items-center gap-ke-stack px-4 py-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -76,10 +76,10 @@ export default function BalanceBreakdownPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Balance Breakdown</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Balance Breakdown</h1>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">
+        <main className="mx-auto max-w-5xl px-4 py-ke-card">
           <div className="animate-pulse space-y-4">
             <div className="h-32 rounded-xl bg-ke-elevated" />
             <div className="h-48 rounded-xl bg-ke-elevated" />
@@ -93,7 +93,7 @@ export default function BalanceBreakdownPage() {
     return (
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
-          <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+          <div className="mx-auto flex max-w-5xl items-center gap-ke-stack px-4 py-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -104,10 +104,10 @@ export default function BalanceBreakdownPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Balance Breakdown</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Balance Breakdown</h1>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">
+        <main className="mx-auto max-w-5xl px-4 py-ke-card">
           <Alert variant="error">{error}</Alert>
         </main>
       </div>
@@ -118,7 +118,7 @@ export default function BalanceBreakdownPage() {
     return (
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
-          <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+          <div className="mx-auto flex max-w-5xl items-center gap-ke-stack px-4 py-4">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -129,10 +129,10 @@ export default function BalanceBreakdownPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Balance Breakdown</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Balance Breakdown</h1>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">
+        <main className="mx-auto max-w-5xl px-4 py-ke-card">
           <EmptyState
             title="No balance data"
             description="No family found or no expenses recorded yet."
@@ -145,7 +145,7 @@ export default function BalanceBreakdownPage() {
   return (
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center gap-ke-stack px-4 py-4">
           <Link href="/dashboard" className="text-ke-muted hover:text-ke-secondary">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -156,29 +156,29 @@ export default function BalanceBreakdownPage() {
               />
             </svg>
           </Link>
-          <h1 className="text-xl font-semibold text-ke-primary">Balance Breakdown</h1>
+          <h1 className="text-ke-title font-semibold text-ke-primary">Balance Breakdown</h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 space-y-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card space-y-6">
         {/* Current Balance Card */}
         <Card>
           <CardBody>
             <div className="text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-ke-muted">
+              <p className="text-ke-label font-semibold uppercase tracking-widest text-ke-muted">
                 Current Balance
               </p>
-              <p className={`mt-2 text-3xl font-bold font-mono ${getBalanceColor()}`}>
+              <p className={`mt-2 text-ke-display font-bold font-mono ${getBalanceColor()}`}>
                 {breakdown.balance_cents === 0 ? '$0.00' : formatCurrency(breakdown.balance_cents)}
               </p>
-              <p className="mt-1 text-sm text-ke-secondary">{getBalanceLabel()}</p>
+              <p className="mt-1 text-ke-caption text-ke-secondary">{getBalanceLabel()}</p>
             </div>
           </CardBody>
         </Card>
 
         {/* Included Expenses */}
         <div>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-3 text-ke-caption font-semibold uppercase tracking-widest text-ke-muted">
             Included Expenses ({breakdown.included_expenses.length})
           </h2>
           {breakdown.included_expenses.length === 0 ? (
@@ -192,7 +192,7 @@ export default function BalanceBreakdownPage() {
                 <Link key={expense.id} href={`/expenses/${expense.id}`}>
                   <Card className="transition-colors hover:bg-ke-elevated">
                     <CardBody>
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-ke-row">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-ke-primary truncate">
@@ -200,12 +200,12 @@ export default function BalanceBreakdownPage() {
                             </p>
                             <Badge variant="default">{formatCategory(expense.category)}</Badge>
                           </div>
-                          <p className="mt-1 text-xs text-ke-muted font-mono">
+                          <p className="mt-1 text-ke-label text-ke-muted font-mono">
                             {new Date(expense.expense_date).toLocaleDateString()}
                             {' -- '}
                             {expense.paid_by === user?.id ? 'You paid' : 'Co-parent paid'}
                           </p>
-                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ke-secondary">
+                          <div className="mt-2 flex flex-wrap gap-x-ke-stack gap-y-1 text-ke-label text-ke-secondary">
                             <span>
                               Your share:{' '}
                               <span className="font-mono font-semibold">
@@ -225,11 +225,11 @@ export default function BalanceBreakdownPage() {
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-sm font-semibold font-mono text-ke-primary">
+                          <p className="text-ke-caption font-semibold font-mono text-ke-primary">
                             {formatCurrency(expense.amount_cents)}
                           </p>
                           <p
-                            className={`mt-1 text-xs font-mono font-medium ${expense.net_impact_cents > 0 ? 'text-ke-negative' : expense.net_impact_cents < 0 ? 'text-ke-positive' : 'text-ke-muted'}`}
+                            className={`mt-1 text-ke-label font-mono font-medium ${expense.net_impact_cents > 0 ? 'text-ke-negative' : expense.net_impact_cents < 0 ? 'text-ke-positive' : 'text-ke-muted'}`}
                           >
                             {expense.net_impact_cents === 0
                               ? 'No impact'
@@ -252,7 +252,7 @@ export default function BalanceBreakdownPage() {
           <div>
             <button
               onClick={() => setShowExcluded(!showExcluded)}
-              className="mb-3 flex w-full items-center justify-between text-sm font-semibold uppercase tracking-widest text-ke-muted hover:text-ke-secondary"
+              className="mb-3 flex w-full items-center justify-between text-ke-caption font-semibold uppercase tracking-widest text-ke-muted hover:text-ke-secondary"
             >
               <span>Excluded Expenses ({breakdown.excluded_expenses.length})</span>
               <svg
@@ -274,7 +274,7 @@ export default function BalanceBreakdownPage() {
                 {breakdown.excluded_expenses.map((expense) => (
                   <Card key={expense.id} className="opacity-70">
                     <CardBody>
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-ke-row">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-ke-primary truncate">
@@ -282,9 +282,11 @@ export default function BalanceBreakdownPage() {
                             </p>
                             <StatusBadge status={expense.status} />
                           </div>
-                          <p className="mt-1 text-xs text-ke-muted">{expense.exclusion_reason}</p>
+                          <p className="mt-1 text-ke-label text-ke-muted">
+                            {expense.exclusion_reason}
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold font-mono text-ke-muted shrink-0">
+                        <p className="text-ke-caption font-semibold font-mono text-ke-muted shrink-0">
                           {formatCurrency(expense.amount_cents)}
                         </p>
                       </div>
@@ -298,7 +300,7 @@ export default function BalanceBreakdownPage() {
 
         {/* Payments */}
         <div>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-3 text-ke-caption font-semibold uppercase tracking-widest text-ke-muted">
             Payments ({breakdown.payments.length})
           </h2>
           {breakdown.payments.length === 0 ? (
@@ -316,19 +318,19 @@ export default function BalanceBreakdownPage() {
               {breakdown.payments.map((payment) => (
                 <Card key={payment.id}>
                   <CardBody>
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center justify-between gap-ke-row">
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-ke-primary">
                           {payment.paid_by === user?.id ? 'You paid' : 'Co-parent paid'}
                         </p>
-                        <p className="mt-0.5 text-xs text-ke-muted font-mono">
+                        <p className="mt-0.5 text-ke-label text-ke-muted font-mono">
                           {new Date(payment.payment_date).toLocaleDateString()}
                         </p>
                         {payment.notes && (
-                          <p className="mt-1 text-sm text-ke-secondary">{payment.notes}</p>
+                          <p className="mt-1 text-ke-caption text-ke-secondary">{payment.notes}</p>
                         )}
                       </div>
-                      <p className="text-sm font-semibold font-mono text-ke-positive shrink-0">
+                      <p className="text-ke-caption font-semibold font-mono text-ke-positive shrink-0">
                         {formatCurrency(payment.amount_cents)}
                       </p>
                     </div>

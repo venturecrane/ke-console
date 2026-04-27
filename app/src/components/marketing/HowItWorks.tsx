@@ -18,16 +18,16 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-16 px-4 sm:px-6">
+    <section className="py-16 px-4 sm:px-ke-card">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-ke-primary mb-12 text-center">
+        <h2 className="text-ke-display sm:text-ke-display font-semibold text-ke-primary mb-12 text-center">
           How it works
         </h2>
         <div className="grid gap-10 sm:gap-12 md:grid-cols-3">
           {steps.map((step) => (
             <div key={step.number}>
-              <div className="text-ke-accent text-2xl font-semibold mb-3">{step.number}</div>
-              <h3 className="text-xl font-semibold text-ke-primary mb-2">{step.title}</h3>
+              <div className="text-ke-accent text-ke-display font-semibold mb-3">{step.number}</div>
+              <h3 className="text-ke-title font-semibold text-ke-primary mb-2">{step.title}</h3>
               <p className="text-ke-secondary leading-relaxed">{step.body}</p>
             </div>
           ))}

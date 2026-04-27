@@ -23,14 +23,20 @@
    Rules:
    - No raw Tailwind color classes (bg-indigo-600, text-slate-500) in
      page code. Use token classes or component primitives instead.
-   - Typography: use Tailwind's default type scale (text-xs through
-     text-3xl). KE does not define venture-specific size tokens.
-     Arbitrary sizes (text-[Npx]) are not allowed.
-   - Spacing: use Tailwind's default spacing scale (p-N, m-N, gap-N where
-     N is in Tailwind's standard set: 1, 2, 3, 4, 5, 6, 8, 10, 12, 14,
-     16, 20, ...). Arbitrary values (p-[Npx], gap-[N]) are not allowed;
-     for offsets that don't fit the scale, use a flex/grid layout with a
-     sized spacer div (see settings/children edit-mode for the pattern).
+   - Typography: use the KE semantic type tokens. Map per role, not per
+     size: `text-ke-display` (hero), `text-ke-title` (page h1),
+     `text-ke-heading` (h2/h3), `text-ke-body-lg`, `text-ke-body` (body
+     content default), `text-ke-caption` (secondary/metadata),
+     `text-ke-label` (chip/status text). Each token bundles font-size,
+     line-height, and font-weight. Arbitrary `text-[Npx]` not allowed;
+     raw Tailwind sizes (`text-sm`, `text-base`) discouraged in new code.
+   - Spacing: prefer KE semantic spacing utilities for layout intent:
+     `p-ke-card`/`p-ke-section` for container padding, `gap-ke-row` for
+     list rhythm, `gap-ke-stack` for sibling content stacks. Other
+     spacing values (p-2, m-1, gap-8, etc.) fall through to Tailwind's
+     default scale and remain valid. Arbitrary `p-[Npx]` not allowed;
+     for offsets that don't fit, use a flex/grid layout with a sized
+     spacer div (see settings/children edit-mode for the pattern).
    ============================================ */
 
 @media (prefers-color-scheme: dark) {
@@ -150,6 +156,104 @@
   /* Semantic amounts */
   --color-ke-positive: var(--ke-color-positive);
   --color-ke-negative: var(--ke-color-negative);
+
+  /* Typography — semantic roles. Each token bundles size + line-height +
+     font-weight per @venturecrane/tokens/ke.css. */
+  --text-ke-display: var(--ke-text-size-display);
+  --text-ke-display--line-height: var(--ke-text-line-height-display);
+  --text-ke-display--font-weight: var(--ke-text-weight-display);
+
+  --text-ke-title: var(--ke-text-size-title);
+  --text-ke-title--line-height: var(--ke-text-line-height-title);
+  --text-ke-title--font-weight: var(--ke-text-weight-title);
+
+  --text-ke-heading: var(--ke-text-size-heading);
+  --text-ke-heading--line-height: var(--ke-text-line-height-heading);
+  --text-ke-heading--font-weight: var(--ke-text-weight-heading);
+
+  --text-ke-body-lg: var(--ke-text-size-body-lg);
+  --text-ke-body-lg--line-height: var(--ke-text-line-height-body-lg);
+  --text-ke-body-lg--font-weight: var(--ke-text-weight-body-lg);
+
+  --text-ke-body: var(--ke-text-size-body);
+  --text-ke-body--line-height: var(--ke-text-line-height-body);
+  --text-ke-body--font-weight: var(--ke-text-weight-body);
+
+  --text-ke-caption: var(--ke-text-size-caption);
+  --text-ke-caption--line-height: var(--ke-text-line-height-caption);
+  --text-ke-caption--font-weight: var(--ke-text-weight-caption);
+
+  --text-ke-label: var(--ke-text-size-label);
+  --text-ke-label--line-height: var(--ke-text-line-height-label);
+  --text-ke-label--font-weight: var(--ke-text-weight-label);
+
+  /* Spacing — semantic roles. Surfaced into @theme so the @utility blocks
+     below can resolve them via --value(--ke-space-*). The right-hand side
+     resolves at use-site against the package's :root definitions, so the
+     single-source-of-truth in @venturecrane/tokens/ke.css is preserved. */
+  --ke-space-section: var(--ke-space-section);
+  --ke-space-card: var(--ke-space-card);
+  --ke-space-row: var(--ke-space-row);
+  --ke-space-stack: var(--ke-space-stack);
+}
+
+/* Semantic spacing utilities. Tailwind v4's --spacing namespace is a single
+   base unit, not a named scale, so the four KE semantic spacing values are
+   exposed via @utility. Other spacing utilities (p-2, gap-3, etc.) fall
+   through to Tailwind's default scale and continue to work. */
+
+@utility p-ke-* {
+  padding: --value(--ke-space-*);
+}
+@utility pt-ke-* {
+  padding-top: --value(--ke-space-*);
+}
+@utility pb-ke-* {
+  padding-bottom: --value(--ke-space-*);
+}
+@utility pl-ke-* {
+  padding-left: --value(--ke-space-*);
+}
+@utility pr-ke-* {
+  padding-right: --value(--ke-space-*);
+}
+@utility px-ke-* {
+  padding-inline: --value(--ke-space-*);
+}
+@utility py-ke-* {
+  padding-block: --value(--ke-space-*);
+}
+
+@utility m-ke-* {
+  margin: --value(--ke-space-*);
+}
+@utility mt-ke-* {
+  margin-top: --value(--ke-space-*);
+}
+@utility mb-ke-* {
+  margin-bottom: --value(--ke-space-*);
+}
+@utility ml-ke-* {
+  margin-left: --value(--ke-space-*);
+}
+@utility mr-ke-* {
+  margin-right: --value(--ke-space-*);
+}
+@utility mx-ke-* {
+  margin-inline: --value(--ke-space-*);
+}
+@utility my-ke-* {
+  margin-block: --value(--ke-space-*);
+}
+
+@utility gap-ke-* {
+  gap: --value(--ke-space-*);
+}
+@utility gap-x-ke-* {
+  column-gap: --value(--ke-space-*);
+}
+@utility gap-y-ke-* {
+  row-gap: --value(--ke-space-*);
 }
 
 body {

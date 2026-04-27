@@ -60,7 +60,7 @@ export default function LeaveFamilyPage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-8">
+      <div className="mx-auto max-w-lg px-4 py-ke-section">
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-48 rounded bg-ke-elevated" />
           <div className="h-40 rounded-xl bg-ke-elevated" />
@@ -71,7 +71,7 @@ export default function LeaveFamilyPage() {
 
   if (!meData?.family) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-8">
+      <div className="mx-auto max-w-lg px-4 py-ke-section">
         <Alert variant="attention">No family found. You are not part of a family.</Alert>
         <Link href="/dashboard" className="mt-4 inline-block text-ke-accent hover:underline">
           Go to Dashboard
@@ -81,9 +81,9 @@ export default function LeaveFamilyPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
+    <div className="mx-auto max-w-lg px-4 py-ke-section">
       {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-ke-row">
         <Link
           href="/settings/family"
           className="rounded-lg p-2 text-ke-secondary hover:bg-ke-elevated"
@@ -98,7 +98,7 @@ export default function LeaveFamilyPage() {
             />
           </svg>
         </Link>
-        <h1 className="text-xl font-bold text-ke-primary">Leave Family</h1>
+        <h1 className="text-ke-title font-bold text-ke-primary">Leave Family</h1>
       </div>
 
       {error && (
@@ -110,7 +110,7 @@ export default function LeaveFamilyPage() {
       {/* Warning Card */}
       <Card className="mb-6 border-ke-negative/30">
         <CardBody>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-ke-row">
             <svg
               className="mt-0.5 h-5 w-5 shrink-0 text-ke-negative"
               fill="none"
@@ -125,15 +125,15 @@ export default function LeaveFamilyPage() {
               />
             </svg>
             <div>
-              <h2 className="text-sm font-semibold text-ke-primary">
+              <h2 className="text-ke-caption font-semibold text-ke-primary">
                 This action cannot be undone
               </h2>
-              <p className="mt-2 text-sm text-ke-secondary">
+              <p className="mt-2 text-ke-caption text-ke-secondary">
                 Leaving will remove your access to the shared expense ledger. Historical data is
                 preserved for your co-parent, but you will no longer be able to view or manage
                 shared expenses.
               </p>
-              <ul className="mt-3 space-y-1 text-sm text-ke-secondary">
+              <ul className="mt-3 space-y-1 text-ke-caption text-ke-secondary">
                 <li className="flex items-center gap-2">
                   <span className="text-ke-negative">--</span>
                   You will lose access to all shared expenses
@@ -155,7 +155,10 @@ export default function LeaveFamilyPage() {
       {/* Confirmation */}
       <Card>
         <CardBody>
-          <label htmlFor="confirmLeave" className="mb-2 block text-sm font-medium text-ke-primary">
+          <label
+            htmlFor="confirmLeave"
+            className="mb-2 block text-ke-caption font-medium text-ke-primary"
+          >
             Type <span className="font-mono font-bold text-ke-negative">LEAVE</span> to confirm
           </label>
           <input
@@ -165,10 +168,10 @@ export default function LeaveFamilyPage() {
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="LEAVE"
             autoComplete="off"
-            className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-sm text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
+            className="w-full rounded-lg border border-ke-border bg-ke-surface px-3 py-2 text-ke-caption text-ke-primary placeholder-ke-muted focus:border-ke-focus focus:outline-none focus:ring-1 focus:ring-ke-focus"
           />
 
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex gap-ke-row">
             <Link href="/settings/family" className="flex-1">
               <Button variant="secondary" fullWidth disabled={isLeaving}>
                 Cancel

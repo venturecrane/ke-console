@@ -107,7 +107,7 @@ export function WaitlistCTA() {
   }
 
   return (
-    <section id="waitlist" className="py-20 px-4 sm:px-6 bg-ke-accent text-ke-inverse">
+    <section id="waitlist" className="py-20 px-4 sm:px-ke-card bg-ke-accent text-ke-inverse">
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="lazyOnload"
@@ -115,28 +115,30 @@ export function WaitlistCTA() {
         defer
       />
       <div className="max-w-xl mx-auto text-center">
-        <h2 className="text-2xl sm:text-3xl font-semibold mb-4">Join the early-access list.</h2>
-        <p className="text-white/85 text-base sm:text-lg mb-8 leading-relaxed">
+        <h2 className="text-ke-display sm:text-ke-display font-semibold mb-4">
+          Join the early-access list.
+        </h2>
+        <p className="text-white/85 text-ke-body sm:text-ke-body-lg mb-ke-section leading-relaxed">
           Kid Expenses is in private alpha. Drop your email to hold a place. We invite families in
           small batches as we build.
         </p>
 
         {state === 'success' ? (
-          <div className="bg-white/10 border border-white/20 rounded-xl p-6 text-left">
-            <p className="text-xl font-semibold mb-2">You are on the list.</p>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-ke-card text-left">
+            <p className="text-ke-title font-semibold mb-2">You are on the list.</p>
             <p className="text-white/85 leading-relaxed">
               Watch your inbox for a confirmation. We will be in touch when your spot opens.
             </p>
           </div>
         ) : state === 'duplicate' ? (
-          <div className="bg-white/10 border border-white/20 rounded-xl p-6 text-left">
-            <p className="text-xl font-semibold mb-2">You are already on the list.</p>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-ke-card text-left">
+            <p className="text-ke-title font-semibold mb-2">You are already on the list.</p>
             <p className="text-white/85 leading-relaxed">
               No need to sign up again — we have you. Watch your inbox.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col items-center gap-ke-stack">
             <div className="w-full">
               <label htmlFor="waitlist-email" className="sr-only">
                 Email address
@@ -167,7 +169,7 @@ export function WaitlistCTA() {
             </Button>
 
             {error && (
-              <p className="text-white/95 text-sm bg-white/10 border border-white/20 rounded-lg px-4 py-2">
+              <p className="text-white/95 text-ke-caption bg-white/10 border border-white/20 rounded-lg px-4 py-2">
                 {error}
               </p>
             )}

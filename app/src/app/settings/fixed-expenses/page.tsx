@@ -293,7 +293,7 @@ export default function FixedExpensesSettingsPage() {
       <div className="min-h-screen bg-ke-bg">
         <header className="border-b border-ke-border bg-ke-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-ke-stack">
               <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -304,12 +304,12 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </svg>
               </Link>
-              <h1 className="text-xl font-semibold text-ke-primary">Recurring Expenses</h1>
+              <h1 className="text-ke-title font-semibold text-ke-primary">Recurring Expenses</h1>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">
+        <main className="mx-auto max-w-5xl px-4 py-ke-section">
           <Card>
             <CardBody className="text-center">
               <p className="text-ke-secondary">You need to create or join a family first.</p>
@@ -329,7 +329,7 @@ export default function FixedExpensesSettingsPage() {
     <div className="min-h-screen bg-ke-bg">
       <header className="border-b border-ke-border bg-ke-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-ke-stack">
             <Link href="/dashboard" className="text-ke-muted hover:text-ke-primary">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -340,13 +340,13 @@ export default function FixedExpensesSettingsPage() {
                 />
               </svg>
             </Link>
-            <h1 className="text-xl font-semibold text-ke-primary">Recurring Expenses</h1>
+            <h1 className="text-ke-title font-semibold text-ke-primary">Recurring Expenses</h1>
           </div>
           <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-ke-card">
         {/* Error Display */}
         {error && (
           <Alert variant="error" className="mb-6">
@@ -356,10 +356,10 @@ export default function FixedExpensesSettingsPage() {
 
         {/* Tier Info & Add Button */}
         <Card className="mb-6">
-          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+          <CardBody className="flex flex-wrap items-center justify-between gap-ke-stack">
             <div>
               <h2 className="font-medium text-ke-primary">Recurring Monthly Templates</h2>
-              <p className="mt-1 text-sm text-ke-muted">
+              <p className="mt-1 text-ke-caption text-ke-muted">
                 {tier &&
                   (tier.limit === -1
                     ? `${tier.current} active recurring expenses (Pro: Unlimited)`
@@ -394,7 +394,7 @@ export default function FixedExpensesSettingsPage() {
         {/* Tier Limit Warning */}
         {tier && !tier.canAdd && tier.limit !== -1 && (
           <Alert variant="attention" className="mb-6">
-            <div className="flex gap-3">
+            <div className="flex gap-ke-row">
               <svg
                 className="h-5 w-5 flex-shrink-0"
                 fill="none"
@@ -410,7 +410,7 @@ export default function FixedExpensesSettingsPage() {
               </svg>
               <div>
                 <p className="font-medium">Recurring expense limit reached</p>
-                <p className="mt-1 text-sm">
+                <p className="mt-1 text-ke-caption">
                   Free tier allows up to {tier.limit} recurring expenses.{' '}
                   <Link
                     href="/settings/billing"
@@ -429,7 +429,9 @@ export default function FixedExpensesSettingsPage() {
         {showAddForm && (
           <Card className="mb-6">
             <CardBody>
-              <h2 className="mb-4 text-lg font-medium text-ke-primary">Add Recurring Expense</h2>
+              <h2 className="mb-4 text-ke-body-lg font-medium text-ke-primary">
+                Add Recurring Expense
+              </h2>
 
               {addError && (
                 <Alert variant="error" className="mb-4">
@@ -438,9 +440,9 @@ export default function FixedExpensesSettingsPage() {
               )}
 
               <form onSubmit={handleAddFixedExpense} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-ke-stack sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Description *
                     </label>
                     <input
@@ -455,7 +457,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Amount ($) *
                     </label>
                     <input
@@ -471,7 +473,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Category *
                     </label>
                     <select
@@ -488,7 +490,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Frequency *
                     </label>
                     <select
@@ -505,7 +507,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Effective From *
                     </label>
                     <input
@@ -518,7 +520,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Effective Until (optional)
                     </label>
                     <input
@@ -530,7 +532,7 @@ export default function FixedExpensesSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                    <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                       Link URL (optional)
                     </label>
                     <input
@@ -544,7 +546,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Memo (optional)
                   </label>
                   <textarea
@@ -557,7 +559,7 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-ke-row">
                   <Button
                     type="button"
                     variant="secondary"
@@ -584,7 +586,7 @@ export default function FixedExpensesSettingsPage() {
             onChange={(e) => setIncludeEnded(e.target.checked)}
             className="h-4 w-4 rounded border-ke-border text-ke-primary"
           />
-          <label htmlFor="includeEnded" className="text-sm text-ke-secondary">
+          <label htmlFor="includeEnded" className="text-ke-caption text-ke-secondary">
             Show ended recurring expenses
           </label>
         </div>
@@ -592,10 +594,10 @@ export default function FixedExpensesSettingsPage() {
         {/* Recurring Expenses List */}
         <Card>
           <CardHeader className="border-b border-ke-border">
-            <h2 className="text-lg font-medium text-ke-primary">
+            <h2 className="text-ke-body-lg font-medium text-ke-primary">
               Recurring Expenses ({fixedExpenses.length})
             </h2>
-            <p className="mt-1 text-sm text-ke-muted">
+            <p className="mt-1 text-ke-caption text-ke-muted">
               These templates auto-generate expenses on the 1st of each month.
             </p>
           </CardHeader>
@@ -613,21 +615,21 @@ export default function FixedExpensesSettingsPage() {
           ) : (
             <ul className="divide-y divide-ke-divider">
               {fixedExpenses.map((expense) => (
-                <li key={expense.id} className="px-6 py-4">
-                  <div className="flex items-start justify-between gap-4">
+                <li key={expense.id} className="px-ke-card py-4">
+                  <div className="flex items-start justify-between gap-ke-stack">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-ke-primary">{expense.description}</p>
-                        <span className="rounded-full bg-ke-elevated px-2 py-0.5 text-xs font-medium text-ke-secondary">
+                        <span className="rounded-full bg-ke-elevated px-2 py-0.5 text-ke-label font-medium text-ke-secondary">
                           {formatCategory(expense.category)}
                         </span>
                         {isExpenseEnded(expense) && (
-                          <span className="rounded-full bg-ke-status-closed-bg px-2 py-0.5 text-xs font-medium text-ke-status-closed-text">
+                          <span className="rounded-full bg-ke-status-closed-bg px-2 py-0.5 text-ke-label font-medium text-ke-status-closed-text">
                             Ended
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ke-muted">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-ke-stack gap-y-1 text-ke-caption text-ke-muted">
                         <span className="font-mono">
                           {formatCurrency(expense.amount_cents)}/
                           {formatFrequency(expense.frequency || 'monthly')}
@@ -642,7 +644,9 @@ export default function FixedExpensesSettingsPage() {
                         )}
                       </div>
                       {expense.memo && (
-                        <p className="mt-2 text-sm text-ke-muted line-clamp-2">{expense.memo}</p>
+                        <p className="mt-2 text-ke-caption text-ke-muted line-clamp-2">
+                          {expense.memo}
+                        </p>
                       )}
                     </div>
 
@@ -670,7 +674,7 @@ export default function FixedExpensesSettingsPage() {
 
                         {showEndConfirm === expense.id ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-ke-muted">End?</span>
+                            <span className="text-ke-label text-ke-muted">End?</span>
                             <Button
                               variant="danger"
                               size="sm"
@@ -720,7 +724,7 @@ export default function FixedExpensesSettingsPage() {
 
         {/* Info Note */}
         <Alert variant="info" className="mt-6">
-          <div className="flex gap-3">
+          <div className="flex gap-ke-row">
             <svg
               className="h-5 w-5 flex-shrink-0"
               fill="none"
@@ -736,7 +740,7 @@ export default function FixedExpensesSettingsPage() {
             </svg>
             <div>
               <p className="font-medium">How recurring expenses work</p>
-              <p className="mt-1 text-sm">
+              <p className="mt-1 text-ke-caption">
                 Recurring expenses automatically generate regular expenses on the 1st of each month
                 (or when you first open the app that month). Only active templates within their
                 effective date range will generate expenses.
@@ -759,7 +763,9 @@ export default function FixedExpensesSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <Card className="w-full max-w-md">
             <CardBody>
-              <h3 className="mb-4 text-lg font-semibold text-ke-primary">Edit Recurring Expense</h3>
+              <h3 className="mb-4 text-ke-body-lg font-semibold text-ke-primary">
+                Edit Recurring Expense
+              </h3>
 
               {editError && (
                 <Alert variant="error" className="mb-4">
@@ -769,7 +775,7 @@ export default function FixedExpensesSettingsPage() {
 
               <form onSubmit={handleEditFixedExpense} className="space-y-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Description *
                   </label>
                   <input
@@ -783,7 +789,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Amount ($) *
                   </label>
                   <input
@@ -798,7 +804,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Category *
                   </label>
                   <select
@@ -815,7 +821,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Frequency *
                   </label>
                   <select
@@ -832,7 +838,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Effective Until (optional)
                   </label>
                   <input
@@ -844,7 +850,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Link URL (optional)
                   </label>
                   <input
@@ -857,7 +863,7 @@ export default function FixedExpensesSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ke-secondary">
+                  <label className="mb-1.5 block text-ke-caption font-medium text-ke-secondary">
                     Memo (optional)
                   </label>
                   <textarea
@@ -869,7 +875,7 @@ export default function FixedExpensesSettingsPage() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-ke-row pt-2">
                   <Button
                     type="button"
                     variant="secondary"
