@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import { app } from '../index'
 import { _resetJWKSCache } from '../middleware/auth'
-import { generateRSAKeyPair, createSignedJWT, createJWKSResponse, type RSAKeySet } from './helpers/jwt'
+import {
+  generateRSAKeyPair,
+  createSignedJWT,
+  createJWKSResponse,
+  type RSAKeySet,
+} from './helpers/jwt'
 
 // These tests verify route wiring and middleware behavior using Hono's app.request().
 // They don't need a real D1 database — they test routing, auth middleware, and 404 handling.

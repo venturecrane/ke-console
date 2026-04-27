@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vite
 import { centsToDollars } from '../calculations'
 import { app } from '../index'
 import { _resetJWKSCache } from '../middleware/auth'
-import { generateRSAKeyPair, createSignedJWT, createJWKSResponse, type RSAKeySet } from './helpers/jwt'
+import {
+  generateRSAKeyPair,
+  createSignedJWT,
+  createJWKSResponse,
+  type RSAKeySet,
+} from './helpers/jwt'
 
 // ============================================================================
 // CSV Export Tests
