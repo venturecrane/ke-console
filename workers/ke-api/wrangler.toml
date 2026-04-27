@@ -12,6 +12,9 @@ database_id = "8a876b33-faf8-4267-bd08-770b76786dcb"
 # APP_URL - Base URL for the app (e.g., https://ke-console.vercel.app)
 # CLERK_DOMAIN - Clerk instance domain for JWT verification (e.g., clerk.example.com)
 # CLERK_ISSUER_URL - Expected JWT issuer URL (e.g., https://clerk.example.com). If not set, derived from CLERK_DOMAIN.
+# CLERK_JWT_AUDIENCE - Expected `aud` claim. When set, JWTs whose `aud` does not match are rejected with 401.
+#                      When unset, the audience check is skipped (a startup warning is logged). Configure a Clerk
+#                      JWT template that includes `"aud": "ke-api"` (or your chosen value) and set this secret to match.
 # STRIPE_SECRET_KEY - Stripe API secret key for billing
 # STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
 # TURNSTILE_SECRET_KEY - Cloudflare Turnstile server-side verification (waitlist anti-abuse)
