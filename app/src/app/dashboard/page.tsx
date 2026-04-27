@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { MeResponse, Expense, BalanceResponse } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import { NEEDS_ATTENTION_STATUSES } from '@/lib/expenseStatus'
 import {
   Button,

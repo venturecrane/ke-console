@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { MeResponse, Payment, SubscriptionResponse } from '@/lib/api'
-import { formatCurrency } from '@/lib/statusColors'
+import { formatCurrency } from '@/lib/formatters'
 import { Button, Card, EmptyState, Alert, UpgradeModal } from '@/components/ui'
 
 const ITEMS_PER_PAGE = 20

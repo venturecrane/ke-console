@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { MeResponse, BalanceBreakdownResponse } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import { Button, Card, CardBody, StatusBadge, EmptyState, Alert, Badge } from '@/components/ui'
 
 export default function BalanceBreakdownPage() {

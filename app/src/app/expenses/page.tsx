@@ -15,7 +15,7 @@ import type {
   SubscriptionResponse,
   Child,
 } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import { NEEDS_ATTENTION_STATUSES } from '@/lib/expenseStatus'
 import {
   Button,

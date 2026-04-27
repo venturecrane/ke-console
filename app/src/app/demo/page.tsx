@@ -9,7 +9,7 @@ import {
   DEMO_TIMELINE,
   getDemoUserName,
 } from '@/lib/demoData'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import { canRespond } from '@/lib/expenseActions'
 import { renderTimelineEvent, formatReasonLabel, formatResolutionLabel } from '@/lib/timelineUtils'
 import { Button, Card, CardBody, StatusBadge, SectionHeader } from '@/components/ui'
