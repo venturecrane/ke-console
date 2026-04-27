@@ -14,7 +14,7 @@ import type {
   ExpenseCategory,
   Child,
 } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import { canQuestion, canRespond, canSatisfy } from '@/lib/expenseActions'
 import { renderTimelineEvent, formatReasonLabel, formatResolutionLabel } from '@/lib/timelineUtils'
 import { Button, Card, CardBody, StatusBadge, Alert } from '@/components/ui'
@@ -464,9 +464,9 @@ export default function ExpenseDetailPage() {
         {showEditForm && (
           <Card>
             <CardBody>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-ke-muted">
                 Edit Expense
-              </h3>
+              </h2>
 
               {editError && (
                 <Alert variant="error" className="mb-4">
@@ -943,9 +943,9 @@ export default function ExpenseDetailPage() {
 
         {/* ---------- Timeline ---------- */}
         <div>
-          <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-ke-muted">
             Timeline
-          </h3>
+          </h2>
 
           {timeline.length === 0 ? (
             <p className="text-sm text-ke-muted">No activity recorded yet.</p>

@@ -1,5 +1,5 @@
 import type { ActivityEvent, QuestionReason } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 
 const QUESTION_REASONS: { value: QuestionReason; label: string }[] = [
   { value: 'wrong_amount', label: 'Wrong amount' },

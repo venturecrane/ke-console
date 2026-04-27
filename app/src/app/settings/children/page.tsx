@@ -24,7 +24,7 @@ export default function ChildrenSettingsPage() {
   const [deletingChildId, setDeletingChildId] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
 
-  // Edit state (#105)
+  // Edit state (issue 105)
   const [editingChildId, setEditingChildId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [isEditing, setIsEditing] = useState(false)

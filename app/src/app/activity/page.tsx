@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { MeResponse, ActivityEvent, ActivityTypeFilter, ActivityFilters } from '@/lib/api'
-import { formatCurrency } from '@/lib/statusColors'
+import { formatCurrency } from '@/lib/formatters'
 import { Button, Card, CardBody, EmptyState, Alert } from '@/components/ui'
 
 const ITEMS_PER_PAGE = 25

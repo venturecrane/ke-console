@@ -15,7 +15,7 @@ import {
   Alert,
 } from '@/components/ui'
 import type { ExpenseStatus } from '@/lib/api'
-import { formatCurrency } from '@/lib/statusColors'
+import { formatCurrency } from '@/lib/formatters'
 
 const allStatuses: ExpenseStatus[] = [
   'posted',

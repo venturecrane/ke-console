@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useApi } from '@/hooks/use-api'
 import type { Expense } from '@/lib/api'
-import { formatCurrency } from '@/lib/statusColors'
+import { formatCurrency } from '@/lib/formatters'
 import { Card, CardBody, StatusBadge, EmptyState } from '@/components/ui'
 
 const QUESTION_DEADLINE_DAYS = 30
@@ -23,7 +23,7 @@ function CountdownBadge({ days, total }: { days: number | null; total: number })
   if (days === null) return null
 
   const isUrgent = days <= 3
-  const urgentClass = 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+  const urgentClass = 'bg-ke-status-closed-bg text-ke-status-closed-text'
   const normalClass = 'bg-ke-elevated text-ke-muted'
   return (
     <span

@@ -11,7 +11,7 @@ import type {
   FixedExpenseTier,
   RecurringFrequency,
 } from '@/lib/api'
-import { formatCurrency, formatCategory } from '@/lib/statusColors'
+import { formatCurrency, formatCategory } from '@/lib/formatters'
 import {
   Button,
   Card,
