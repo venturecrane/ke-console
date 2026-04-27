@@ -23,6 +23,7 @@ export default defineConfig({
     // 1. Auth setup — runs once before authenticated projects
     {
       name: 'setup-clerk',
+      testDir: './playwright',
       testMatch: /auth\.setup\.ts/,
     },
 
