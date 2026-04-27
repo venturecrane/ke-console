@@ -98,3 +98,42 @@ jobs:
           cd app
           set -a && source .env.ci && set +a
           npm run build
+
+  playwright:
+    # Smoke e2e specs (app/e2e/*.spec.ts). Chromium only for now; other
+    # browsers can come in a follow-up. Runs after build so a broken bundle
+    # fails fast in the build job rather than wasting the Playwright slot.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@venturecrane'
+          cache: 'npm'
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: app
+      - name: Run Playwright (chromium)
+        env:
+          # The auth.setup.ts fixture talks to the real Clerk Backend API,
+          # so these secrets must be wired in repo settings before this
+          # job will pass end-to-end. See PR body for the required list.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+          E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.E2E_NEXT_PUBLIC_API_URL }}
+        run: npx playwright test
+        working-directory: app
+      - name: Upload Playwright HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: app/playwright-report/
+          retention-days: 7
