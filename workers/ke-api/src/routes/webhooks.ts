@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { AppType, Subscription } from '../types'
-import { generateId } from '../utils'
+import { generateId, hexToBytes, timingSafeEqual } from '../utils'
 import { createActivityEvent } from '../services/activity'
 
 const app = new Hono<AppType>()
@@ -78,12 +78,16 @@ async function verifyStripeSignature(
       false,
       ['sign']
     )
-    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload))
-    const expectedSig = Array.from(new Uint8Array(signatureBytes))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')
+    const expectedBytes = new Uint8Array(
+      await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload))
+    )
+    const providedBytes = hexToBytes(sig)
+    if (!providedBytes) return false
 
-    return expectedSig === sig
+    // Constant-time comparison to avoid leaking the signature through
+    // response timing. Plain `===` on hex strings short-circuits at the
+    // first mismatched character.
+    return timingSafeEqual(expectedBytes, providedBytes)
   } catch {
     return false
   }
