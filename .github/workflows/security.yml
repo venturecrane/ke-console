@@ -11,12 +11,20 @@ on:
   workflow_dispatch:
 
 # Plan v3.1 §H-3: explicit minimum permissions. Workflow only needs to
-# read the repository contents; it does not write commits, comments, or
-# artifacts. Explicit permissions block supersedes the repo default and
-# protects against accidental write-capable tokens leaking into the
-# authenticated curl calls below.
+# read the repository contents and read packages from npm.pkg.github.com
+# (for `@venturecrane/*` scoped deps installed via `npm ci`). It does not
+# write commits, comments, or artifacts. Explicit permissions block
+# supersedes the repo default and protects against accidental
+# write-capable tokens leaking into the authenticated curl calls below.
+#
+# `packages: read` is required on `pull_request` events: when a workflow
+# declares an explicit permissions block, GitHub drops any permission
+# not listed — including the default `packages: read`. Without this line,
+# `npm ci` 403s on `@venturecrane/*` downloads on every PR run, blocking
+# the entire security gate. Read-only package access; no write surface.
 permissions:
   contents: read
+  packages: read
 
 jobs:
   npm-audit:
