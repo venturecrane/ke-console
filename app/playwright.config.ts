@@ -23,12 +23,16 @@ export default defineConfig({
     // 1. Auth setup — runs once before authenticated projects
     {
       name: 'setup-clerk',
+      testDir: './playwright',
       testMatch: /auth\.setup\.ts/,
     },
 
-    // 2. Authenticated projects — reuse the captured storageState
+    // 2. Authenticated projects — reuse the captured storageState.
+    //    Ignore *.public.spec.ts (those run in chromium-public) and the
+    //    auth.setup.ts file (it's owned by the setup-clerk project).
     {
       name: 'chromium-authed',
+      testIgnore: [/.*\.public\.spec\.ts/, /auth\.setup\.ts/],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.clerk/user.json',
